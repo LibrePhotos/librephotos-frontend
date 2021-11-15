@@ -1,37 +1,20 @@
 import { AnyAction } from "redux";
 import {
-  FETCH_PERSON_PHOTOS_FULFILLED,
-  FETCH_PERSON_PHOTOS_REJECTED,
-  FETCH_USER_ALBUM_FULFILLED,
-  FETCH_USER_ALBUM_REJECTED,
+  FetchDateAlbumsListAction,
+  FetchDateAlbumsRetrieveAction,
+  FetchPersonPhotosAction,
+  FetchUserAlbumAction,
 } from "../actions/albumsActions";
 import {
-  FETCH_NO_TIMESTAMP_PHOTOS_COUNT,
-  FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED,
-  FETCH_NO_TIMESTAMP_PHOTOS_COUNT_FULFILLED,
-  FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED,
-  FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED,
-  FETCH_NO_TIMESTAMP_PHOTOS_COUNT_REJECTED,
-  FETCH_PHOTOSET,
-  FETCH_PHOTOSET_FULFILLED,
-  FETCH_PHOTOSET_REJECTED,
-  FETCH_RECENTLY_ADDED_PHOTOS,
-  FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED,
-  FETCH_RECENTLY_ADDED_PHOTOS_REJECTED,
-  SET_PHOTOS_FAVORITE_FULFILLED,
-  SET_PHOTOS_PUBLIC_FULFILLED,
-  SET_PHOTOS_HIDDEN_FULFILLED,
   UserPhotosGroup,
+  PhotosAction,
 } from "../actions/photosActions";
-import {
-  SEARCH_PHOTOS_FULFILLED,
-  SEARCH_PHOTOS_REJECTED,
-} from "../actions/searchActions";
 import {
   addTempElementsToFlatList,
   getPhotosFlatFromGroupedByDate,
 } from "../util/util";
 import { IncompleteDatePhotosGroup, Photo, PigPhoto } from "../actions/photosActions.types";
+import { SearchPhotosAction } from "../actions/searchActions";
 
 export enum PhotosetType {
   NONE = "none",
@@ -52,7 +35,7 @@ interface PhotosState {
   scannedPhotos: boolean,
   error: string | null,
 
-  photoDetails: { [key: string]: Photo},
+  photoDetails: { [key: string]: Photo },
   fetchingPhotoDetail: boolean,
   fetchedPhotoDetail: boolean,
 
@@ -60,12 +43,12 @@ interface PhotosState {
   fetchingPhotos: boolean,
 
   photosFlat: PigPhoto[],
-  photosGroupedByDate: IncompleteDatePhotosGroup[], //  | GroupedPhotosSerializer[]
+  photosGroupedByDate: IncompleteDatePhotosGroup[],
   photosGroupedByUser: UserPhotosGroup[],
   fetchedPhotosetType: PhotosetType,
   numberOfPhotos: number,
 
-  recentlyAddedPhotosDate?: Date,
+  recentlyAddedPhotosDate?: string,
 
   generatingCaptionIm2txt: boolean,
   generatedCaptionIm2txt: boolean,
@@ -116,8 +99,14 @@ function updatePhotoDetails(state: PhotosState, action: AnyAction) {
 
 export default function photosReducer(
   state = initialPhotosState,
-  action: AnyAction
-) : PhotosState {
+  action:
+    | PhotosAction
+    | FetchDateAlbumsRetrieveAction
+    | FetchDateAlbumsListAction
+    | FetchUserAlbumAction
+    | FetchPersonPhotosAction
+    | SearchPhotosAction
+): PhotosState {
   var updatedPhotoDetails;
   var newPhotosFlat: PigPhoto[];
   var newPhotosGroupedByDate: IncompleteDatePhotosGroup[];
@@ -144,10 +133,10 @@ export default function photosReducer(
       };
     }
 
-    case FETCH_RECENTLY_ADDED_PHOTOS: {
+    case "FETCH_RECENTLY_ADDED_PHOTOS": {
       return { ...state, fetchedPhotosetType: PhotosetType.NONE };
     }
-    case FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED: {
+    case "FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED": {
       return {
         ...state,
         photosFlat: action.payload.photosFlat,
@@ -155,7 +144,7 @@ export default function photosReducer(
         recentlyAddedPhotosDate: action.payload.date,
       };
     }
-    case FETCH_RECENTLY_ADDED_PHOTOS_REJECTED: {
+    case "FETCH_RECENTLY_ADDED_PHOTOS_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 
@@ -215,10 +204,10 @@ export default function photosReducer(
       };
     }
 
-    case FETCH_NO_TIMESTAMP_PHOTOS_COUNT: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_COUNT": {
       return { ...state };
     }
-    case FETCH_NO_TIMESTAMP_PHOTOS_COUNT_FULFILLED: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_COUNT_FULFILLED": {
       return {
         ...state,
         numberOfPhotos: action.payload.photosCount,
@@ -226,14 +215,14 @@ export default function photosReducer(
         fetchedPhotosetType: PhotosetType.NO_TIMESTAMP,
       };
     }
-    case FETCH_NO_TIMESTAMP_PHOTOS_COUNT_REJECTED: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_COUNT_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 
-    case FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED": {
       return { ...state };
     }
-    case FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED": {
       var fetched_page = action.payload.fetchedPage;
       newPhotosFlat = state.photosFlat
         .slice(0, (fetched_page - 1) * 100)
@@ -245,13 +234,13 @@ export default function photosReducer(
         fetchedPhotosetType: PhotosetType.NO_TIMESTAMP,
       };
     }
-    case FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED: {
+    case "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED": {
       return resetPhotos(state, action.payload);
     }
-    case FETCH_PHOTOSET: {
+    case "FETCH_PHOTOSET": {
       return { ...state, fetchedPhotosetType: PhotosetType.NONE };
     }
-    case FETCH_PHOTOSET_FULFILLED: {
+    case "FETCH_PHOTOSET_FULFILLED": {
       return {
         ...state,
         photosFlat: action.payload.photosFlat,
@@ -260,7 +249,7 @@ export default function photosReducer(
         photosGroupedByUser: action.payload.photosGroupedByUser ? action.payload.photosGroupedByUser : [],
       };
     }
-    case FETCH_PHOTOSET_REJECTED: {
+    case "FETCH_PHOTOSET_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 
@@ -285,11 +274,11 @@ export default function photosReducer(
       return { ...state, fetchingPhotoDetail: false, error: action.payload };
     }
 
-    case SET_PHOTOS_PUBLIC_FULFILLED: {
+    case "SET_PHOTOS_PUBLIC_FULFILLED": {
       return updatePhotoDetails(state, action);
     }
 
-    case SET_PHOTOS_FAVORITE_FULFILLED: {
+    case "SET_PHOTOS_FAVORITE_FULFILLED": {
       updatedPhotoDetails = action.payload.updatedPhotos as Photo[];
       newPhotoDetails = { ...state.photoDetails };
       newPhotosGroupedByDate = [...state.photosGroupedByDate];
@@ -352,11 +341,11 @@ export default function photosReducer(
       };
     }
 
-    case SET_PHOTOS_HIDDEN_FULFILLED: {
+    case "SET_PHOTOS_HIDDEN_FULFILLED": {
       return updatePhotoDetails(state, action);
     }
 
-    case SEARCH_PHOTOS_FULFILLED: {
+    case "SEARCH_PHOTOS_FULFILLED": {
       return {
         ...state,
         photosFlat: action.payload.photosFlat,
@@ -365,11 +354,15 @@ export default function photosReducer(
       };
     }
 
-    case SEARCH_PHOTOS_REJECTED: {
+    case "SEARCH_PHOTOS": {
+      return { ...state };
+    }
+
+    case "SEARCH_PHOTOS_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 
-    case FETCH_USER_ALBUM_FULFILLED: {
+    case "FETCH_USER_ALBUM_FULFILLED": {
       return {
         ...state,
         photosFlat: action.payload.photosFlat,
@@ -377,11 +370,11 @@ export default function photosReducer(
         photosGroupedByDate: action.payload.photosGroupedByDate,
       };
     }
-    case FETCH_USER_ALBUM_REJECTED: {
+    case "FETCH_USER_ALBUM_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 
-    case FETCH_PERSON_PHOTOS_FULFILLED: {
+    case "FETCH_PERSON_PHOTOS_FULFILLED": {
       return {
         ...state,
         photosFlat: action.payload.photosFlat,
@@ -389,7 +382,7 @@ export default function photosReducer(
         photosGroupedByDate: action.payload.photosGroupedByDate,
       };
     }
-    case FETCH_PERSON_PHOTOS_REJECTED: {
+    case "FETCH_PERSON_PHOTOS_REJECTED": {
       return resetPhotos(state, action.payload);
     }
 

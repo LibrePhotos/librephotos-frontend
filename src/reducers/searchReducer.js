@@ -1,9 +1,3 @@
-import {
-  SEARCH_EMPTY_QUERY_ERROR,
-  SEARCH_PHOTOS,
-  SEARCH_PHOTOS_REJECTED,
-} from "../actions/searchActions";
-
 export default function reducer(
   state = {
     searchPeopleRes: [],
@@ -23,15 +17,15 @@ export default function reducer(
   action
 ) {
   switch (action.type) {
-    case SEARCH_EMPTY_QUERY_ERROR: {
+    case "SEARCH_EMPTY_QUERY_ERROR": {
       return { ...state, error: "Search query cannot be empty!" };
     }
 
-    case SEARCH_PHOTOS: {
+    case "SEARCH_PHOTOS": {
       return { ...state, query: action.payload };
     }
 
-    case SEARCH_PHOTOS_REJECTED: {
+    case "SEARCH_PHOTOS_REJECTED": {
       return { ...state, error: action.payload, query: "" };
     }
 

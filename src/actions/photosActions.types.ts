@@ -85,8 +85,8 @@ export const DatePhotosGroupSchema = z.object({
 export type DatePhotosGroup = z.infer<typeof DatePhotosGroupSchema>
 
 export const IncompleteDatePhotosGroupSchema = DatePhotosGroupSchema.extend({
-  id: z.string(),
-  incomplete: z.boolean(),
-  numberOfItems: z.number(),
+  id: z.string().optional(),
+  incomplete: z.boolean().optional(),
+  numberOfItems: z.number().optional(),
 })
 export type IncompleteDatePhotosGroup = z.infer<typeof IncompleteDatePhotosGroupSchema>
