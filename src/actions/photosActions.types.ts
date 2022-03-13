@@ -64,11 +64,11 @@ export const PhotoSchema = z.object({
   rating: z.number(),
   hidden: z.boolean(),
   public: z.boolean(),
-  deleted: z.boolean(),
+  deleted: z.boolean().optional(),
   shared_to: z.number().nullable().array(), // TODO: There are sometimes items in the array with value null. Why?!?
   similar_photos: z.object({ image_hash: z.string(), type: z.nativeEnum(MediaType) }).array(),
   video: z.boolean(),
-  owner: SimpleUserSchema,
+  owner: SimpleUserSchema.optional(),
 });
 export type Photo = z.infer<typeof PhotoSchema>;
 
