@@ -25,7 +25,6 @@
       "yarn prettier --config ./prettier.config.js  --write"
     ]
   },
-  "proxy": "http://192.168.1.100:8000/",
   "browserslist": [
     ">0.2%",
     "not dead",
@@ -132,6 +131,7 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-react": "^7.29.3",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "http-proxy-middleware": "^2.0.4",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "lint-staged": "^12.3.5",
