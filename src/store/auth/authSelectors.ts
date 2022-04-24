@@ -1,6 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 
 import type { RootState } from "../store";
+// eslint-disable-next-line import/no-cycle
 import { selectSelf } from "../store";
 import { isTokenExpired } from "../util/auth";
 
@@ -18,4 +19,3 @@ export const isRefreshTokenExpired = createSelector(selectSelf, (state: RootStat
 export const selectAuthErrors = createSelector(selectSelf, (state: RootState) => state.auth.error ?? null);
 export const selectAuth = createSelector(selectSelf, (state: RootState) => state.auth);
 export const selectAuthAccess = createSelector(selectSelf, (state: RootState) => state.auth.access);
-export const selectAuthRefres = createSelector(selectSelf, (state: RootState) => state.auth.refresh);
