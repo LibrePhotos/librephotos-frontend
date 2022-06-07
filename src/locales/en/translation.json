@@ -182,6 +182,7 @@
     "sharing": "Sharing",
     "publicphotos": "Public photos",
     "youshared": "You shared",
+    "explore": "Explore",
     "sharedwithyou": "Shared with you"
   },
   "selectionbar": {
@@ -243,7 +244,7 @@
     "notimestamp": "Photos without Timestamps",
     "hidden": "Hidden Photos",
     "favorite": "Favorite Photos",
-    "deleted": "Trashcan"
+    "deleted": "Trash"
   },
   "login": {
     "name": "LibrePhotos",
