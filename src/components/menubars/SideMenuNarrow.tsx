@@ -64,7 +64,7 @@ export function SideMenuNarrow(): JSX.Element {
   const navigation = [
     { link: '/', label: t('sidemenu.photos'), icon: Photo },
     { link: '/useralbums', label: t('sidemenu.albums'), icon: Album },
-    { link: '/explore', label: t('sidemenu.explore'), icon: Search },
+    { link: '/explorer', label: t('sidemenu.explore'), icon: Search },
     { link: '/shared/fromme/photos', label: t('sidemenu.sharing'), icon: Share },
     { link: '/deleted', label: t('photos.deleted'), icon: Trash },
   ];

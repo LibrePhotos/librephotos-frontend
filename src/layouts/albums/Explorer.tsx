@@ -1,118 +1,126 @@
-import { Box, Button, Group, Loader, Stack, Title } from "@mantine/core";
+import { createStyles, Stack } from "@mantine/core";
 import { push } from "connected-react-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Ballon } from "tabler-icons-react";
+import { Search, FaceId, Sitemap, Map, Users, Tags, Globe, Cloud, ChartBar, Share, UserCircle } from "tabler-icons-react";
 
 import { fetchAutoAlbumsList, fetchUserAlbumsList } from "../../actions/albumsActions";
-import { Tile } from "../../components/Tile";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { HeaderComponent } from "./HeaderComponent";
 
+const useStyles = createStyles((theme, _params, getRef) => {
+  const icon = getRef('icon');
+  return {
+    group: {
+      display: 'flex',
+      section: {
+        flexGrow: 3,
+        margin: 10
+      },
+      header: {
+        color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[3],
+        textTransform: 'uppercase',
+        margin: '10px 0 10px 10px'
+      },
+      ul: {
+        listStyle: 'none',
+        paddingLeft: 0,
+        marginRight: 20,
+        li: {
+          display: 'flex',
+          position: 'relative',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          height: 48,
+          cursor: 'pointer',
+          color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[5],
+          svg: {
+            marginLeft: 5,
+            marginRight: 10,
+          },
+          div: {
+            marginTop: 5
+          },
+          '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2],
+            color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[5],
+            [`& .${icon}`]: {
+              color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[5],
+            },
+          }
+        }
+      }
+    }
+  }
+});
+
 export const Explorer = () => {
-  const auth = useAppSelector(state => state.auth);
-  const { albumsAutoList, fetchingAlbumsAutoList, albumsUserList, fetchingAlbumsUserList } = useAppSelector(
-    store => store.albums
-  );
+  const { fetchingAlbumsAutoList } = useAppSelector(store => store.albums);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const entrySquareSize = 200;
+
+  const { classes } = useStyles();
 
   useEffect(() => {
     dispatch(fetchAutoAlbumsList());
     dispatch(fetchUserAlbumsList());
   }, []);
 
+  const groups = [
+    {
+      name: 'Data visualization',
+      items: [
+        { label: t('sidemenu.placetree'), link: '/placetree', icon: Sitemap },
+        { label: t('sidemenu.wordclouds'), link: '/wordclouds', icon: Cloud },
+        { label: t('sidemenu.timeline'), link: '/timeline', icon: ChartBar },
+        { label: t("sidemenu.socialgraph"), link: '/socialgraph', icon: Share },
+        { label: t("sidemenu.facecluster"), link: '/facescatter', icon: UserCircle },
+      ]
+    },
+    {
+      name: 'Images',
+      items: [
+        { label: t("sidemenu.people"), link: '/people', icon: Users },
+        { label: t("sidemenu.places"), link: '/places', icon: Map },
+        { label: t("sidemenu.things"), link: '/things', icon: Tags }
+      ]
+    },
+    {
+      name: 'Other',
+      items: [
+        { label: t("sidemenu.facerecognition"), link: '/faces', icon: FaceId },
+        { label: t("sidemenu.publicphotos"), link: '/users', icon: Globe },
+      ]
+    }
+  ]
+
+  const exploreGroups = groups.map(group => {
+    return (
+      <section>
+        <header>{group.name}</header>
+        <ul>
+          {group.items.map(item => (
+            <li onClick={() => dispatch(push(item.link))}>
+              <item.icon size={24} />
+              <div className={item.label}>{item.label}</div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  });
+
   return (
     <Stack>
       <HeaderComponent
-        icon={<Ballon size={50} />}
+        icon={<Search size={50} />}
         fetching={fetchingAlbumsAutoList || fetchingAlbumsAutoList}
-        title="Explorer"
-        subtitle="Explore your photos."
+        title="Explore"
+        subtitle=""
       />
-      <Title order={3}>{t("people")}</Title>
-      <Group>
-        {albumsUserList.slice(0, 19).map(autoAlbum => {
-          return (
-            <Tile
-              onClick={() => {
-                dispatch(push(`/album/${autoAlbum.id}`));
-              }}
-              video={autoAlbum.cover_photos[0].video === true}
-              height={entrySquareSize - 10}
-              width={entrySquareSize - 10}
-              image_hash={autoAlbum.cover_photos[0].image_hash}
-            />
-          );
-        })}
-
-        <Box color="gray">
-          <Button
-            variant="light"
-            color="gray"
-            onClick={() => {
-              dispatch(push(`/album/`));
-            }}
-          >
-            Show More
-          </Button>
-        </Box>
-      </Group>
-      <Title order={3}>{t("things")}</Title>
-      <Group>
-        {albumsUserList.slice(0, 19).map(autoAlbum => {
-          return (
-            <Tile
-              onClick={() => {
-                dispatch(push(`/album/${autoAlbum.id}`));
-              }}
-              video={autoAlbum.cover_photos[0].video === true}
-              height={entrySquareSize - 10}
-              width={entrySquareSize - 10}
-              image_hash={autoAlbum.cover_photos[0].image_hash}
-            />
-          );
-        })}
-        <Box color="gray">
-          <Button
-            variant="light"
-            color="gray"
-            onClick={() => {
-              dispatch(push(`/album/`));
-            }}
-          >
-            Show More
-          </Button>
-        </Box>
-      </Group>
-      <Title order={3}>{t("places")}</Title>
-      <Group>
-        {albumsUserList.slice(0, 19).map(autoAlbum => {
-          return (
-            <Tile
-              onClick={() => {
-                dispatch(push(`/album/${autoAlbum.id}`));
-              }}
-              video={autoAlbum.cover_photos[0].video === true}
-              height={entrySquareSize - 10}
-              width={entrySquareSize - 10}
-              image_hash={autoAlbum.cover_photos[0].image_hash}
-            />
-          );
-        })}
-        <Box color="gray">
-          <Button
-            variant="light"
-            color="gray"
-            onClick={() => {
-              dispatch(push(`/album/`));
-            }}
-          >
-            Show More
-          </Button>
-        </Box>
-      </Group>
+      <div className={classes.group}>
+        {exploreGroups}
+      </div>
     </Stack>
   );
 };
