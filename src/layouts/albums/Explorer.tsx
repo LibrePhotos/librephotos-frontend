@@ -34,6 +34,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
           height: 48,
           cursor: 'pointer',
           color: theme.colorScheme === 'dark' ? theme.white : theme.colors.dark[5],
+          borderRadius: 5,
           svg: {
             marginLeft: 5,
             marginRight: 10,
