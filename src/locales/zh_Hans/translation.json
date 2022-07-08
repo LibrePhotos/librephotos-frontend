@@ -59,11 +59,11 @@
         "missingphotos": "丢失的照片",
         "missingphotosbutton": "移除已丢失的照片",
         "missingphotosdescription": "在每次扫描时，LibrePhotos都会检查文件是否仍在原来位置还是已被移动， 如找不到，则标记为已丢失。",
-        "eventsalbumsdescription": "后端服务器将首先按照拍摄时间对照片进行分组， 如果在 12 小时内连续拍摄两张照片，则认为两张照片来自同一事件， 以这种方式组织在一起后，系统将会自动为该专辑生成对应标题。",
+        "eventsalbumsdescription": "后端服务器将首先按照拍摄时间对照片进行分组， 如果连续的两张照片是在 12 小时内拍摄的，则认为两张照片来自同一事件， 以这种方式组织在一起后，系统将会自动为该专辑生成对应的标题。",
         "eventalbumsgenerate": "生成事件相册",
         "eventsalbums": "事件专辑",
         "eventalbumsregenerate": "重新生成事件标题",
-        "eventalbumsregeneratedescription": "自动生成的专辑标题中会包含人名， 如果您在制作事件专辑后重新训练了人脸识别功能，可以为该事件专辑生成新标题，以生成与照片中的人脸相关联的新名称。",
+        "eventalbumsregeneratedescription": "自动生成的专辑标题中会包含人名， 如果您在制作事件专辑后重新训练了人脸识别功能，则可以为该事件专辑重新生成标题，以反映照片中重训人脸后所关联的新人名。",
         "faces": "人脸",
         "people": "人物",
         "facesbutton": "训练人脸识别",
@@ -90,7 +90,7 @@
         },
         "semanticsearchupdate": "保存",
         "favorite": "喜爱选项",
-        "favoriteminimum": "标记为最喜欢图片的最低等级",
+        "favoriteminimum": "标记为最喜爱图片的最低等级",
         "favoriteoption": {
             "placeholder": "最低等级"
         },
@@ -124,7 +124,9 @@
         "metadata": "元数据选项",
         "sync": "将元数据同步到硬盘",
         "polish": "波兰语",
-        "dutch": "荷兰语"
+        "dutch": "荷兰语",
+        "confidencepercentage": "可信度： {{percentage}}%",
+        "profile": "个人资料"
     },
     "modalnextcloud": {
         "setdirectory": "设置Nextcloud扫描目录",
@@ -140,8 +142,10 @@
         "logout": "注销",
         "settings": "设置",
         "adminarea": "管理面板",
-        "available": "已连接！您可以开始扫描照片、进行人脸识别、自动创建事件专辑或生成事件专辑标题。",
-        "running": "运行中"
+        "available": "已连接！您可以开始扫描照片、识别人脸、自动创建事件专辑或生成事件专辑标题等操作。",
+        "running": "运行中",
+        "profile": "个人资料",
+        "library": "图库"
     },
     "sidemenu": {
         "name": "LibrePhotos",
@@ -266,7 +270,8 @@
         "minimumconfidence": "最低置信度",
         "photocount": "照片数量",
         "joined": "注册于",
-        "notset": "未设置"
+        "notset": "未设置",
+        "remove": "移除"
     },
     "joblist": {
         "workerlogs": "操作日志",
@@ -296,11 +301,11 @@
         "allow": "开放",
         "noallow": "关闭",
         "header": "用户注册",
-        "apikey": "你想在地图上看到你所有照片的拍摄地点吗（如果你的照片中存储了位置）？在这里获取一个 Mapbox API 密钥 https://account.mapbox.com/auth/signup/",
+        "apikey": "是否要在地图上展示照片的拍摄地点（如果照片中存储了位置）？需要注册并提供 Map box 的 API 密钥 https://account.mapbox.com/auth/signup/",
         "headerupload": "允许上传",
         "skippatterns": " 用逗号分隔欲忽略的模式列表（例如：群晖设备上的“@eaDir,#recycle”）",
         "headerapikey": "Mapbox API 密钥",
-        "heavyweight": "扫描图片时的工作线程数量。此设置会显著影响内存的使用。每个工作线程需要 800MB 的内存。根据你的意愿修改。默认为1。",
+        "heavyweight": "扫描图片时的工作线程数量，此设置会显著增加内存占用量，每个工作线程需要 800MB 内存，请根据需要自行修改，默认为1。",
         "headerheavyweight": "高负荷处理",
         "headerskippatterns": "忽略模式"
     },
@@ -429,17 +434,20 @@
         "finaldeletephototitle": "删除图片",
         "setdeletetitle": "删除图片",
         "editphoto": "照片已编辑",
-        "editphototitle": "编辑照片"
+        "editphototitle": "编辑照片",
+        "deletejobtitle": "删除任务",
+        "deletejob": "任务 {{id}} 已被删除。",
+        "uploadsuccess": "上传成功"
     },
     "rules": {
-        "1": "提取exif中的DATE_TIME_ORIGINAL作为当地时间",
+        "1": "提取EXIF中的DATE_TIME_ORIGINAL作为当地时间",
         "2": "使用UTC时间创建视频标签 + 使用 GPS 坐标计算时区",
         "3": "使用文件名假设时间是本地的",
         "4": "视频 UTC - 使用UTC时间作为本地时间（因为无法定位实际时区）",
         "source_tz": "从{{rule}}中转换过来",
         "report_tz": "转换到 {{rule}}",
         "rule_type": "规则类型：{{rule}}",
-        "exif_tag": "使用Exif标签 {{rule}}",
+        "exif_tag": "使用EXIF标签 {{rule}}",
         "file_property": "使用文件属性{{rule}}",
         "5": "从 WhatsApp 文件名中提取日期",
         "predefined_regexp": "使用预定义的正则表达式：{{rule}}",
@@ -458,5 +466,18 @@
     "nofaces": "未检测到人脸",
     "nodata": "无数据",
     "nosocialgraph": "无社交图谱",
-    "locationtimeline": "地理时间轴"
+    "locationtimeline": "地理时间轴",
+    "modalalbum": {
+        "title": "添加到相册",
+        "newalbum": "新建相册",
+        "create": "创建",
+        "items": "{{count}}个项目",
+        "alreadexists": "相册{{title}}已经存在。",
+        "selectedimages": "将选定的 {{count}} 张照片添加到...",
+        "placeholder": "相册标题"
+    },
+    "deleteface": "删除面孔",
+    "deletefaceexplanation": "此操作将完全删除该人脸数据及相关的关联数据，且无法撤销。",
+    "confirm": "确认",
+    "cancel": "取消"
 }
