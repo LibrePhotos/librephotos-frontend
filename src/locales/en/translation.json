@@ -363,7 +363,7 @@
   "scan": "Scan",
   "socialgraph": "Social Graph",
   "facecluster": "Face Clusters",
-  "nofaces": "No faces",
+  "nofaces": "No faces. Train or rescan faces in your Library Settings",
   "nodata": "No data",
   "nosocialgraph": "No social graph",
   "fetchingsocialgraph": "Fetching social graph…",
