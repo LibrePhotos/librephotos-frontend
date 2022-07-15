@@ -7,7 +7,7 @@ import "react-virtualized/styles.css";
 // only needs to be imported once
 import { Edit, File, Map2, Note, Photo, Tags, Users, X } from "tabler-icons-react";
 
-import { generatePhotoIm2txtCaption } from "../../actions/photosActions";
+import { generatePhotoIm2txtCaption, editPhoto } from "../../actions/photosActions";
 import { searchPhotos } from "../../actions/searchActions";
 import { serverAddress } from "../../api_client/apiClient";
 import { useAppDispatch, useAppSelector } from "../../store/store";
@@ -143,15 +143,22 @@ export const Sidebar = (props: Props) => {
               <Note></Note>
               <Title order={4}>{t("lightbox.sidebar.caption")}</Title>
             </Group>
-            {false && photoDetail.captions_json.im2txt}
+            {true && photoDetail.captions_json.user}
             <Stack>
               <Textarea
-                value={photoDetail.captions_json.im2txt}
-                disabled={isPublic}
-                placeholder={photoDetail.captions_json.im2txt}
+                value={photoDetail.captions_json.user}
+                disabled={false}
+                placeholder={photoDetail.captions_json.user}
               />
               <Group>
-                <Button disabled={isPublic} size="sm" color="green">
+                <Button
+                  disabled={false}
+                  size="sm"
+                  color="green"
+                  onClick={() => {
+                    dispatch(editPhoto(props.photoDetail.image_hash, { caption: "TEST" }));
+                  }}
+                >
                   {t("lightbox.sidebar.submit")}
                 </Button>
                 <Button
