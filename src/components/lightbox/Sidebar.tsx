@@ -5,15 +5,15 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "react-virtualized/styles.css";
 // only needs to be imported once
-import { Edit, File, Map2, Note, Photo, Tags, Users, X } from "tabler-icons-react";
+import { Edit, File, Map2, Photo, Tags, Users, X } from "tabler-icons-react";
 
-import { generatePhotoIm2txtCaption, editPhoto } from "../../actions/photosActions";
 import { searchPhotos } from "../../actions/searchActions";
 import { serverAddress } from "../../api_client/apiClient";
-import { useAppDispatch, useAppSelector } from "../../store/store";
+import { useAppDispatch } from "../../store/store";
 import { LocationMap } from "../LocationMap";
 import { Tile } from "../Tile";
 import { ModalPersonEdit } from "../modals/ModalPersonEdit";
+import { CaptionItem } from "./CaptionItem";
 import { TimestampItem } from "./TimestampItem";
 
 let LIGHTBOX_SIDEBAR_WIDTH = 320;
@@ -31,7 +31,6 @@ export const Sidebar = (props: Props) => {
   const dispatch = useAppDispatch();
   const [personEditOpen, setPersonEditOpen] = useState(false);
   const [selectedFaces, setSelectedFaces] = useState<any[]>([]);
-  const { generatingCaptionIm2txt } = useAppSelector(store => store.photos);
   const { photoDetail, isPublic, closeSidepanel } = props;
   return (
     <Box
@@ -137,45 +136,7 @@ export const Sidebar = (props: Props) => {
 
           {/* End Item People */}
           {/* Start Item Caption */}
-
-          <Stack>
-            <Group>
-              <Note></Note>
-              <Title order={4}>{t("lightbox.sidebar.caption")}</Title>
-            </Group>
-            {true && photoDetail.captions_json.user}
-            <Stack>
-              <Textarea
-                value={photoDetail.captions_json.user}
-                disabled={false}
-                placeholder={photoDetail.captions_json.user}
-              />
-              <Group>
-                <Button
-                  disabled={false}
-                  size="sm"
-                  color="green"
-                  onClick={() => {
-                    dispatch(editPhoto(props.photoDetail.image_hash, { caption: "TEST" }));
-                  }}
-                >
-                  {t("lightbox.sidebar.submit")}
-                </Button>
-                <Button
-                  loading={generatingCaptionIm2txt}
-                  onClick={() => {
-                    dispatch(generatePhotoIm2txtCaption(photoDetail.image_hash));
-                  }}
-                  disabled={isPublic || (generatingCaptionIm2txt != null && generatingCaptionIm2txt)}
-                  size="sm"
-                  color="blue"
-                >
-                  {t("lightbox.sidebar.generate")}
-                </Button>
-              </Group>
-            </Stack>
-          </Stack>
-
+          <CaptionItem photoDetail={photoDetail} dispatch={dispatch} isPublic={isPublic}/>
           {/* End Item Caption */}
           {/* Start Item Scene */}
           {photoDetail.captions_json.places365 && (
