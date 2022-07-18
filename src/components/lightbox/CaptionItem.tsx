@@ -31,6 +31,10 @@ export function CaptionItem(props: Props) {
     dispatch(editPhoto(photoDetail.image_hash, differentJson));
   };
 
+  const generateIm2txtCaption = () => {
+    generatePhotoIm2txtCaption(props.photoDetail.image_hash)
+  }
+
   return (
     <Stack>
       <Group>
@@ -55,10 +59,8 @@ export function CaptionItem(props: Props) {
           </Button>
           <Button
             loading={generatingCaptionIm2txt}
-            onClick={() => {
-              dispatch(generatePhotoIm2txtCaption(photoDetail.image_hash))
-            }}
-            //disabled={isPublic || (generatingCaptionIm2txt != null && generatingCaptionIm2txt)}
+            onClick={generateIm2txtCaption}
+            disabled={isPublic || (generatingCaptionIm2txt != null && generatingCaptionIm2txt)}
             size="sm"
             color="blue"
           >
