@@ -136,7 +136,7 @@ export const Sidebar = (props: Props) => {
 
           {/* End Item People */}
           {/* Start Item Caption */}
-          <CaptionItem photoDetail={photoDetail} dispatch={dispatch} isPublic={isPublic}/>
+          <CaptionItem photoDetail={photoDetail} isPublic={isPublic}/>
           {/* End Item Caption */}
           {/* Start Item Scene */}
           {photoDetail.captions_json.places365 && (

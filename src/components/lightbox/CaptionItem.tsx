@@ -11,7 +11,6 @@ import { Photo } from "../../actions/photosActions.types";
 type Props = {
   isPublic: boolean;
   photoDetail: Photo;
-  dispatch: any;
 };
 
 function getCaption(props: Props) {
@@ -23,13 +22,13 @@ function getCaption(props: Props) {
 }
 
 export function CaptionItem(props: Props) {
+  const dispatch = useAppDispatch()
   const { generatingCaptionIm2txt } = useAppSelector(store => store.photos);
-  const { photoDetail, isPublic, dispatch } = props;
+  const { photoDetail, isPublic } = props;
   const { t } = useTranslation();
-
   const onSubmit = () => {
     const differentJson = { caption: getCaption(props) };
-    props.dispatch(editPhoto(props.photoDetail.image_hash, differentJson));
+    dispatch(editPhoto(photoDetail.image_hash, differentJson));
   };
 
   return (
