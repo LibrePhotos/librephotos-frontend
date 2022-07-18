@@ -6,10 +6,11 @@ import "react-virtualized/styles.css";
 import { Note } from "tabler-icons-react";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { generatePhotoIm2txtCaption, editPhoto } from "../../actions/photosActions";
+import { Photo } from "../../actions/photosActions.types";
 
 type Props = {
   isPublic: boolean;
-  photoDetail: any;
+  photoDetail: Photo;
   dispatch: any;
 };
 
