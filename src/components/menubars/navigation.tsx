@@ -24,7 +24,7 @@ export interface Navigation {
   submenu?: Array<Partial<NavigationSubmenu>>;
 }
 
-function createSubmenuItems(item: any, id: number) {
+function createSubmenuItem(item: any, id: number) {
   if (item.separator) {
     return <Dropdown.Divider key={id} />;
   }
@@ -52,7 +52,7 @@ export function createDesktopMenuItem(item: any, id: number) {
           item
           icon={<MainLink icon={<item.icon size={33} />} color={item.color} label={item.label} />}
         >
-          <Dropdown.Menu>{item.submenu.map(createSubmenuItems)}</Dropdown.Menu>
+          <Dropdown.Menu>{item.submenu.map(createSubmenuItem)}</Dropdown.Menu>
         </Dropdown>
       </Navbar.Section>
     );
@@ -80,7 +80,7 @@ export function createMobileMenuItem(item: any, id: number) {
           </ActionIcon>
         }
       >
-        <Dropdown.Menu>{item.submenu.map(createSubmenuItems)}</Dropdown.Menu>
+        <Dropdown.Menu>{item.submenu.map(createSubmenuItem)}</Dropdown.Menu>
       </Dropdown>
     );
   }
