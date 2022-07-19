@@ -24,58 +24,54 @@ export interface Navigation {
   submenu?: Array<Partial<NavigationSubmenu>>;
 }
 
-function createSubmenuItems(items: any) {
+function createSubmenuItems(item: any, id: number) {
+  if (item.separator) {
+    return <Dropdown.Divider key={id} />;
+  }
+  if (item.header) {
+    return <Dropdown.Header key={id}>{item.header}</Dropdown.Header>;
+  }
   return (
-    <Dropdown.Menu>
-      {items.map((item: any) => {
-        if (item.separator) {
-          return <Dropdown.Divider />;
-        }
-        if (item.header) {
-          return <Dropdown.Header>{item.header}</Dropdown.Header>;
-        }
-        return (
-          <Dropdown.Item as={Link} to={item.link} disabled={item.disabled}>
-            <SemanticIcon name={item.icon} color={item.color} />
-            {item.label}
-          </Dropdown.Item>
-        );
-      })}
-    </Dropdown.Menu>
+    <Dropdown.Item key={id} as={Link} to={item.link} disabled={item.disabled}>
+      <SemanticIcon name={item.icon} color={item.color} />
+      {item.label}
+    </Dropdown.Item>
   );
 }
 
-export function createDesktopMenuItem(item: any) {
+export function createDesktopMenuItem(item: any, id: number) {
   if (item.display === false) {
     return null;
   }
   if (item.submenu) {
+    console.log(item.submenu);
     return (
-      <Navbar.Section>
+      <Navbar.Section key={id}>
         <Dropdown
           pointing="left"
           item
           icon={<MainLink icon={<item.icon size={33} />} color={item.color} label={item.label} />}
         >
-          {createSubmenuItems(item.submenu)}
+          <Dropdown.Menu>{item.submenu.map(createSubmenuItems)}</Dropdown.Menu>
         </Dropdown>
       </Navbar.Section>
     );
   }
   return (
-    <Navbar.Section>
+    <Navbar.Section key={id}>
       <MainLink icon={<item.icon size={33} />} color={item.color} label={item.label} to={item.link} />
     </Navbar.Section>
   );
 }
 
-export function createMobileMenuItem(item: any) {
+export function createMobileMenuItem(item: any, id: number) {
   if (item.display === false) {
     return null;
   }
   if (item.submenu) {
     return (
       <Dropdown
+        key={id}
         pointing="top"
         item
         icon={
@@ -84,12 +80,12 @@ export function createMobileMenuItem(item: any) {
           </ActionIcon>
         }
       >
-        {createSubmenuItems(item.submenu)}
+        <Dropdown.Menu>{item.submenu.map(createSubmenuItems)}</Dropdown.Menu>
       </Dropdown>
     );
   }
   return (
-    <ActionIcon color={item.color} variant="light" component={Link} to={item.link}>
+    <ActionIcon key={id} color={item.color} variant="light" component={Link} to={item.link}>
       <item.icon size={33} />
     </ActionIcon>
   );
