@@ -2,13 +2,10 @@ import { ActionIcon, Divider, Footer, Group, Menu } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { push } from "redux-first-history";
-import { Heart } from "tabler-icons-react";
 
 import { selectAuthAccess, selectIsAuthenticated } from "../../store/auth/authSelectors";
 import { useAppDispatch, useAppSelector } from "../../store/store";
-import { SUPPORT_LINK } from "../../ui-constants";
 import { getNavigationItems, navigationStyles } from "./navigation";
 
 export function FooterMenu(): JSX.Element {
@@ -24,19 +21,26 @@ export function FooterMenu(): JSX.Element {
     return <div />;
   }
 
-  const navigationItems = getNavigationItems(t, isAuthenticated, canAccess);
-
-  navigationItems.push({ label: t("supportus"), link: SUPPORT_LINK, icon: Heart, color: "pink" });
-
-  const links = navigationItems.map(item => {
+  const links = getNavigationItems(t, isAuthenticated, canAccess).map(item => {
     if (item.display === false) {
       return null;
     }
 
     const link = (
-      <ActionIcon component={Link} to={item.link}>
-        <item.icon className={classes.linkIcon} color={item.color} size={33} style={{ margin: 0 }} />
-      </ActionIcon>
+      <a
+        href={item.link}
+        key={item.label}
+        onClick={event => {
+          event.preventDefault();
+          if (!item.submenu) {
+            dispatch(push(item.link));
+          }
+        }}
+      >
+        <ActionIcon color={item.color} variant="light">
+          <item.icon className={classes.linkIcon} size={33} style={{ margin: 0 }} />
+        </ActionIcon>
+      </a>
     );
 
     if (item.submenu) {
