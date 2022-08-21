@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Anchor, Image, Loader } from "@mantine/core";
+import { Image, Loader } from "@mantine/core";
 import _ from "lodash";
 import React, { Component } from "react";
 import { withTranslation } from "react-i18next";
