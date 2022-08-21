@@ -1,9 +1,10 @@
 /* eslint-disable */
-import { Anchor, Image, Loader, Stack, Text } from "@mantine/core";
+import { Image, Loader, Stack, Text } from "@mantine/core";
 import debounce from "lodash/debounce";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { AutoSizer, Grid } from "react-virtualized";
+import { push } from "redux-first-history";
 import { Polaroid, User } from "tabler-icons-react";
 
 import { serverAddress } from "../../api_client/apiClient";
@@ -149,13 +150,13 @@ export class AlbumsShared extends Component {
       // photo cell
       return (
         <div key={key} style={{ ...style, padding: 1 }}>
-          <Anchor href={`/useralbum/${cell.id}/`}>
-            <Image
-              width={this.state.entrySquareSize - 2}
-              height={this.state.entrySquareSize - 2}
-              src={`${serverAddress}/media/square_thumbnails/${cell.cover_photo.image_hash}`}
-            />
-          </Anchor>
+          <Image
+            style={{ cursor: "pointer" }}
+            onClick={() => this.props.dispatch(push(`/useralbum/${cell.id}/`))}
+            width={this.state.entrySquareSize - 2}
+            height={this.state.entrySquareSize - 2}
+            src={`${serverAddress}/media/square_thumbnails/${cell.cover_photo.image_hash}`}
+          />
           <Text weight={700}>{cell.title}</Text>
           <Text size="sm" color="dimmed">
             {cell.photo_count} photo(s)

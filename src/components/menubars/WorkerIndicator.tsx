@@ -51,25 +51,22 @@ export function WorkerIndicator() {
   }, []);
 
   return (
-    <Popover
-      opened={opened}
-      onClose={() => setOpened(false)}
-      width={260}
-      target={
+    <Popover opened={opened} onClose={() => setOpened(false)} width={260} position="bottom" withArrow>
+      <Popover.Target>
         <Indicator onMouseEnter={openModalCallback} onMouseLeave={closeModalCallback} color={canWorkerAcceptJob}>
           <div />
         </Indicator>
-      }
-      position="bottom"
-      withArrow
-    >
-      <Text size="sm">
-        {currentData?.queue_can_accept_job ? (
-          t("topmenu.available")
-        ) : (
-          <WorkerRunningJob workerRunningJob={workerRunningJob} />
-        )}
-      </Text>
+      </Popover.Target>
+
+      <Popover.Dropdown>
+        <Text size="sm">
+          {currentData?.queue_can_accept_job ? (
+            t("topmenu.available")
+          ) : (
+            <WorkerRunningJob workerRunningJob={workerRunningJob} />
+          )}
+        </Text>
+      </Popover.Dropdown>
     </Popover>
   );
 }

@@ -10,6 +10,7 @@ import { api } from "../../api_client/api";
 import { serverAddress } from "../../api_client/apiClient";
 import { logout } from "../../store/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "../../store/store";
+import { MENU_DROPDOWN_WIDTH } from "../../ui-constants";
 import { ChunkedUploadButton } from "../ChunkedUploadButton";
 import { CustomSearch } from "../CustomSearch";
 import { TopMenuCommon } from "./TopMenuPublic";
@@ -41,9 +42,9 @@ export function TopMenu() {
           <Group position="right">
             <ChunkedUploadButton />
             <WorkerIndicator />
-            <Menu
-              trigger="hover"
-              control={
+
+            <Menu width={MENU_DROPDOWN_WIDTH} position="bottom-end">
+              <Menu.Target>
                 <Group spacing="xs">
                   <Avatar
                     src={
@@ -56,30 +57,32 @@ export function TopMenu() {
                     radius="xl"
                   />
                 </Group>
-              }
-            >
-              <Menu.Label>
-                <Trans i18nKey="topmenu.loggedin">Logged in as</Trans> {auth.access ? auth.access.name : ""}
-              </Menu.Label>
-              <Menu.Item icon={<Book />} onClick={() => dispatch(push("/library"))}>
-                {t("topmenu.library")}
-              </Menu.Item>
-              <Menu.Item icon={<User />} onClick={() => dispatch(push("/profile"))}>
-                {t("topmenu.profile")}
-              </Menu.Item>
-              <Menu.Item icon={<Settings />} onClick={() => dispatch(push("/settings"))}>
-                {t("topmenu.settings")}
-              </Menu.Item>
-              {auth.access && auth.access.is_admin && <Divider />}
+              </Menu.Target>
 
-              {auth.access && auth.access.is_admin && (
-                <Menu.Item icon={<Adjustments />} onClick={() => dispatch(push("/admin"))}>
-                  {t("topmenu.adminarea")}
+              <Menu.Dropdown>
+                <Menu.Label>
+                  <Trans i18nKey="topmenu.loggedin">Logged in as</Trans> {auth.access ? auth.access.name : ""}
+                </Menu.Label>
+                <Menu.Item icon={<Book />} onClick={() => dispatch(push("/library"))}>
+                  {t("topmenu.library")}
                 </Menu.Item>
-              )}
-              <Menu.Item icon={<Logout />} onClick={() => dispatch(logout())}>
-                {t("topmenu.logout")}
-              </Menu.Item>
+                <Menu.Item icon={<User />} onClick={() => dispatch(push("/profile"))}>
+                  {t("topmenu.profile")}
+                </Menu.Item>
+                <Menu.Item icon={<Settings />} onClick={() => dispatch(push("/settings"))}>
+                  {t("topmenu.settings")}
+                </Menu.Item>
+                {auth.access && auth.access.is_admin && <Divider />}
+
+                {auth.access && auth.access.is_admin && (
+                  <Menu.Item icon={<Adjustments />} onClick={() => dispatch(push("/admin"))}>
+                    {t("topmenu.adminarea")}
+                  </Menu.Item>
+                )}
+                <Menu.Item icon={<Logout />} onClick={() => dispatch(logout())}>
+                  {t("topmenu.logout")}
+                </Menu.Item>
+              </Menu.Dropdown>
             </Menu>
           </Group>
         </Grid.Col>

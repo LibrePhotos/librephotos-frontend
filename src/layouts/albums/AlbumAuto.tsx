@@ -1,3 +1,6 @@
+/* eslint-disable */
+
+/* TODO(sickelap) enable eslint */
 import { ActionIcon, Button, Group, Image, Menu, Modal, Text } from "@mantine/core";
 import { useViewportSize } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
@@ -75,23 +78,24 @@ export const AlbumAuto = () => {
                 image_hash={albumsAutoList[albumAutoIndex].photos.image_hash}
               />
             </Link>
-            <Menu
-              style={{ position: "absolute", top: 10, right: 10 }}
-              control={
-                <ActionIcon>
-                  <DotsVertical />
-                </ActionIcon>
-              }
-            >
-              <Menu.Item
-                icon={<Trash />}
-                onClick={() => {
-                  openDeleteDialog(albumsAutoList[albumAutoIndex].id, albumsAutoList[albumAutoIndex].title);
-                }}
-              >
-                {t("delete")}
-              </Menu.Item>
-            </Menu>
+            <div style={{ position: "absolute", top: 10, right: 10 }}>
+              <Menu>
+                <Menu.Target>
+                  <ActionIcon>
+                    <DotsVertical />
+                  </ActionIcon>
+                </Menu.Target>
+
+                <Menu.Item
+                  icon={<Trash />}
+                  onClick={() => {
+                    openDeleteDialog(albumsAutoList[albumAutoIndex].id, albumsAutoList[albumAutoIndex].title);
+                  }}
+                >
+                  {t("delete")}
+                </Menu.Item>
+              </Menu>
+            </div>
           </div>
           <div className="personCardName" style={{ paddingLeft: 15, paddingRight: 15, height: 50 }}>
             <b>{albumsAutoList[albumAutoIndex].title}</b> <br />

@@ -1,5 +1,5 @@
 import { ActionIcon, Image, Popover } from "@mantine/core";
-import React, { useRef, useState } from "react";
+import React from "react";
 import { Photo } from "tabler-icons-react";
 
 import { serverAddress } from "../../api_client/apiClient";
@@ -8,22 +8,18 @@ type Props = {
   photo: string;
 };
 
-export function PhotoIcon(props: Props) {
-  const [opened, setOpened] = useState(false);
+export function PhotoIcon({ photo }: Props) {
   return (
     <div style={{ left: 0, bottom: 0, position: "absolute" }}>
-      <Popover
-        target={
-          <ActionIcon onClick={() => setOpened(o => !o)} variant="filled">
+      <Popover>
+        <Popover.Target>
+          <ActionIcon variant="filled">
             <Photo />
           </ActionIcon>
-        }
-        onScroll={() => setOpened(false)}
-        opened={opened}
-        position="bottom"
-        onClose={() => setOpened(false)}
-      >
-        <Image height={300} src={`${serverAddress}/media/thumbnails_big/${props.photo}`} />
+        </Popover.Target>
+        <Popover.Dropdown>
+          <Image width={300} height={200} src={`${serverAddress}/media/thumbnails_big/${photo}`} />
+        </Popover.Dropdown>
       </Popover>
     </div>
   );

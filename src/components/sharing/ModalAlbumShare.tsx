@@ -13,17 +13,16 @@ import {
 } from "@mantine/core";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Share } from "tabler-icons-react";
 
 import { setUserAlbumShared } from "../../actions/albumsActions";
 import { fetchPublicUserList } from "../../actions/publicActions";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 
-function fuzzy_match(str, pattern) {
+function fuzzyMatch(str: string, pattern: string) {
   if (pattern.split("").length > 0) {
-    pattern = pattern.split("").reduce((a, b) => `${a}.*${b}`);
-    return new RegExp(pattern).test(str);
+    const expr = pattern.split("").reduce((a, b) => `${a}.*${b}`);
+    return new RegExp(expr).test(str);
   }
   return false;
 }
@@ -32,10 +31,9 @@ type Props = {
   isOpen: boolean;
   onRequestClose: () => void;
   params: any;
-  selectedImageHashes: any;
 };
-//To-Do: Add missing locales
-export const ModalAlbumShare = (props: Props) => {
+// TODO: Add missing locales
+export function ModalAlbumShare(props: Props) {
   const [userNameFilter, setUserNameFilter] = useState("");
   const [opened, setOpened] = useState(false);
 
@@ -43,8 +41,7 @@ export const ModalAlbumShare = (props: Props) => {
   const { albumDetails } = useAppSelector(store => store.albums);
 
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
-  const { isOpen, onRequestClose, params, selectedImageHashes } = props;
+  const { isOpen, onRequestClose, params } = props;
 
   useEffect(() => {
     if (isOpen) {
@@ -56,8 +53,8 @@ export const ModalAlbumShare = (props: Props) => {
   if (userNameFilter.length > 0) {
     filteredUserList = pub.publicUserList.filter(
       el =>
-        fuzzy_match(el.username.toLowerCase(), userNameFilter.toLowerCase()) ||
-        fuzzy_match(`${el.first_name.toLowerCase()} ${el.last_name.toLowerCase()}`, userNameFilter.toLowerCase())
+        fuzzyMatch(el.username.toLowerCase(), userNameFilter.toLowerCase()) ||
+        fuzzyMatch(`${el.first_name.toLowerCase()} ${el.last_name.toLowerCase()}`, userNameFilter.toLowerCase())
     );
   } else {
     filteredUserList = pub.publicUserList;
@@ -105,14 +102,11 @@ export const ModalAlbumShare = (props: Props) => {
                     <Group>
                       {displayName}
                       {albumDetails.shared_to && albumDetails.shared_to.map(e => e.id).includes(item.id) && (
-                        <Popover
-                          opened={opened}
-                          onClose={() => setOpened(false)}
-                          withArrow
-                          position="bottom"
-                          target={<Share />}
-                        >
-                          Share
+                        <Popover opened={opened} onClose={() => setOpened(false)} withArrow position="bottom">
+                          <Popover.Target>
+                            <Share />
+                          </Popover.Target>
+                          <Popover.Dropdown>Share</Popover.Dropdown>
                         </Popover>
                       )}
                     </Group>
@@ -120,7 +114,7 @@ export const ModalAlbumShare = (props: Props) => {
                   <Text>Joined {moment(item.date_joined).format("MMMM YYYY")}</Text>
                   <Switch
                     checked={albumDetails.shared_to && albumDetails.shared_to.map(e => e.id).includes(item.id)}
-                    onChange={event => {
+                    onChange={() => {
                       dispatch(
                         setUserAlbumShared(
                           parseInt(params.albumID, 10),
@@ -137,4 +131,4 @@ export const ModalAlbumShare = (props: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

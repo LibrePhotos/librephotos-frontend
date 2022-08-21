@@ -8,6 +8,7 @@ import MarkerClusterGroup from "react-leaflet-markercluster";
 import { connect } from "react-redux";
 import { AutoSizer, Grid } from "react-virtualized";
 import { compose } from "redux";
+import { push } from "redux-first-history";
 import { Map2 } from "tabler-icons-react";
 
 import { fetchPlaceAlbumsList } from "../../actions/albumsActions";
@@ -166,21 +167,24 @@ export class AlbumPlace extends Component {
     });
   }
 
+  showPlaceAlbum = id => {
+    this.props.dispatch(push(`/place/${id}/`));
+  };
+
   cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
     const place = this.state.visiblePlaceAlbums;
     const albumPlaceIndex = rowIndex * this.state.numEntrySquaresPerRow + columnIndex;
     if (albumPlaceIndex < place.length) {
       return (
         <div key={key} style={style}>
-          <div onClick={() => {}} style={{ padding: 5 }}>
+          <div style={{ padding: 5, cursor: "pointer" }}>
             {place[albumPlaceIndex].cover_photos.slice(0, 1).map((photo, index) => (
-              <Anchor key={index} href={`/place/${place[albumPlaceIndex].id}/`}>
-                <Image
-                  width={this.state.entrySquareSize - 10}
-                  height={this.state.entrySquareSize - 10}
-                  src={`${serverAddress}/media/thumbnails_big/${photo.image_hash}`}
-                />
-              </Anchor>
+              <Image
+                onClick={() => this.showPlaceAlbum(place[albumPlaceIndex].id)}
+                width={this.state.entrySquareSize - 10}
+                height={this.state.entrySquareSize - 10}
+                src={`${serverAddress}/media/thumbnails_big/${photo.image_hash}`}
+              />
             ))}
           </div>
           <div style={{ paddingLeft: 15, paddingRight: 15, height: 50 }}>

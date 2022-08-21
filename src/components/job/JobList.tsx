@@ -94,7 +94,7 @@ export function JobList() {
                 <JobDuration matches={matches} finished={finished} finishedAt={finishedAt} startedAt={startedAt} />
                 {matches && <td>{username}</td>}
                 <td>
-                  <DeleteJobButton job={job} />
+                  <DeleteJobButton job={job} activePage={activePage} pageSize={pageSize} />
                 </td>
               </tr>
             );

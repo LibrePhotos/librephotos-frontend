@@ -10,7 +10,7 @@ type Props = {
   idx2hash: any[];
 };
 
-export const SelectionBar = (props: Props) => {
+export function SelectionBar(props: Props) {
   const [openedAll, setOpenedAll] = useState(false);
   const [openedSelect, setOpenedSelect] = useState(false);
 
@@ -19,11 +19,8 @@ export const SelectionBar = (props: Props) => {
   const { selectMode, updateSelectionState, selectedItems, idx2hash } = props;
   return (
     <Group spacing="xs">
-      <Popover
-        opened={openedAll}
-        onClose={() => setOpenedAll(false)}
-        withArrow
-        target={
+      <Popover opened={openedAll} onClose={() => setOpenedAll(false)} withArrow>
+        <Popover.Target>
           <ActionIcon
             onMouseEnter={() => setOpenedAll(true)}
             onMouseLeave={() => setOpenedAll(false)}
@@ -44,18 +41,16 @@ export const SelectionBar = (props: Props) => {
           >
             <Checks color={selectedItems.length === idx2hash.length ? "green" : "gray"} />
           </ActionIcon>
-        }
-      >
-        <Text size="sm">
-          {selectedItems.length === idx2hash.length ? t("selectionbar.deselect") : t("selectionbar.select")}
-        </Text>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <Text size="sm">
+            {selectedItems.length === idx2hash.length ? t("selectionbar.deselect") : t("selectionbar.select")}
+          </Text>
+        </Popover.Dropdown>
       </Popover>
       <div style={{ paddingTop: 5 }}>
-        <Popover
-          opened={openedSelect}
-          onClose={() => setOpenedSelect(false)}
-          withArrow
-          target={
+        <Popover opened={openedSelect} onClose={() => setOpenedSelect(false)} withArrow>
+          <Popover.Target>
             <Button
               onMouseEnter={() => setOpenedSelect(true)}
               onMouseLeave={() => setOpenedSelect(false)}
@@ -77,11 +72,12 @@ export const SelectionBar = (props: Props) => {
             >
               {`${selectedItems.length} ${t("selectionbar.selected")}`}
             </Button>
-          }
-        >
-          <Text size="sm">{t("selectionbar.toggle")}</Text>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Text size="sm">{t("selectionbar.toggle")}</Text>
+          </Popover.Dropdown>
         </Popover>
       </div>
     </Group>
   );
-};
+}

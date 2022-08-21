@@ -7,7 +7,7 @@ import { ChevronRight, Heart } from "tabler-icons-react";
 
 import { selectAuthAccess, selectIsAuthenticated } from "../../store/auth/authSelectors";
 import { useAppDispatch, useAppSelector } from "../../store/store";
-import { LEFT_MENU_WIDTH, SUPPORT_LINK } from "../../ui-constants";
+import { LEFT_MENU_WIDTH, MENU_DROPDOWN_WIDTH, SUPPORT_LINK } from "../../ui-constants";
 import { getNavigationItems, navigationStyles } from "./navigation";
 
 export function SideMenuNarrow(): JSX.Element {
@@ -52,31 +52,35 @@ export function SideMenuNarrow(): JSX.Element {
 
     if (item.submenu) {
       return (
-        <Menu key={item.label} control={link} withArrow position="right" style={{ display: "block" }} gutter={0}>
-          {item.submenu.map(subitem => {
-            var idx = item.submenu?.indexOf(subitem);
-            if (subitem.header) {
-              return <Menu.Label key={idx}>{subitem.header}</Menu.Label>;
-            }
-            if (subitem.separator) {
-              return <Divider key={idx} />;
-            }
-            const onClick = (event: { preventDefault: () => void }) => {
-              event.preventDefault();
-              setActive(item.link);
-              dispatch(push(subitem.link!));
-            };
-            const icon = (
-              <ActionIcon color={subitem.color} variant="light">
-                <subitem.icon />
-              </ActionIcon>
-            );
-            return (
-              <Menu.Item key={idx} onClick={onClick} icon={icon}>
-                {subitem.label}
-              </Menu.Item>
-            );
-          })}
+        <Menu key={item.label} withArrow position="right-start" width={MENU_DROPDOWN_WIDTH} arrowOffset={20}>
+          <Menu.Target>{link}</Menu.Target>
+
+          <Menu.Dropdown>
+            {item.submenu.map(subitem => {
+              const idx = item.submenu?.indexOf(subitem);
+              if (subitem.header) {
+                return <Menu.Label key={idx}>{subitem.header}</Menu.Label>;
+              }
+              if (subitem.separator) {
+                return <Divider key={idx} />;
+              }
+              const onClick = (event: { preventDefault: () => void }) => {
+                event.preventDefault();
+                setActive(item.link);
+                dispatch(push(subitem.link!));
+              };
+              const icon = (
+                <ActionIcon color={subitem.color} variant="light">
+                  <subitem.icon />
+                </ActionIcon>
+              );
+              return (
+                <Menu.Item key={idx} onClick={onClick} icon={icon}>
+                  {subitem.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Dropdown>
         </Menu>
       );
     }

@@ -54,17 +54,15 @@ export function DefaultHeader(props: Props) {
 
   const { loading, numPhotosetItems, icon, numPhotos, title, additionalSubHeader, date, dayHeaderPrefix } = props;
 
+  const gettingStarted =
+    !loading && auth.access && isScanView() && auth.access.is_admin && !user.scan_directory && numPhotosetItems < 1;
+
   if (loading || numPhotosetItems < 1) {
     return (
       <div>
         <Title order={4}>
           <Group>
-            {!loading &&
-            auth.access &&
-            isScanView() &&
-            auth.access.is_admin &&
-            !user.scan_directory &&
-            numPhotosetItems < 1 ? (
+            {gettingStarted && (
               <div>
                 <p>{t("defaultheader.setup")}</p>
                 <Button
@@ -77,12 +75,16 @@ export function DefaultHeader(props: Props) {
                   {t("defaultheader.gettingstarted")}
                 </Button>
               </div>
-            ) : loading ? (
-              t("defaultheader.loading")
-            ) : (
-              t("defaultheader.noimages")
             )}
-            {loading ? <Loader size={25} /> : null}
+
+            {loading && !gettingStarted && (
+              <>
+                {t("defaultheader.loading")}
+                <Loader size={25} />
+              </>
+            )}
+
+            {!loading && !gettingStarted && t("defaultheader.noimages")}
           </Group>
         </Title>
         <ModalUserEdit
@@ -106,40 +108,41 @@ export function DefaultHeader(props: Props) {
         {icon}
         <div>
           {auth.access && isMenuView() ? (
-            <Menu
-              trigger="hover"
-              control={
+            <Menu trigger="hover">
+              <Menu.Target>
                 <Title style={{ minWidth: 200 }} align="left" order={2}>
                   {title} <ChevronDown size={20} />
                 </Title>
-              }
-            >
-              <Menu.Item icon={<Calendar color="green" size={14} />} onClick={() => dispatch(push("/"))}>
-                {t("sidemenu.withtimestamp")}
-              </Menu.Item>
-              <Menu.Item icon={<Calendar color="red" size={14} />} onClick={() => dispatch(push("/notimestamp"))}>
-                {t("sidemenu.withouttimestamp")}
-              </Menu.Item>
-              <Divider />
+              </Menu.Target>
 
-              <Menu.Item icon={<Clock size={14} />} onClick={() => dispatch(push("/recent"))}>
-                {t("sidemenu.recentlyadded")}
-              </Menu.Item>
-              <Divider />
+              <Menu.Dropdown>
+                <Menu.Item icon={<Calendar color="green" size={14} />} onClick={() => dispatch(push("/"))}>
+                  {t("sidemenu.withtimestamp")}
+                </Menu.Item>
+                <Menu.Item icon={<Calendar color="red" size={14} />} onClick={() => dispatch(push("/notimestamp"))}>
+                  {t("sidemenu.withouttimestamp")}
+                </Menu.Item>
+                <Divider />
 
-              <Menu.Item icon={<EyeOff color="red" size={14} />} onClick={() => dispatch(push("/hidden"))}>
-                {t("sidemenu.hidden")}
-              </Menu.Item>
-              <Menu.Item icon={<Star color="yellow" size={14} />} onClick={() => dispatch(push("/favorites"))}>
-                {t("sidemenu.favorites")}
-              </Menu.Item>
-              <Menu.Item
-                icon={<Globe color="green" size={14} />}
-                disabled={!auth.access}
-                onClick={() => dispatch(push(auth.access ? `/user/${auth.access.name}` : "/"))}
-              >
-                {t("sidemenu.mypublicphotos")}
-              </Menu.Item>
+                <Menu.Item icon={<Clock size={14} />} onClick={() => dispatch(push("/recent"))}>
+                  {t("sidemenu.recentlyadded")}
+                </Menu.Item>
+                <Divider />
+
+                <Menu.Item icon={<EyeOff color="red" size={14} />} onClick={() => dispatch(push("/hidden"))}>
+                  {t("sidemenu.hidden")}
+                </Menu.Item>
+                <Menu.Item icon={<Star color="yellow" size={14} />} onClick={() => dispatch(push("/favorites"))}>
+                  {t("sidemenu.favorites")}
+                </Menu.Item>
+                <Menu.Item
+                  icon={<Globe color="green" size={14} />}
+                  disabled={!auth.access}
+                  onClick={() => dispatch(push(auth.access ? `/user/${auth.access.name}` : "/"))}
+                >
+                  {t("sidemenu.mypublicphotos")}
+                </Menu.Item>
+              </Menu.Dropdown>
             </Menu>
           ) : (
             <Title align="left" order={2}>
@@ -147,7 +150,7 @@ export function DefaultHeader(props: Props) {
             </Title>
           )}
           <Text align="left" color="dimmed">
-            {numPhotosetItems != numPhotos ? `${numPhotosetItems} ${t("defaultheader.days")}, ` : ""}
+            {numPhotosetItems !== numPhotos ? `${numPhotosetItems} ${t("defaultheader.days")}, ` : ""}
             {numPhotos} {t("defaultheader.photos")}{" "}
           </Text>
           {additionalSubHeader}

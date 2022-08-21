@@ -1,5 +1,4 @@
-import { Avatar, Button, Group, Loader, Menu, Popover, Stack, TextInput } from "@mantine/core";
-import { useViewportSize } from "@mantine/hooks";
+import { Avatar, Group, Loader, Menu, Popover, TextInput } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -10,24 +9,50 @@ import { fetchPlaceAlbumsList, fetchThingAlbumsList, fetchUserAlbumsList } from 
 import { fetchPeople } from "../actions/peopleActions";
 import { searchPeople, searchPhotos, searchPlaceAlbums, searchThingAlbums } from "../actions/searchActions";
 import { fetchExampleSearchTerms } from "../actions/utilActions";
-import { SearchTermExamples } from "../actions/utilActions.types";
 import { serverAddress } from "../api_client/apiClient";
 import { useAppDispatch, useAppSelector } from "../store/store";
 
-const ENTER_KEY = 13;
+type PersonAvatarProps = {
+  person: {
+    key: string;
+    face_url: string;
+    text: string;
+  };
+};
 
-function fuzzy_match(str, pattern) {
+function fuzzyMatch(str: string, pattern: string) {
   if (pattern.split("").length > 0) {
-    pattern = pattern.split("").reduce((a, b) => `${a}.*${b}`);
-    return new RegExp(pattern).test(str);
+    const re = pattern.split("").reduce((a, b) => `${a}.*${b}`);
+    return new RegExp(re).test(str);
   }
   return false;
 }
 
-export const CustomSearch = () => {
+function PersonAvatar({ person }: PersonAvatarProps) {
+  const [opened, setOpened] = useState(false);
+
+  return (
+    <Popover opened={opened} onClose={() => setOpened(false)} withArrow position="bottom">
+      <Popover.Target>
+        <Avatar
+          component={Link}
+          to={`/person/${person.key}`}
+          onMouseEnter={() => setOpened(true)}
+          onMouseLeave={() => setOpened(false)}
+          key={`suggestion_person_${person.key}`}
+          size={50}
+          radius="xl"
+          src={serverAddress + person.face_url}
+        />
+      </Popover.Target>
+      {person.text}
+    </Popover>
+  );
+}
+
+export function CustomSearch() {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const { width } = useViewportSize();
   const [exampleSearchTerm, setExampleSearchTerm] = useState("");
   const [filteredExampleSearchTerms, setFilteredExampleSearchTerms] = useState<any[]>([]);
   const [filteredSuggestedPeople, setFilteredSuggestedPeople] = useState<any[]>([]);
@@ -42,81 +67,76 @@ export const CustomSearch = () => {
 
   useEffect(() => {
     dispatch(fetchExampleSearchTerms());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const example = exampleSearchTerms[Math.floor(Math.random() * exampleSearchTerms.length)];
       const searchTerm = example ? `${t("search.search")} ${example}` : t("search.default");
-      setExampleSearchTerm(searchTerm ? searchTerm : "");
+      setExampleSearchTerm(searchTerm || "");
     }, 5000);
     return () => {
       clearInterval(interval);
     };
-  }, [exampleSearchTerms]);
+  }, [exampleSearchTerms, t]);
 
   useEffect(() => {
     if (searchText) {
-      if (people.length == 0) {
+      if (people.length === 0) {
         fetchPeople(dispatch);
       }
-      if (albumsPlaceList.length == 0) {
+      if (albumsPlaceList.length === 0) {
         dispatch(fetchPlaceAlbumsList());
       }
-      if (albumsThingList.length == 0) {
+      if (albumsThingList.length === 0) {
         dispatch(fetchThingAlbumsList());
       }
-      if (albumsUserList.length == 0) {
+      if (albumsUserList.length === 0) {
         dispatch(fetchUserAlbumsList());
       }
     }
-  }, [searchText]);
+  }, [searchText, albumsPlaceList, albumsThingList, albumsUserList, dispatch, people]);
 
   const filterSearchSuggestions = () => {
-    if (searchText.trim().length === 0) {
-      var filteredExampleSearchTerms = [];
-      var filteredSuggestedPeople = [];
-      var filteredSuggestedPlaces = [];
-      var filteredSuggestedThings = [];
-      var filteredSuggestedUserAlbums = [];
-    } else {
-      filteredExampleSearchTerms = exampleSearchTerms.filter(el =>
-        fuzzy_match(el.toLowerCase(), searchText.toLowerCase())
+    let filterExamples = [];
+    let filterPeople = [];
+    let filterPlaces = [];
+    let filterThings = [];
+    let filterAlbums = [];
+    if (searchText.trim().length !== 0) {
+      // TODO(sickelap): use proper types
+      filterExamples = exampleSearchTerms.filter((el: string) =>
+        fuzzyMatch(el.toLowerCase(), searchText.toLowerCase())
       );
-      filteredSuggestedPeople = people.filter(person =>
-        fuzzy_match(person.text.toLowerCase(), searchText.toLowerCase())
+      filterPeople = filterPeople.filter((person: { text: string }) =>
+        fuzzyMatch(person.text.toLowerCase(), searchText.toLowerCase())
       );
-      filteredSuggestedPlaces = albumsPlaceList.filter(place =>
-        fuzzy_match(place.title.toLowerCase(), searchText.toLowerCase())
+      filterPlaces = albumsPlaceList.filter((place: { title: string }) =>
+        fuzzyMatch(place.title.toLowerCase(), searchText.toLowerCase())
       );
-      filteredSuggestedThings = albumsThingList.filter(thing =>
-        fuzzy_match(thing.title.toLowerCase(), searchText.toLowerCase())
+      filterThings = albumsThingList.filter((thing: { title: string }) =>
+        fuzzyMatch(thing.title.toLowerCase(), searchText.toLowerCase())
       );
-      filteredSuggestedUserAlbums = albumsUserList.filter(album =>
-        fuzzy_match(album.title.toLowerCase(), searchText.toLowerCase())
+      filterAlbums = albumsUserList.filter((album: { title: string }) =>
+        fuzzyMatch(album.title.toLowerCase(), searchText.toLowerCase())
       );
     }
-    setFilteredExampleSearchTerms(filteredExampleSearchTerms);
-    setFilteredSuggestedPeople(filteredSuggestedPeople);
-    setFilteredSuggestedPlaces(filteredSuggestedPlaces);
-    setFilteredSuggestedThings(filteredSuggestedThings);
-    setFilteredSuggestedUserAlbums(filteredSuggestedUserAlbums);
+    setFilteredExampleSearchTerms(filterExamples);
+    setFilteredSuggestedPeople(filterPeople);
+    setFilteredSuggestedPlaces(filterPlaces);
+    setFilteredSuggestedThings(filterThings);
+    setFilteredSuggestedUserAlbums(filterAlbums);
   };
 
-  const handleChange = d => {
+  const handleChange = (d: React.FormEvent<HTMLInputElement>) => {
     setSearchText(d.currentTarget.value);
 
     filterSearchSuggestions();
   };
 
-  const searchBarWidth = width - width / 2.2;
-
   return (
-    <Menu
-      style={{
-        width: searchBarWidth,
-      }}
-      control={
+    <Menu>
+      <Menu.Target>
         <TextInput
           icon={<Search size={14} />}
           onKeyPress={event => {
@@ -132,8 +152,7 @@ export const CustomSearch = () => {
           onChange={handleChange}
           placeholder={exampleSearchTerm}
         />
-      }
-    >
+      </Menu.Target>
       {filteredExampleSearchTerms.length > 0 &&
         filteredExampleSearchTerms.slice(0, 2).map(el => (
           <Menu.Item
@@ -191,7 +210,7 @@ export const CustomSearch = () => {
           ))}
         </Group>
       )}
-      {albumsThingList.length == 0 && searchText.length > 0 && (
+      {albumsThingList.length === 0 && searchText.length > 0 && (
         <Menu.Item icon={<Search size={14} />}>
           <Group>
             <Loader size={14} />
@@ -201,31 +220,4 @@ export const CustomSearch = () => {
       )}
     </Menu>
   );
-};
-
-const PersonAvatar = ({ person }) => {
-  const [opened, setOpened] = useState(false);
-
-  return (
-    <Popover
-      opened={opened}
-      onClose={() => setOpened(false)}
-      withArrow
-      position="bottom"
-      target={
-        <Avatar
-          component={Link}
-          to={`/person/${person.key}`}
-          onMouseEnter={() => setOpened(true)}
-          onMouseLeave={() => setOpened(false)}
-          key={`suggestion_person_${person.key}`}
-          size={50}
-          radius="xl"
-          src={serverAddress + person.face_url}
-        />
-      }
-    >
-      {person.text}
-    </Popover>
-  );
-};
+}

@@ -14,28 +14,32 @@ import { HeaderComponent } from "./HeaderComponent";
 
 const SIDEBAR_WIDTH = LEFT_MENU_WIDTH;
 
-export function SharedWith(album: any) {
+type Props = {
+  album: {
+    shared_to: any[];
+  };
+};
+
+export function SharedWith({ album }: Props) {
   const [tooltipOpened, setTooltipOpened] = useState(false);
-  //To-Do: Figure out, why album is an array / json
+  // TODO: Figure out, why album is an array / json
   return (
-    <Popover
-      opened={tooltipOpened}
-      width={260}
-      position="bottom"
-      onClose={() => {
-        setTooltipOpened(false);
-      }}
-      target={<Users size={20} onClick={() => setTooltipOpened(o => !o)} />}
-    >
-      <Stack>
-        <Title order={5}>Shared with:</Title>
-        {album.album.shared_to.map(el => (
-          <Group>
-            <User />
-            <b>{el.username}</b>
-          </Group>
-        ))}
-      </Stack>
+    <Popover opened={tooltipOpened} width={260} position="bottom" onClose={() => setTooltipOpened(false)}>
+      <Popover.Target>
+        <Users size={20} onClick={() => setTooltipOpened(o => !o)} />
+      </Popover.Target>
+
+      <Popover.Dropdown>
+        <Stack>
+          <Title order={5}>Shared with:</Title>
+          {album.shared_to.map(el => (
+            <Group>
+              <User />
+              <b>{el.username}</b>
+            </Group>
+          ))}
+        </Stack>
+      </Popover.Dropdown>
     </Popover>
   );
 }
@@ -55,47 +59,47 @@ export function AlbumUser() {
 
   const { albumsUserList, fetchingAlbumsUserList } = useAppSelector(store => store.albums);
 
-  const openDeleteDialog = (albumID: string, albumTitle: string) => {
+  const openDeleteDialog = (id: string, title: string) => {
     setIsDeleteDialogOpen(true);
-    setAlbumID(albumID);
-    setAlbumTitle(albumTitle);
+    setAlbumID(id);
+    setAlbumTitle(title);
   };
 
-  const openRenameDialog = (albumID: string, albumTitle: string) => {
+  const openRenameDialog = (id: string, title: string) => {
     setIsRenameDialogOpen(true);
-    setAlbumID(albumID);
-    setAlbumTitle(albumTitle);
+    setAlbumID(id);
+    setAlbumTitle(title);
   };
 
   const closeDeleteDialog = () => setIsDeleteDialogOpen(false);
 
   const closeRenameDialog = () => setIsRenameDialogOpen(false);
 
+  const calculateEntrySquareSize = () => {
+    let numPerRow = 6;
+    if (window.innerWidth < 600) {
+      numPerRow = 2;
+    } else if (window.innerWidth < 800) {
+      numPerRow = 3;
+    } else if (window.innerWidth < 1000) {
+      numPerRow = 4;
+    } else if (window.innerWidth < 1200) {
+      numPerRow = 5;
+    }
+
+    const columnWidth = window.innerWidth - SIDEBAR_WIDTH - 5 - 5 - 15;
+    const squareSize = columnWidth / numPerRow;
+
+    setEntrySquareSize(squareSize);
+    setNumEntrySquaresPerRow(numPerRow);
+  };
+
   useEffect(() => {
     calculateEntrySquareSize();
     if (albumsUserList.length === 0) {
       dispatch(fetchUserAlbumsList());
     }
-  }, []);
-
-  const calculateEntrySquareSize = () => {
-    let numEntrySquaresPerRow = 6;
-    if (window.innerWidth < 600) {
-      numEntrySquaresPerRow = 2;
-    } else if (window.innerWidth < 800) {
-      numEntrySquaresPerRow = 3;
-    } else if (window.innerWidth < 1000) {
-      numEntrySquaresPerRow = 4;
-    } else if (window.innerWidth < 1200) {
-      numEntrySquaresPerRow = 5;
-    }
-
-    const columnWidth = window.innerWidth - SIDEBAR_WIDTH - 5 - 5 - 15;
-
-    const entrySquareSize = columnWidth / numEntrySquaresPerRow;
-    setEntrySquareSize(entrySquareSize);
-    setNumEntrySquaresPerRow(numEntrySquaresPerRow);
-  };
+  }, [albumsUserList, dispatch]);
 
   const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
     const albumUserIndex = rowIndex * numEntrySquaresPerRow + columnIndex;
@@ -112,31 +116,34 @@ export function AlbumUser() {
               />
             </Link>
 
-            <Menu
-              style={{ position: "absolute", top: 10, right: 10 }}
-              control={
-                <ActionIcon>
-                  <DotsVertical />
-                </ActionIcon>
-              }
-            >
-              <Menu.Item
-                icon={<Edit />}
-                onClick={() =>
-                  openRenameDialog(albumsUserList[albumUserIndex].id, albumsUserList[albumUserIndex].title)
-                }
-              >
-                {t("rename")}
-              </Menu.Item>
-              <Menu.Item
-                icon={<Trash />}
-                onClick={() => {
-                  openDeleteDialog(albumsUserList[albumUserIndex].id, albumsUserList[albumUserIndex].title);
-                }}
-              >
-                {t("delete")}
-              </Menu.Item>
-            </Menu>
+            <div style={{ position: "absolute", top: 10, right: 10 }}>
+              <Menu position="bottom-end">
+                <Menu.Target>
+                  <ActionIcon>
+                    <DotsVertical />
+                  </ActionIcon>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Item
+                    icon={<Edit />}
+                    onClick={() =>
+                      openRenameDialog(albumsUserList[albumUserIndex].id, albumsUserList[albumUserIndex].title)
+                    }
+                  >
+                    {t("rename")}
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<Trash />}
+                    onClick={() => {
+                      openDeleteDialog(albumsUserList[albumUserIndex].id, albumsUserList[albumUserIndex].title);
+                    }}
+                  >
+                    {t("delete")}
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </div>
           </div>
           <div className="personCardName" style={{ paddingLeft: 15, paddingRight: 15, height: 50 }}>
             <Group>

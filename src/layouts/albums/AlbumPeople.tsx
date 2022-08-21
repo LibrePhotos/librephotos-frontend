@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Group, Image, Menu, Modal, Text, TextInput } from "@mantine/core";
-import { useDisclosure, useResizeObserver, useViewportSize } from "@mantine/hooks";
+import { useResizeObserver, useViewportSize } from "@mantine/hooks";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -14,11 +14,10 @@ import { HeaderComponent } from "./HeaderComponent";
 
 const SIDEBAR_WIDTH = LEFT_MENU_WIDTH;
 
-export const AlbumPeople = () => {
-  const { width, height } = useViewportSize();
+export function AlbumPeople() {
+  const { height } = useViewportSize();
   const [entrySquareSize, setEntrySquareSize] = useState(200);
 
-  const [opened, handlers] = useDisclosure(false);
   const [numEntrySquaresPerRow, setNumEntrySquaresPerRow] = useState(0);
   const [openDeleteDialogState, setOpenDeleteDialogState] = useState(false);
   const [openRenameDialogState, setOpenRenameDialogState] = useState(false);
@@ -29,15 +28,34 @@ export const AlbumPeople = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
-  const openDeleteDialog = (personID, personName) => {
+  const openDeleteDialog = (id: string, name: string) => {
     setOpenDeleteDialogState(true);
-    setPersonID(personID);
-    setPersonName(personName);
+    setPersonID(id);
+    setPersonName(name);
   };
-  const openRenameDialog = (personID, personName) => {
+  const openRenameDialog = (id: string, name: string) => {
     setOpenRenameDialogState(true);
-    setPersonID(personID);
-    setPersonName(personName);
+    setPersonID(id);
+    setPersonName(name);
+  };
+
+  const calculateEntrySquareSize = () => {
+    let numPerRow = 6;
+    if (window.innerWidth < 600) {
+      numPerRow = 2;
+    } else if (window.innerWidth < 800) {
+      numPerRow = 3;
+    } else if (window.innerWidth < 1000) {
+      numPerRow = 4;
+    } else if (window.innerWidth < 1200) {
+      numPerRow = 5;
+    }
+
+    const columnWidth = window.innerWidth - SIDEBAR_WIDTH - 5 - 5 - 15;
+    const squareSize = columnWidth / numPerRow;
+
+    setNumEntrySquaresPerRow(numPerRow);
+    setEntrySquareSize(squareSize);
   };
 
   const [ref, rect] = useResizeObserver();
@@ -49,78 +67,61 @@ export const AlbumPeople = () => {
     if (people.length === 0) {
       fetchPeople(dispatch);
     }
-  }, []);
+  }, [dispatch, people]);
 
-  const calculateEntrySquareSize = () => {
-    let numEntrySquaresPerRow = 6;
-    if (window.innerWidth < 600) {
-      numEntrySquaresPerRow = 2;
-    } else if (window.innerWidth < 800) {
-      numEntrySquaresPerRow = 3;
-    } else if (window.innerWidth < 1000) {
-      numEntrySquaresPerRow = 4;
-    } else if (window.innerWidth < 1200) {
-      numEntrySquaresPerRow = 5;
+  function getPersonAmbum(album) {
+    if (album.face_count === 0) {
+      return <Image height={entrySquareSize - 10} width={entrySquareSize - 10} src="/unknown_user.jpg" />;
     }
-
-    const columnWidth = window.innerWidth - SIDEBAR_WIDTH - 5 - 5 - 15;
-
-    const entrySquareSize = columnWidth / numEntrySquaresPerRow;
-
-    setNumEntrySquaresPerRow(numEntrySquaresPerRow);
-    setEntrySquareSize(entrySquareSize);
-  };
+    if (album.text === "unknown") {
+      return (
+        <Link to={`/person/${album.key}`}>
+          <Image height={entrySquareSize - 10} width={entrySquareSize - 10} src="/unknown_user.jpg" />
+        </Link>
+      );
+    }
+    return (
+      <div>
+        <Link to={`/person/${album.key}`}>
+          <Tile
+            video={album.video === true}
+            height={entrySquareSize - 10}
+            width={entrySquareSize - 10}
+            image_hash={album.face_photo_url}
+          />
+        </Link>
+        <div style={{ position: "absolute", top: 10, right: 10 }}>
+          <Menu position="bottom-end">
+            <Menu.Target>
+              <ActionIcon>
+                <DotsVertical />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item icon={<Edit />} onClick={() => openRenameDialog(album.key, album.text)}>
+                {t("rename")}
+              </Menu.Item>
+              <Menu.Item
+                icon={<Trash />}
+                onClick={() => {
+                  openDeleteDialog(album.key, album.text);
+                }}
+              >
+                {t("delete")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+      </div>
+    );
+  }
 
   const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
     const albumPersonIndex = rowIndex * numEntrySquaresPerRow + columnIndex;
     if (albumPersonIndex < people.length) {
       return (
         <div key={key} style={style}>
-          <div style={{ padding: 5 }}>
-            {people[albumPersonIndex].face_count > 0 ? (
-              people[albumPersonIndex].text === "unknown" ? (
-                <Link to={`/person/${people[albumPersonIndex].key}`}>
-                  <Image height={entrySquareSize - 10} width={entrySquareSize - 10} src="/unknown_user.jpg" />
-                </Link>
-              ) : (
-                <div>
-                  <Link to={`/person/${people[albumPersonIndex].key}`}>
-                    <Tile
-                      video={people[albumPersonIndex].video === true}
-                      height={entrySquareSize - 10}
-                      width={entrySquareSize - 10}
-                      image_hash={people[albumPersonIndex].face_photo_url}
-                    />
-                  </Link>
-                  <Menu
-                    style={{ position: "absolute", top: 10, right: 10 }}
-                    control={
-                      <ActionIcon>
-                        <DotsVertical />
-                      </ActionIcon>
-                    }
-                  >
-                    <Menu.Item
-                      icon={<Edit />}
-                      onClick={() => openRenameDialog(people[albumPersonIndex].key, people[albumPersonIndex].text)}
-                    >
-                      {t("rename")}
-                    </Menu.Item>
-                    <Menu.Item
-                      icon={<Trash />}
-                      onClick={() => {
-                        openDeleteDialog(people[albumPersonIndex].key, people[albumPersonIndex].text);
-                      }}
-                    >
-                      {t("delete")}
-                    </Menu.Item>
-                  </Menu>
-                </div>
-              )
-            ) : (
-              <Image height={entrySquareSize - 10} width={entrySquareSize - 10} src="/unknown_user.jpg" />
-            )}
-          </div>
+          <div style={{ padding: 5 }}>{getPersonAmbum(people[albumPersonIndex])}</div>
           <div style={{ paddingLeft: 15, paddingRight: 15, height: 50 }}>
             <Group position="apart">
               <div>
@@ -165,7 +166,7 @@ export const AlbumPeople = () => {
               setNewPersonName(e.currentTarget.value);
             }}
             placeholder={t("personalbum.nameplaceholder")}
-          ></TextInput>
+          />
           <Button
             onClick={() => {
               dispatch(renamePerson(personID, personName, newPersonName));
@@ -223,4 +224,4 @@ export const AlbumPeople = () => {
       </AutoSizer>
     </div>
   );
-};
+}

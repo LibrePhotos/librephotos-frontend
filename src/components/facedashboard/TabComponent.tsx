@@ -2,35 +2,31 @@ import { Loader, Tabs } from "@mantine/core";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { FaceDetection } from "../../layouts/dataviz/constants";
+
 type Props = {
-  activeTab: number;
   width: number;
-  changeTab: (tabIndex: number) => void;
+  onTabChange: (name: string) => void;
   fetchingLabeledFacesList: boolean;
   fetchingInferredFacesList: boolean;
 };
 
 export function TabComponent(props: Props) {
   const { t } = useTranslation();
+  const { width, onTabChange, fetchingLabeledFacesList, fetchingInferredFacesList } = props;
 
   return (
-    <Tabs style={{ width: props.width }} active={props.activeTab} onTabChange={props.changeTab}>
-      <Tabs.Tab
-        label={
-          <div>
-            {t("settings.labeled")} {props.fetchingLabeledFacesList ? <Loader size="sm" /> : null}
-          </div>
-        }
-        name="labeled"
-      ></Tabs.Tab>
-      <Tabs.Tab
-        name="inferred"
-        label={
-          <div>
-            {t("settings.inferred")} {props.fetchingInferredFacesList ? <Loader size="sm" /> : null}
-          </div>
-        }
-      ></Tabs.Tab>
+    <Tabs style={{ width }} defaultValue={FaceDetection.LABELED} onTabChange={onTabChange}>
+      <Tabs.List>
+        <Tabs.Tab value={FaceDetection.LABELED}>{t("settings.labeled")}</Tabs.Tab>
+        <Tabs.Tab value={FaceDetection.INFERRED}>{t("settings.inferred")}</Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Panel value={FaceDetection.LABELED}>{fetchingLabeledFacesList ? <Loader size="sm" /> : null}</Tabs.Panel>
+
+      <Tabs.Panel value={FaceDetection.INFERRED}>
+        {t("settings.inferred")} {fetchingInferredFacesList ? <Loader size="sm" /> : null}
+      </Tabs.Panel>
     </Tabs>
   );
 }

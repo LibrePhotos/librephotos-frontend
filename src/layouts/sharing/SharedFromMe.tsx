@@ -1,5 +1,5 @@
 import { Group, Stack, Tabs, Text, Title } from "@mantine/core";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { fetchUserAlbumsSharedFromMe } from "../../actions/albumsActions";
@@ -15,7 +15,6 @@ export function SharedFromMe() {
   const { albums } = useAppSelector(store => store);
   const { photosFlat, photosGroupedByUser, fetchedPhotosetType } = useAppSelector(store => store.photos);
   const { which } = useParams();
-  const [activeTab, setActiveTab] = useState(1);
 
   useEffect(() => {
     if (fetchedPhotosetType !== PhotosetType.SHARED_BY_ME) {
@@ -48,13 +47,17 @@ export function SharedFromMe() {
           </Text>
         </div>
       </Group>
-      <Tabs active={activeTab} onTabChange={setActiveTab}>
-        <Tabs.Tab label="Photos" name="photos">
+      <Tabs defaultValue="photos">
+        <Tabs.List>
+          <Tabs.Tab value="photos">Photos</Tabs.Tab>
+          <Tabs.Tab value="albums">Albums</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="photos">
           <PhotosShared isSharedToMe={false} />
-        </Tabs.Tab>
-        <Tabs.Tab label="Albums" name="albums">
+        </Tabs.Panel>
+        <Tabs.Panel value="albums">
           <AlbumsShared isSharedToMe={false} />
-        </Tabs.Tab>
+        </Tabs.Panel>
       </Tabs>
     </Stack>
   );

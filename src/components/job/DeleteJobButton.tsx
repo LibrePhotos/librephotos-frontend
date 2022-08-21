@@ -5,38 +5,35 @@ import { useTranslation } from "react-i18next";
 import { deleteJob } from "../../actions/utilActions";
 import { useAppDispatch } from "../../store/store";
 
+type Props = {
+  job: {
+    id: number;
+  };
+  pageSize: number;
+  activePage: number;
+};
 
-export function DeleteJobButton(job) {
+export function DeleteJobButton({ job, pageSize, activePage }: Props) {
+  const { id } = job;
   const [opened, setOpened] = useState(false);
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
-  const { id } = job.job;
-  const page = job.activePage;
-  const { pageSize } = job;
-
   return (
-    <Popover
-      opened={opened}
-      position="top"
-      placement="center"
-      withArrow
-      width={260}
-      onClose={() => setOpened(false)}
-      target={
+    <Popover opened={opened} position="top" withArrow width={260} onClose={() => setOpened(false)}>
+      <Popover.Target>
         <Button
           onMouseEnter={() => setOpened(true)}
           onMouseLeave={() => setOpened(false)}
-          onClick={() => {
-            dispatch(deleteJob(id, page, pageSize));
-          }}
+          onClick={() => dispatch(deleteJob(id, activePage, pageSize))}
           color="red"
         >
           {t("adminarea.remove")}
         </Button>
-      }
-    >
-      <div style={{ display: "flex" }}>{t("joblist.removeexplanation")}</div>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <div style={{ display: "flex" }}>{t("joblist.removeexplanation")}</div>
+      </Popover.Dropdown>
     </Popover>
   );
 }

@@ -38,7 +38,7 @@ import { ModalNextcloudScanDirectoryEdit } from "../../components/modals/ModalNe
 import { CountStats } from "../../components/statistics";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 
-export const Library = () => {
+export function Library() {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenNextcloudExplanation, setIsOpenNextcloudExplanation] = useState(false);
   const [isOpenCredentials, setIsOpenCredentials] = useState(false);
@@ -93,7 +93,7 @@ export const Library = () => {
     if (auth.access.is_admin) {
       dispatch(fetchJobList());
     }
-  }, []);
+  }, [auth, dispatch]);
 
   useEffect(() => {
     setUserSelfDetails(userSelfDetailsRedux);
@@ -238,7 +238,7 @@ export const Library = () => {
             </Button>
             <Modal opened={isOpen} title={t("settings.missingphotosbutton")} onClose={close}>
               <Stack spacing="xl">
-                This action will delete all missing photos and it's metadata from the database.
+                This action will delete all missing photos and its metadata from the database.
                 <Group>
                   <Button onClick={close}>Cancel</Button>
                   <Button color="red" onClick={onDeleteMissingPhotosButtonClick}>
@@ -395,9 +395,9 @@ export const Library = () => {
           opened={isOpenNextcloudExplanation}
           onClose={() => setIsOpenNextcloudExplanation(false)}
           position="top"
-          placement="center"
           withArrow
-          target={
+        >
+          <Popover.Target>
             <Group>
               <Indicator
                 inline
@@ -405,13 +405,15 @@ export const Library = () => {
                 onMouseLeave={() => setIsOpenNextcloudExplanation(false)}
                 color={fetchedNextcloudDirectoryTree ? "green" : "red"}
               >
-                <div></div>
+                <div />
               </Indicator>
               <Trans i18nKey="settings.nextcloudheader">Nextcloud</Trans>
             </Group>
-          }
-        >
-          {fetchedNextcloudDirectoryTree ? t("settings.nextcloudloggedin") : t("settings.nextcloudnotloggedin")}
+          </Popover.Target>
+
+          <Popover.Dropdown>
+            {fetchedNextcloudDirectoryTree ? t("settings.nextcloudloggedin") : t("settings.nextcloudnotloggedin")}
+          </Popover.Dropdown>
         </Popover>
       </Title>
       <Stack>
@@ -422,7 +424,7 @@ export const Library = () => {
           value={userSelfDetails.nextcloud_server_address}
           label={t("settings.serveradress")}
           placeholder={t("settings.serveradressplaceholder")}
-        ></TextInput>
+        />
         <Group>
           <TextInput
             onChange={event => {
@@ -431,20 +433,15 @@ export const Library = () => {
             label={t("settings.nextcloudusername")}
             placeholder={t("settings.nextcloudusernameplaceholder")}
             value={userSelfDetails.nextcloud_username}
-          ></TextInput>
+          />
           <TextInput
             onChange={event => {
               setUserSelfDetails({ ...userSelfDetails, nextcloud_app_password: event.currentTarget.value });
             }}
             type="password"
             label={
-              <Popover
-                position="top"
-                placement="center"
-                withArrow
-                opened={isOpenCredentials}
-                onClose={() => setIsOpenCredentials(false)}
-                target={
+              <Popover position="top" withArrow opened={isOpenCredentials} onClose={() => setIsOpenCredentials(false)}>
+                <Popover.Target>
                   <Group>
                     {t("settings.nextcloudpassword")}
                     <QuestionMark
@@ -452,9 +449,8 @@ export const Library = () => {
                       onMouseLeave={() => setIsOpenCredentials(false)}
                     />
                   </Group>
-                }
-              >
-                {t("settings.credentialspopup")}
+                </Popover.Target>
+                <Popover.Dropdown>{t("settings.credentialspopup")}</Popover.Dropdown>
               </Popover>
             }
             placeholder={t("settings.nextcloudpasswordplaceholder")}
@@ -519,4 +515,4 @@ export const Library = () => {
       </Dialog>
     </Stack>
   );
-};
+}

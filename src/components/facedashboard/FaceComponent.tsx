@@ -4,6 +4,7 @@ import _ from "lodash";
 import React, { useState } from "react";
 
 import { serverAddress } from "../../api_client/apiClient";
+import { FaceDetection } from "../../layouts/dataviz/constants";
 import { PhotoIcon } from "./PhotoIcon";
 
 type Props = {
@@ -12,23 +13,35 @@ type Props = {
   selectMode: boolean;
   entrySquareSize: number;
   isSelected: boolean;
-  activeItem: number;
+  activeItem: string;
   handleClick: (e: any, cell: any) => void;
 };
 
-export function FaceComponent(props: Props) {
-  const calculateProbabiltyColor = (labelProbability: number) =>
-    labelProbability > 0.9 ? "green" : labelProbability > 0.8 ? "yellow" : labelProbability > 0.7 ? "orange" : "red";
+function calculateProbabiltyColor(probability: number) {
+  if (probability > 0.9) {
+    return "green";
+  }
+  if (probability > 0.8) {
+    return "yellow";
+  }
+  if (probability > 0.7) {
+    return "orange";
+  }
+  return "red";
+}
 
-  const labelProbabilityColor = calculateProbabiltyColor(props.cell.person_label_probability);
-  const showPhotoIcon = <PhotoIcon photo={props.cell.photo} />;
+export function FaceComponent(props: Props) {
+  const { cell, isScrollingFast, entrySquareSize, activeItem, selectMode, handleClick } = props;
+
+  const labelProbabilityColor = calculateProbabiltyColor(cell.person_label_probability);
+  const showPhotoIcon = <PhotoIcon photo={cell.photo} />;
   const [tooltipOpened, setTooltipOpened] = useState(false);
   // TODO: janky shit going on in the next line!
-  const faceImageSrc = `${serverAddress}/media/faces/${_.reverse(props.cell.image.split("/"))[0]}`;
-  if (props.isScrollingFast) {
-    return <Avatar radius="xl" src="/thumbnail_placeholder.png" size={props.entrySquareSize - 10} />;
+  const faceImageSrc = `${serverAddress}/media/faces/${_.reverse(cell.image.split("/"))[0]}`;
+  if (isScrollingFast) {
+    return <Avatar radius="xl" src="/thumbnail_placeholder.png" size={entrySquareSize - 10} />;
   }
-  if (props.selectMode) {
+  if (selectMode) {
     const { isSelected } = props;
     return (
       <Box
@@ -47,9 +60,9 @@ export function FaceComponent(props: Props) {
       >
         <Center>
           <Tooltip
-            opened={tooltipOpened && props.activeItem === 1}
+            opened={tooltipOpened && activeItem === FaceDetection.INFERRED}
             label={t<string>("settings.confidencepercentage", {
-              percentage: (props.cell.person_label_probability * 100).toFixed(1),
+              percentage: (cell.person_label_probability * 100).toFixed(1),
             })}
             position="bottom"
             withArrow
@@ -58,16 +71,16 @@ export function FaceComponent(props: Props) {
               color={labelProbabilityColor}
               onMouseEnter={() => setTooltipOpened(true)}
               onMouseLeave={() => setTooltipOpened(false)}
-              disabled={props.activeItem === 0}
+              disabled={activeItem === FaceDetection.LABELED}
               size={15}
             >
               <Avatar
                 radius="xl"
                 onClick={(e: any) => {
-                  props.handleClick(e, props.cell);
+                  handleClick(e, cell);
                 }}
                 src={faceImageSrc}
-                size={props.entrySquareSize - 30}
+                size={entrySquareSize - 30}
               />
             </Indicator>
           </Tooltip>
@@ -93,9 +106,9 @@ export function FaceComponent(props: Props) {
     >
       <Center>
         <Tooltip
-          opened={tooltipOpened && props.activeItem === 1}
+          opened={tooltipOpened && activeItem === FaceDetection.INFERRED}
           label={t<string>("settings.confidencepercentage", {
-            percentage: (props.cell.person_label_probability * 100).toFixed(1),
+            percentage: (cell.person_label_probability * 100).toFixed(1),
           })}
           position="bottom"
         >
@@ -104,16 +117,14 @@ export function FaceComponent(props: Props) {
             color={labelProbabilityColor}
             onMouseEnter={() => setTooltipOpened(true)}
             onMouseLeave={() => setTooltipOpened(false)}
-            disabled={props.activeItem === 0}
+            disabled={activeItem === FaceDetection.LABELED}
             size={15}
           >
             <Avatar
-              onClick={(e: any) => {
-                props.handleClick(e, props.cell);
-              }}
+              onClick={(e: any) => handleClick(e, cell)}
               radius="xl"
               src={faceImageSrc}
-              size={props.entrySquareSize - 10}
+              size={entrySquareSize - 10}
             />
           </Indicator>
         </Tooltip>

@@ -369,7 +369,6 @@ function PhotoListViewComponent(props: Props) {
             setModalAlbumShareOpen(false);
           }}
           params={params}
-          selectedImageHashes={selectionState.selectedItems.map(i => i.id)}
         />
       )}
     </div>

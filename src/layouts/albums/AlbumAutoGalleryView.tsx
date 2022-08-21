@@ -1,4 +1,7 @@
-import { Avatar, AvatarsGroup, Breadcrumbs, Button, Divider, Group, Loader, Text, Title } from "@mantine/core";
+/* eslint-disable */
+
+/* TODO(sickelap): enable eslint */
+import { Avatar, Breadcrumbs, Button, Divider, Group, Loader, Text, Title } from "@mantine/core";
 import { useViewportSize } from "@mantine/hooks";
 import _ from "lodash";
 import moment from "moment";
@@ -110,8 +113,8 @@ export function AlbumAutoGalleryView() {
                 <Users /> {t("people")}
               </Title>
 
-              <AvatarsGroup limit={5}>
-                {album.people.map((person, idx) => (
+              <Avatar.Group>
+                {album.people.slice(0, 5).map((person, idx) => (
                   <Avatar
                     radius="xl"
                     component="a"
@@ -120,7 +123,7 @@ export function AlbumAutoGalleryView() {
                     alt={person.name}
                   />
                 ))}
-              </AvatarsGroup>
+              </Avatar.Group>
             </div>
           )}
 

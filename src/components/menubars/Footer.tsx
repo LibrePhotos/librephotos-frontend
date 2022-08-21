@@ -8,7 +8,7 @@ import { Heart } from "tabler-icons-react";
 
 import { selectAuthAccess, selectIsAuthenticated } from "../../store/auth/authSelectors";
 import { useAppDispatch, useAppSelector } from "../../store/store";
-import { SUPPORT_LINK } from "../../ui-constants";
+import { MENU_DROPDOWN_WIDTH, SUPPORT_LINK } from "../../ui-constants";
 import { getNavigationItems, navigationStyles } from "./navigation";
 
 export function FooterMenu(): JSX.Element {
@@ -41,21 +41,25 @@ export function FooterMenu(): JSX.Element {
 
     if (item.submenu) {
       return (
-        <Menu control={link} withArrow position="top" placement="center" style={{ display: "block" }} gutter={0}>
-          {item.submenu.map(subitem => {
-            if (subitem.header) {
-              return <Menu.Label>{subitem.header}</Menu.Label>;
-            }
-            if (subitem.separator) {
-              return <Divider />;
-            }
-            const icon = <subitem.icon size={20} color={subitem.color} />;
-            return (
-              <Menu.Item icon={icon} onClick={() => dispatch(push(subitem.link!))}>
-                {subitem.label}
-              </Menu.Item>
-            );
-          })}
+        <Menu width={MENU_DROPDOWN_WIDTH} withArrow position="top">
+          <Menu.Target>{link}</Menu.Target>
+
+          <Menu.Dropdown>
+            {item.submenu.map(subitem => {
+              if (subitem.header) {
+                return <Menu.Label>{subitem.header}</Menu.Label>;
+              }
+              if (subitem.separator) {
+                return <Divider />;
+              }
+              const icon = <subitem.icon size={20} color={subitem.color} />;
+              return (
+                <Menu.Item icon={icon} onClick={() => dispatch(push(subitem.link!))}>
+                  {subitem.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Dropdown>
         </Menu>
       );
     }
