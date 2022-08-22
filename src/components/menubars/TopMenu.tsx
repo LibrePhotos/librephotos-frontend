@@ -45,7 +45,7 @@ export function TopMenu() {
 
             <Menu width={MENU_DROPDOWN_WIDTH} position="bottom-end">
               <Menu.Target>
-                <Group spacing="xs">
+                <Group spacing="xs" style={{ cursor: "pointer" }}>
                   <Avatar
                     src={
                       userSelfDetails && userSelfDetails.avatar_url
