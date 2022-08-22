@@ -34,7 +34,7 @@ export function FooterMenu(): JSX.Element {
     }
 
     const link = (
-      <ActionIcon component={Link} to={item.link}>
+      <ActionIcon onClick={(e: React.MouseEvent) => item.submenu && e.preventDefault()} component={Link} to={item.link}>
         <item.icon className={classes.linkIcon} color={item.color} size={33} style={{ margin: 0 }} />
       </ActionIcon>
     );
