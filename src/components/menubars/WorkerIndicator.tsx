@@ -51,7 +51,15 @@ export function WorkerIndicator() {
   }, []);
 
   return (
-    <Popover opened={opened} onClose={() => setOpened(false)} width={260} position="bottom" withArrow>
+    <Popover
+      opened={opened}
+      onClose={() => setOpened(false)}
+      width={260}
+      position="bottom-start"
+      offset={15}
+      withArrow
+      arrowOffset={210}
+    >
       <Popover.Target>
         <Indicator onMouseEnter={openModalCallback} onMouseLeave={closeModalCallback} color={canWorkerAcceptJob}>
           <div />
