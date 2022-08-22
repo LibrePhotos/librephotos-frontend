@@ -4,7 +4,7 @@ import _ from "lodash";
 import React, { useState } from "react";
 
 import { serverAddress } from "../../api_client/apiClient";
-import { FaceDetection } from "../../layouts/dataviz/constants";
+import { FACES_INFERRED, FACES_LABELED } from "../../layouts/dataviz/constants";
 import { PhotoIcon } from "./PhotoIcon";
 
 type Props = {
@@ -60,7 +60,7 @@ export function FaceComponent(props: Props) {
       >
         <Center>
           <Tooltip
-            opened={tooltipOpened && activeItem === FaceDetection.INFERRED}
+            opened={tooltipOpened && activeItem === FACES_INFERRED}
             label={t<string>("settings.confidencepercentage", {
               percentage: (cell.person_label_probability * 100).toFixed(1),
             })}
@@ -71,7 +71,7 @@ export function FaceComponent(props: Props) {
               color={labelProbabilityColor}
               onMouseEnter={() => setTooltipOpened(true)}
               onMouseLeave={() => setTooltipOpened(false)}
-              disabled={activeItem === FaceDetection.LABELED}
+              disabled={activeItem === FACES_LABELED}
               size={15}
             >
               <Avatar
@@ -106,7 +106,7 @@ export function FaceComponent(props: Props) {
     >
       <Center>
         <Tooltip
-          opened={tooltipOpened && activeItem === FaceDetection.INFERRED}
+          opened={tooltipOpened && activeItem === FACES_INFERRED}
           label={t<string>("settings.confidencepercentage", {
             percentage: (cell.person_label_probability * 100).toFixed(1),
           })}
@@ -117,7 +117,7 @@ export function FaceComponent(props: Props) {
             color={labelProbabilityColor}
             onMouseEnter={() => setTooltipOpened(true)}
             onMouseLeave={() => setTooltipOpened(false)}
-            disabled={activeItem === FaceDetection.LABELED}
+            disabled={activeItem === FACES_LABELED}
             size={15}
           >
             <Avatar

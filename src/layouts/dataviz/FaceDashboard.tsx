@@ -13,12 +13,12 @@ import { TabComponent } from "../../components/facedashboard/TabComponent";
 import { ModalPersonEdit } from "../../components/modals/ModalPersonEdit";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { calculateFaceGridCellSize, calculateFaceGridCells } from "../../util/gridUtils";
-import { FaceDetection } from "./constants";
+import { FACES_LABELED } from "./constants";
 
 export function FaceDashboard() {
   const { ref, width } = useElementSize();
   const [lastChecked, setLastChecked] = useState(null);
-  const [activeItem, setActiveItem] = useState("");
+  const [activeItem, setActiveItem] = useState(FACES_LABELED);
   const [entrySquareSize, setEntrySquareSize] = useState(200);
   const [numEntrySquaresPerRow, setNumEntrySquaresPerRow] = useState(10);
   const [selectMode, setSelectMode] = useState(false);
@@ -124,7 +124,7 @@ export function FaceDashboard() {
       return;
     }
     if (e.shiftKey) {
-      const currentCellsInRowFormat = activeItem === FaceDetection.LABELED ? labeledCellContents : inferredCellContents;
+      const currentCellsInRowFormat = activeItem === FACES_LABELED ? labeledCellContents : inferredCellContents;
 
       const allFacesInCells = [] as any[];
       for (let i = 0; i < currentCellsInRowFormat.length; i++) {
@@ -170,7 +170,7 @@ export function FaceDashboard() {
 
   const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
     let cell;
-    if (activeItem === FaceDetection.LABELED) {
+    if (activeItem === FACES_LABELED) {
       cell = labeledCellContents[rowIndex][columnIndex];
     } else {
       cell = inferredCellContents[rowIndex][columnIndex];
@@ -228,7 +228,7 @@ export function FaceDashboard() {
               rowHeight={entrySquareSize}
               height={height}
               width={width}
-              rowCount={activeItem === FaceDetection.LABELED ? labeledCellContents.length : inferredCellContents.length}
+              rowCount={activeItem === FACES_LABELED ? labeledCellContents.length : inferredCellContents.length}
             />
           )}
         </AutoSizer>
