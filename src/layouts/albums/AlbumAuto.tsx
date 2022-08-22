@@ -86,14 +86,16 @@ export const AlbumAuto = () => {
                   </ActionIcon>
                 </Menu.Target>
 
-                <Menu.Item
-                  icon={<Trash />}
-                  onClick={() => {
-                    openDeleteDialog(albumsAutoList[albumAutoIndex].id, albumsAutoList[albumAutoIndex].title);
-                  }}
-                >
-                  {t("delete")}
-                </Menu.Item>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    icon={<Trash />}
+                    onClick={() => {
+                      openDeleteDialog(albumsAutoList[albumAutoIndex].id, albumsAutoList[albumAutoIndex].title);
+                    }}
+                  >
+                    {t("delete")}
+                  </Menu.Item>
+                </Menu.Dropdown>
               </Menu>
             </div>
           </div>
