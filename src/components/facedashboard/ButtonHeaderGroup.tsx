@@ -1,10 +1,11 @@
 import { ActionIcon, Button, Group, Modal, Space, Stack, Switch, Tooltip } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Barbell, Plus, Trash } from "tabler-icons-react";
+import { Barbell, Plus, Trash, UserOff } from "tabler-icons-react";
 
-import { trainFaces } from "../../actions/facesActions";
-import { finalPhotosDeleted } from "../../actions/photosActions";
+import { api } from "../../api_client/api";
+import i18n from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
   changeSelectMode: () => void;
   addFaces: () => void;
   deleteFaces: () => void;
+  notThisPerson: () => void;
 };
 
 export function ButtonHeaderGroup(props: Props) {
@@ -45,6 +47,16 @@ export function ButtonHeaderGroup(props: Props) {
               <Plus></Plus>
             </ActionIcon>
           </Tooltip>
+          <Tooltip label={t("facesdashboard.notthisperson")}>
+            <ActionIcon
+              variant="light"
+              color="orange"
+              disabled={props.selectedFaces.length === 0}
+              onClick={() => props.notThisPerson()}
+            >
+              <UserOff></UserOff>
+            </ActionIcon>
+          </Tooltip>
           <Tooltip label={t("facesdashboard.explanationdeleting")}>
             <ActionIcon
               variant="light"
@@ -63,7 +75,12 @@ export function ButtonHeaderGroup(props: Props) {
               color="blue"
               variant="light"
               onClick={() => {
-                dispatch(trainFaces());
+                dispatch(api.endpoints.trainFaces.initiate());
+                showNotification({
+                  message: i18n.t<string>("toasts.trainingstarted"),
+                  title: i18n.t<string>("toasts.trainingstartedtitle"),
+                  color: "teal",
+                });
               }}
             >
               <Barbell></Barbell>

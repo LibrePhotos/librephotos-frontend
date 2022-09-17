@@ -1,22 +1,25 @@
 /* eslint no-plusplus: ["error", { "allowForLoopAfterthoughts": true }] */
 import { Stack } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { AutoSizer, Grid } from "react-virtualized";
 
-import { deleteFaces, fetchInferredFacesList, fetchLabeledFacesList } from "../../actions/facesActions";
+import { api, useFetchIncompleteFacesQuery } from "../../api_client/api";
 import { ButtonHeaderGroup } from "../../components/facedashboard/ButtonHeaderGroup";
 import { FaceComponent } from "../../components/facedashboard/FaceComponent";
 import { HeaderComponent } from "../../components/facedashboard/HeaderComponent";
 import { TabComponent } from "../../components/facedashboard/TabComponent";
 import { ModalPersonEdit } from "../../components/modals/ModalPersonEdit";
+import i18n from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { calculateFaceGridCellSize, calculateFaceGridCells } from "../../util/gridUtils";
 import { FACES_LABELED } from "./constants";
 
 export function FaceDashboard() {
   const { ref, width } = useElementSize();
+
   const [lastChecked, setLastChecked] = useState(null);
   const [activeItem, setActiveItem] = useState(FACES_LABELED);
   const [entrySquareSize, setEntrySquareSize] = useState(200);
@@ -27,50 +30,79 @@ export function FaceDashboard() {
 
   const [inferredCellContents, setInferredCellContents] = useState<any[]>([]);
   const [labeledCellContents, setLabeledCellContents] = useState<any[]>([]);
-  const [inferredGroupedByPersonList, setInferredGroupedByPersonList] = useState<any[]>([]);
-  const [labeledGroupedByPersonList, setLabeledGroupedByPersonList] = useState<any[]>([]);
 
-  const { inferredFacesList, labeledFacesList, fetchingLabeledFacesList, fetchingInferredFacesList } = useAppSelector(
-    store => store.faces,
-    (prev, next) =>
-      prev.inferredFacesList === next.inferredFacesList &&
-      prev.labeledFacesList === next.labeledFacesList &&
-      prev.fetchingLabeledFacesList === next.fetchingLabeledFacesList &&
-      prev.fetchingInferredFacesList === next.fetchingInferredFacesList
+  const fetchingInferredFacesList = useFetchIncompleteFacesQuery({ inferred: false }).isFetching;
+  const fetchingLabeledFacesList = useFetchIncompleteFacesQuery({ inferred: true }).isFetching;
+
+  const [groups, setGroups] = useState<
+    {
+      page: number;
+      person: any;
+    }[]
+  >([]);
+
+  const { inferredFacesList, labeledFacesList } = useAppSelector(
+    store => store.face,
+    (prev, next) => {
+      return prev.inferredFacesList === next.inferredFacesList && prev.labeledFacesList === next.labeledFacesList;
+    }
   );
+  useEffect(() => {
+    if (groups) {
+      groups.forEach(element => {
+        dispatch(
+          api.endpoints.fetchFaces.initiate({
+            person: element.person,
+            page: element.page,
+            inferred: activeItem === 1,
+          })
+        );
+      });
+    }
+  }, [groups]);
+
+  // ensure that the endpoint is not undefined
+  const getEndpointCell = (cellContents, rowStopIndex, columnStopIndex) => {
+    if (cellContents[rowStopIndex][columnStopIndex]) {
+      return cellContents[rowStopIndex][columnStopIndex];
+    } else {
+      return getEndpointCell(cellContents, rowStopIndex, columnStopIndex - 1);
+    }
+  };
+
+  const onSectionRendered = (params: any) => {
+    const cellContents = activeItem === 1 ? inferredCellContents : labeledCellContents;
+    const startPoint = cellContents[params.rowOverscanStartIndex][params.columnOverscanStartIndex];
+    const endPoint = getEndpointCell(cellContents, params.rowOverscanStopIndex, params.columnOverscanStopIndex);
+    //flatten labeledCellContents and find the range of cells that are in the viewport
+    const flatCellContents = _.flatten(cellContents);
+    const startIndex = flatCellContents.findIndex(cell => JSON.stringify(cell) === JSON.stringify(startPoint));
+    const endIndex = flatCellContents.findIndex(cell => JSON.stringify(cell) === JSON.stringify(endPoint));
+
+    //get the range of cells that are in the viewport
+    const visibleCells = flatCellContents.slice(startIndex, endIndex + 1);
+    const relevantInfos = visibleCells
+      .filter((i: any) => i.isTemp)
+      .map((i: any) => {
+        const page = Math.ceil((parseInt(i.id) + 1) / 100);
+        return { page: page, person: i.person };
+      });
+    const uniqueGroups = _.uniqBy(relevantInfos, (e: any) => {
+      return e.page + " " + e.person;
+    });
+    if (uniqueGroups.length > 0) {
+      setGroups(uniqueGroups);
+    }
+  };
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchInferredFacesList());
-    dispatch(fetchLabeledFacesList());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const inferredAndGroupedByPerson = _.groupBy(inferredFacesList, el => el.person_name);
-    const inferredAndGroupedByPersonList = _.sortBy(_.toPairsIn(inferredAndGroupedByPerson), el => el[0]).map(el => ({
-      person_name: el[0],
-      faces: _.reverse(_.sortBy(el[1], el2 => el2.person_label_probability)),
-    }));
-
-    const labeledAndGroupedByPerson = _.groupBy(labeledFacesList, el => el.person_name);
-    const labeledAndGroupedByPersonList = _.sortBy(_.toPairsIn(labeledAndGroupedByPerson), el => el[0]).map(el => ({
-      person_name: el[0],
-      faces: el[1],
-    }));
-    const inferredFaceGridCells = calculateFaceGridCells(
-      inferredAndGroupedByPersonList,
-      numEntrySquaresPerRow
-    ).cellContents;
-    const labeledFaceGridCells = calculateFaceGridCells(
-      labeledAndGroupedByPersonList,
-      numEntrySquaresPerRow
-    ).cellContents;
-    setInferredCellContents(inferredFaceGridCells);
-    setLabeledCellContents(labeledFaceGridCells);
-    setInferredGroupedByPersonList(inferredAndGroupedByPersonList);
-    setLabeledGroupedByPersonList(labeledAndGroupedByPersonList);
-  }, [inferredFacesList, labeledFacesList, selectedFaces, numEntrySquaresPerRow]);
+    const inferredCellContents = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
+    const labeledCellContents = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
+    setInferredCellContents(inferredCellContents);
+    setLabeledCellContents(labeledCellContents);
+  }, [inferredFacesList, labeledFacesList, selectedFaces]);
 
   useEffect(() => {
     const faceGridCellSize = calculateFaceGridCellSize(width);
@@ -80,15 +112,19 @@ export function FaceDashboard() {
     setEntrySquareSize(squareSize);
     setNumEntrySquaresPerRow(numPerRow);
 
-    if (inferredGroupedByPersonList) {
-      const inferredFaceGridCells = calculateFaceGridCells(inferredGroupedByPersonList, numPerRow).cellContents;
-      setInferredCellContents(inferredFaceGridCells);
+    if (inferredFacesList) {
+      const inferredCellContents = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
+      setInferredCellContents(inferredCellContents);
     }
-    if (labeledGroupedByPersonList) {
-      const labeledFaceGridCells = calculateFaceGridCells(labeledGroupedByPersonList, numPerRow).cellContents;
-      setLabeledCellContents(labeledFaceGridCells);
+    if (labeledFacesList) {
+      const labeledCellContents = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
+      setLabeledCellContents(labeledCellContents);
     }
-  }, [inferredGroupedByPersonList, labeledGroupedByPersonList, selectedFaces, width]);
+  }, [selectedFaces, width]);
+
+  useEffect(() => {
+    setSelectMode(selectedFaces.length > 0);
+  }, [selectedFaces]);
 
   const onFacesSelect = faces => {
     // get duplicates of new faces and selected faces
@@ -137,7 +173,7 @@ export function FaceDashboard() {
 
       const facesToSelect = allFacesInCells
         .slice(Math.min(start, end), Math.max(start, end) + 1)
-        .filter(i => i && i.id);
+        .filter(i => i && i.image);
       onFacesSelect(facesToSelect.map(i => ({ face_id: i.id, face_url: i.face_url })));
       setLastChecked(cell);
       return;
@@ -146,19 +182,50 @@ export function FaceDashboard() {
     setLastChecked(cell);
   };
 
+  const onFacesSelect = faces => {
+    // get duplicates of new faces and selected faces
+    const duplicates = faces.filter(face => selectedFaces.find(i => i.face_id === face.face_id));
+    // merge selected faces with new faces, filter both duplicates
+    const merged = _.uniqBy([...selectedFaces, ...faces], el => el.face_id);
+    // filter duplicates from new faces
+    const mergedAndFiltered = merged.filter(face => !duplicates.find(i => i.face_id === face.face_id));
+    // add the last selected face back to the start of the list when adding new faces
+    //@ts-ignore
+    const lastSelectedFace = { face_id: lastChecked.id, face_url: lastChecked.face_url };
+    const mergedAndFilteredAndLastSelected =
+      duplicates.length !== faces.length ? [lastSelectedFace, ...mergedAndFiltered] : mergedAndFiltered;
+    setSelectedFaces(mergedAndFilteredAndLastSelected);
+  };
+
+  const onFaceSelect = face => {
+    var tempSelectedFaces = selectedFaces;
+    if (tempSelectedFaces.map(face => face.face_url).includes(face.face_url)) {
+      tempSelectedFaces = tempSelectedFaces.filter(item => item.face_url !== face.face_url);
+    } else {
+      tempSelectedFaces.push(face);
+    }
+    setSelectedFaces([...tempSelectedFaces]);
+  };
+
   const changeSelectMode = () => {
     if (selectMode) {
       setSelectedFaces([]);
     }
-    setSelectMode(!selectMode);
   };
 
   const deleteSelectedFaces = () => {
     if (selectedFaces.length > 0) {
       const ids = selectedFaces.map(face => face.face_id);
-      dispatch(deleteFaces(ids));
+      //@ts-ignore
+      dispatch(api.endpoints.deleteFaces.initiate({ faceIds: ids }));
+      showNotification({
+        message: i18n.t<string>("toasts.deletefaces", {
+          numberOfFaces: ids.length,
+        }),
+        title: i18n.t<string>("toasts.deletefacestitle"),
+        color: "teal",
+      });
       setSelectedFaces([]);
-      setSelectMode(false);
     }
   };
 
@@ -168,18 +235,44 @@ export function FaceDashboard() {
     }
   };
 
-  const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
-    let cell;
-    if (activeItem === FACES_LABELED) {
-      cell = labeledCellContents[rowIndex][columnIndex];
-    } else {
-      cell = inferredCellContents[rowIndex][columnIndex];
+  const notThisPersonFunc = () => {
+    if (selectedFaces.length > 0) {
+      const ids = selectedFaces.map(face => face.face_id);
+      //@ts-ignore
+      dispatch(api.endpoints.setFacesPersonLabel.initiate({ faceIds: ids, personName: "Unknown - Other" }));
+      showNotification({
+        message: i18n.t<string>("toasts.removefacestoperson", {
+          numberOfFaces: ids.length,
+        }),
+        title: i18n.t<string>("toasts.removefacestopersontitle"),
+        color: "teal",
+      });
+      setSelectedFaces([]);
     }
+  };
+
+  const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
+    const cell =
+      activeItem === 0 ? labeledCellContents[rowIndex][columnIndex] : inferredCellContents[rowIndex][columnIndex];
 
     if (cell) {
-      if (!cell.image) {
-        return <HeaderComponent key={key} style={style} width={width} cell={cell} entrySquareSize={entrySquareSize} />;
+      if (cell.name) {
+        return (
+          <HeaderComponent
+            key={key}
+            style={style}
+            width={width}
+            cell={cell}
+            entrySquareSize={entrySquareSize}
+            selectedFaces={selectedFaces}
+            setSelectedFaces={setSelectedFaces}
+          />
+        );
       }
+      if (cell.isTemp) {
+        return <div key={key} style={{ ...style, height: entrySquareSize, width: entrySquareSize }} />;
+      }
+
       return (
         <div key={key} style={style}>
           <FaceComponent
@@ -212,6 +305,7 @@ export function FaceDashboard() {
           changeSelectMode={changeSelectMode}
           addFaces={addFaces}
           deleteFaces={deleteSelectedFaces}
+          notThisPerson={notThisPersonFunc}
         />
       </Stack>
       <div ref={ref} style={{ flexGrow: 1 }}>
@@ -226,6 +320,7 @@ export function FaceDashboard() {
               columnWidth={entrySquareSize}
               columnCount={numEntrySquaresPerRow}
               rowHeight={entrySquareSize}
+              onSectionRendered={onSectionRendered}
               height={height}
               width={width}
               rowCount={activeItem === FACES_LABELED ? labeledCellContents.length : inferredCellContents.length}
@@ -238,7 +333,6 @@ export function FaceDashboard() {
         onRequestClose={() => {
           setModalPersonEditOpen(false);
           setSelectedFaces([]);
-          setSelectMode(false);
         }}
         selectedFaces={selectedFaces}
       />

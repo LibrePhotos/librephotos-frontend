@@ -5,9 +5,22 @@ import { Cookies } from "react-cookie";
 
 import type { IJobRequestSchema, IJobsResponseSchema } from "../actions/utilActions.types";
 import type { IApiDeleteUserPost, IApiLoginPost, IApiLoginResponse, IApiUserSignUpPost } from "../store/auth/auth.zod";
-
 // eslint-disable-next-line import/no-cycle
 import { tokenReceived } from "../store/auth/authSlice";
+import type {
+  IClusterFacesResponse,
+  IDeleteFacesRequest,
+  IDeleteFacesResponse,
+  IIncompletePersonFaceListRequest,
+  IIncompletePersonFaceListResponse,
+  INotThisPersonRequest,
+  IPersonFaceListRequest,
+  IPersonFaceListResponse,
+  IScanFacesResponse,
+  ISetFacesLabelRequest,
+  ISetFacesLabelResponse,
+  ITrainFacesResponse,
+} from "../store/faces/facesActions.types";
 import type { RootState } from "../store/store";
 import type { IUploadOptions, IUploadResponse } from "../store/upload/upload.zod";
 import { UploadExistResponse, UploadResponse } from "../store/upload/upload.zod";
@@ -29,6 +42,14 @@ export enum Endpoints {
   deleteUser = "deleteUser",
   manageUpdateUser = "manageUpdateUser",
   jobs = "jobs",
+  incompleteFaces = "fetchIncompleteFaces",
+  fetchFaces = "fetchFaces",
+  clusterFaces = "clusterFaces",
+  rescanFaces = "rescanFaces",
+  trainFaces = "trainFaces",
+  deleteFaces = "deleteFaces",
+  notThisPerson = "notThisPerson",
+  setFacesPersonLabel = "setFacesPersonLabel",
 }
 
 const baseQuery = fetchBaseQuery({
@@ -163,6 +184,45 @@ export const api = createApi({
         url: `jobs/?page_size=${pageSize}&page=${page}`,
       }),
     }),
+    [Endpoints.incompleteFaces]: builder.query<IIncompletePersonFaceListResponse, IIncompletePersonFaceListRequest>({
+      query: ({ inferred = false }) => ({
+        url: `faces/incomplete/?inferred=${inferred}`,
+      }),
+    }),
+    [Endpoints.fetchFaces]: builder.query<IPersonFaceListResponse, IPersonFaceListRequest>({
+      query: ({ person, page = 0, inferred = false }) => ({
+        url: `faces/?person=${person}&page=${page}&inferred=${inferred}`,
+      }),
+    }),
+    [Endpoints.clusterFaces]: builder.query<IClusterFacesResponse, void>({
+      query: () => ({
+        url: "/clusterfaces",
+      }),
+    }),
+    [Endpoints.rescanFaces]: builder.query<IScanFacesResponse, void>({
+      query: () => ({
+        url: "/scanfaces",
+      }),
+    }),
+    [Endpoints.trainFaces]: builder.query<ITrainFacesResponse, void>({
+      query: () => ({
+        url: "/trainfaces",
+      }),
+    }),
+    [Endpoints.deleteFaces]: builder.mutation<IDeleteFacesResponse, IDeleteFacesRequest>({
+      query: ({ faceIds }) => ({
+        url: "/deletefaces",
+        method: "POST",
+        body: { face_ids: faceIds },
+      }),
+    }),
+    [Endpoints.setFacesPersonLabel]: builder.mutation<ISetFacesLabelResponse, ISetFacesLabelRequest>({
+      query: ({ faceIds, personName }) => ({
+        url: "/labelfaces",
+        method: "POST",
+        body: { person_name: personName, face_ids: faceIds },
+      }),
+    }),
   }),
 });
 
@@ -173,6 +233,13 @@ export const {
   useFetchUserListQuery,
   useFetchPredefinedRulesQuery,
   useFetchUserSelfDetailsQuery,
+  useFetchIncompleteFacesQuery,
+  useFetchFacesQuery,
+  useSetFacesPersonLabelMutation,
+  useDeleteFacesMutation,
+  useTrainFacesQuery,
+  useRescanFacesQuery,
+  useClusterFacesQuery,
   useLoginMutation,
   useSignUpMutation,
   useWorkerQuery,
