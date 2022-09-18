@@ -15,10 +15,12 @@ import { ModalPersonEdit } from "../../components/modals/ModalPersonEdit";
 import i18n from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { calculateFaceGridCellSize, calculateFaceGridCells } from "../../util/gridUtils";
-import { FACES_LABELED } from "./constants";
+import { FACES_INFERRED, FACES_LABELED } from "./constants";
 
 export function FaceDashboard() {
   const { ref, width } = useElementSize();
+
+  const dispatch = useAppDispatch();
 
   const [lastChecked, setLastChecked] = useState(null);
   const [activeItem, setActiveItem] = useState(FACES_LABELED);
@@ -43,10 +45,9 @@ export function FaceDashboard() {
 
   const { inferredFacesList, labeledFacesList } = useAppSelector(
     store => store.face,
-    (prev, next) => {
-      return prev.inferredFacesList === next.inferredFacesList && prev.labeledFacesList === next.labeledFacesList;
-    }
+    (prev, next) => prev.inferredFacesList === next.inferredFacesList && prev.labeledFacesList === next.labeledFacesList
   );
+
   useEffect(() => {
     if (groups) {
       groups.forEach(element => {
@@ -54,55 +55,50 @@ export function FaceDashboard() {
           api.endpoints.fetchFaces.initiate({
             person: element.person,
             page: element.page,
-            inferred: activeItem === 1,
+            inferred: activeItem === FACES_INFERRED,
           })
         );
       });
     }
-  }, [groups]);
+  }, [groups, activeItem, dispatch]);
 
   // ensure that the endpoint is not undefined
   const getEndpointCell = (cellContents, rowStopIndex, columnStopIndex) => {
     if (cellContents[rowStopIndex][columnStopIndex]) {
       return cellContents[rowStopIndex][columnStopIndex];
-    } else {
-      return getEndpointCell(cellContents, rowStopIndex, columnStopIndex - 1);
     }
+    return getEndpointCell(cellContents, rowStopIndex, columnStopIndex - 1);
   };
 
   const onSectionRendered = (params: any) => {
-    const cellContents = activeItem === 1 ? inferredCellContents : labeledCellContents;
+    const cellContents = activeItem === FACES_INFERRED ? inferredCellContents : labeledCellContents;
     const startPoint = cellContents[params.rowOverscanStartIndex][params.columnOverscanStartIndex];
     const endPoint = getEndpointCell(cellContents, params.rowOverscanStopIndex, params.columnOverscanStopIndex);
-    //flatten labeledCellContents and find the range of cells that are in the viewport
+    // flatten labeledCellContents and find the range of cells that are in the viewport
     const flatCellContents = _.flatten(cellContents);
     const startIndex = flatCellContents.findIndex(cell => JSON.stringify(cell) === JSON.stringify(startPoint));
     const endIndex = flatCellContents.findIndex(cell => JSON.stringify(cell) === JSON.stringify(endPoint));
 
-    //get the range of cells that are in the viewport
+    // get the range of cells that are in the viewport
     const visibleCells = flatCellContents.slice(startIndex, endIndex + 1);
     const relevantInfos = visibleCells
       .filter((i: any) => i.isTemp)
       .map((i: any) => {
-        const page = Math.ceil((parseInt(i.id) + 1) / 100);
+        const page = Math.ceil((parseInt(i.id, 10) + 1) / 100);
         return { page: page, person: i.person };
       });
-    const uniqueGroups = _.uniqBy(relevantInfos, (e: any) => {
-      return e.page + " " + e.person;
-    });
+    const uniqueGroups = _.uniqBy(relevantInfos, (e: any) => `${e.page} ${e.person}`);
     if (uniqueGroups.length > 0) {
       setGroups(uniqueGroups);
     }
   };
 
-  const dispatch = useAppDispatch();
-
   useEffect(() => {
-    const inferredCellContents = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
-    const labeledCellContents = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
-    setInferredCellContents(inferredCellContents);
-    setLabeledCellContents(labeledCellContents);
-  }, [inferredFacesList, labeledFacesList, selectedFaces]);
+    const inferred = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
+    const labeled = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
+    setInferredCellContents(inferred);
+    setLabeledCellContents(labeled);
+  }, [inferredFacesList, labeledFacesList, selectedFaces, numEntrySquaresPerRow]);
 
   useEffect(() => {
     const faceGridCellSize = calculateFaceGridCellSize(width);
@@ -113,14 +109,14 @@ export function FaceDashboard() {
     setNumEntrySquaresPerRow(numPerRow);
 
     if (inferredFacesList) {
-      const inferredCellContents = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
-      setInferredCellContents(inferredCellContents);
+      const inferred = calculateFaceGridCells(inferredFacesList, numEntrySquaresPerRow).cellContents;
+      setInferredCellContents(inferred);
     }
     if (labeledFacesList) {
-      const labeledCellContents = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
-      setLabeledCellContents(labeledCellContents);
+      const labeled = calculateFaceGridCells(labeledFacesList, numEntrySquaresPerRow).cellContents;
+      setLabeledCellContents(labeled);
     }
-  }, [selectedFaces, width]);
+  }, [selectedFaces, width, inferredFacesList, labeledFacesList, numEntrySquaresPerRow]);
 
   useEffect(() => {
     setSelectMode(selectedFaces.length > 0);
@@ -139,18 +135,16 @@ export function FaceDashboard() {
     const mergedAndFilteredAndLastSelected =
       duplicates.length !== faces.length ? [lastSelectedFace, ...mergedAndFiltered] : mergedAndFiltered;
     setSelectedFaces(mergedAndFilteredAndLastSelected);
-    setSelectMode(true);
   };
 
   const onFaceSelect = face => {
     let tempSelectedFaces = selectedFaces;
-    if (tempSelectedFaces.map(f => f.face_id).includes(face.face_id)) {
-      tempSelectedFaces = tempSelectedFaces.filter(item => item.face_id !== face.face_id);
+    if (tempSelectedFaces.map(item => item.face_url).includes(face.face_url)) {
+      tempSelectedFaces = tempSelectedFaces.filter(item => item.face_url !== face.face_url);
     } else {
       tempSelectedFaces.push(face);
     }
-    setSelectedFaces(tempSelectedFaces);
-    setSelectMode(tempSelectedFaces.length > 0);
+    setSelectedFaces([...tempSelectedFaces]);
   };
 
   const handleClick = (e, cell) => {
@@ -182,31 +176,6 @@ export function FaceDashboard() {
     setLastChecked(cell);
   };
 
-  const onFacesSelect = faces => {
-    // get duplicates of new faces and selected faces
-    const duplicates = faces.filter(face => selectedFaces.find(i => i.face_id === face.face_id));
-    // merge selected faces with new faces, filter both duplicates
-    const merged = _.uniqBy([...selectedFaces, ...faces], el => el.face_id);
-    // filter duplicates from new faces
-    const mergedAndFiltered = merged.filter(face => !duplicates.find(i => i.face_id === face.face_id));
-    // add the last selected face back to the start of the list when adding new faces
-    //@ts-ignore
-    const lastSelectedFace = { face_id: lastChecked.id, face_url: lastChecked.face_url };
-    const mergedAndFilteredAndLastSelected =
-      duplicates.length !== faces.length ? [lastSelectedFace, ...mergedAndFiltered] : mergedAndFiltered;
-    setSelectedFaces(mergedAndFilteredAndLastSelected);
-  };
-
-  const onFaceSelect = face => {
-    var tempSelectedFaces = selectedFaces;
-    if (tempSelectedFaces.map(face => face.face_url).includes(face.face_url)) {
-      tempSelectedFaces = tempSelectedFaces.filter(item => item.face_url !== face.face_url);
-    } else {
-      tempSelectedFaces.push(face);
-    }
-    setSelectedFaces([...tempSelectedFaces]);
-  };
-
   const changeSelectMode = () => {
     if (selectMode) {
       setSelectedFaces([]);
@@ -216,7 +185,7 @@ export function FaceDashboard() {
   const deleteSelectedFaces = () => {
     if (selectedFaces.length > 0) {
       const ids = selectedFaces.map(face => face.face_id);
-      //@ts-ignore
+      // @ts-ignore
       dispatch(api.endpoints.deleteFaces.initiate({ faceIds: ids }));
       showNotification({
         message: i18n.t<string>("toasts.deletefaces", {
@@ -238,7 +207,7 @@ export function FaceDashboard() {
   const notThisPersonFunc = () => {
     if (selectedFaces.length > 0) {
       const ids = selectedFaces.map(face => face.face_id);
-      //@ts-ignore
+      // @ts-ignore
       dispatch(api.endpoints.setFacesPersonLabel.initiate({ faceIds: ids, personName: "Unknown - Other" }));
       showNotification({
         message: i18n.t<string>("toasts.removefacestoperson", {
@@ -253,7 +222,9 @@ export function FaceDashboard() {
 
   const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
     const cell =
-      activeItem === 0 ? labeledCellContents[rowIndex][columnIndex] : inferredCellContents[rowIndex][columnIndex];
+      activeItem === FACES_LABELED
+        ? labeledCellContents[rowIndex][columnIndex]
+        : inferredCellContents[rowIndex][columnIndex];
 
     if (cell) {
       if (cell.name) {
