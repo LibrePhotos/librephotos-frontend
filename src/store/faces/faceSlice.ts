@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { api } from "../../api_client/api";
-import type { ICompletePersonFace, ICompletePersonFaceList, IFacesState, IIncompletePersonFace, IIncompletePersonFaceList, IPersonFace } from "./facesActions.types";
+import type { ICompletePersonFace, ICompletePersonFaceList, IFacesState, IPersonFace } from "./facesActions.types";
 
 const initialState: IFacesState = {
   labeledFacesList: [] as ICompletePersonFaceList[],
