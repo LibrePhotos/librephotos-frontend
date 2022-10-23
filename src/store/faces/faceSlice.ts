@@ -30,7 +30,7 @@ const compareFacesConfidence = (a: IPersonFace, b: IPersonFace) => {
 const compareFacesDate = (a: IPersonFace, b: IPersonFace) => {
   const dateA = new Date(a.timestamp || '');
   const dateB = new Date(b.timestamp || '');
-  if (dateA.toString() === "Invalid Date" && dateA.toString() === "Invalid Date")
+  if (dateA.toString() === "Invalid Date" && dateB.toString() === "Invalid Date")
     return compareFacesConfidence(a, b);             
   if (dateA.toString() === "Invalid Date")
     return 1;
