@@ -18,7 +18,9 @@ export const IncompletePersonFace = z.object({
   face_count: z.number(),
 });
 
+export type IIncompletePersonFace = z.infer<typeof IncompletePersonFace>;
 export const IncompletePersonFaceList = z.array(IncompletePersonFace);
+export type IIncompletePersonFaceList = z.infer<typeof IncompletePersonFaceList>;
 export type IIncompletePersonFaceListResponse = z.infer<typeof IncompletePersonFaceListResponse>;
 export type IIncompletePersonFaceListRequest = z.infer<typeof IncompletePersonFaceListRequest>;
 export const IncompletePersonFaceListResponse = IncompletePersonFaceList;
@@ -34,7 +36,9 @@ export const PersonFace = z.object({
   person_label_probability: z.number(),
   isTemp: z.boolean().optional(),
   person: z.number().optional(),
+  timestamp: z.string().optional()
 });
+export type IPersonFace = z.infer<typeof PersonFace>;
 
 export const PersonFaceListResponse = z.object({
   data: z.object({
@@ -46,6 +50,7 @@ export const PersonFaceListRequest = z.object({
   person: z.number(),
   page: z.number(),
   inferred: z.boolean(),
+  orderBy: z.string(),
 });
 export type IPersonFaceListRequest = z.infer<typeof PersonFaceListRequest>;
 

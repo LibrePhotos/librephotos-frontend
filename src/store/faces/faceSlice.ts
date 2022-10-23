@@ -1,7 +1,8 @@
-import { createSlice, current } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { api } from "../../api_client/api";
-import type { ICompletePersonFace, ICompletePersonFaceList, IFacesState } from "./facesActions.types";
+import type { ICompletePersonFace, ICompletePersonFaceList, IFacesState, IIncompletePersonFace, IIncompletePersonFaceList, IPersonFace } from "./facesActions.types";
 
 const initialState: IFacesState = {
   labeledFacesList: [] as ICompletePersonFaceList[],
@@ -14,10 +15,70 @@ const initialState: IFacesState = {
   error: null,
 };
 
+const compareFacesConfidence = (a: IPersonFace, b: IPersonFace) => {
+  if (a.person_label_probability > b.person_label_probability)
+    return -1;
+  if (a.person_label_probability < b.person_label_probability)
+    return 1;
+  if (a.id < b.id)
+    return -1;
+  if (a.id > b.id)
+    return 1;
+  return 0;
+};
+
+const compareFacesDate = (a: IPersonFace, b: IPersonFace) => {
+  const dateA = new Date(a.timestamp || '');
+  const dateB = new Date(b.timestamp || '');
+  if (dateA.toString() === "Invalid Date" && dateA.toString() === "Invalid Date")
+    return compareFacesConfidence(a, b);             
+  if (dateA.toString() === "Invalid Date")
+    return 1;
+  if (dateB.toString() === "Invalid Date")
+    return -1;
+  if (dateA < dateB)
+    return -1;
+  if (dateA > dateB)
+    return 1;
+  return compareFacesConfidence(a, b);
+};
+
+const sortFaces = (faces, orderBy: string = "confidence") => {
+  if (orderBy === "confidence") {
+    faces.sort((a: IPersonFace, b: IPersonFace) => compareFacesConfidence(a, b));
+  } else if (orderBy === "date") {
+    faces.sort((a: IPersonFace, b: IPersonFace) => compareFacesDate(a, b));
+  }
+};
+
+const sortGroupsByName = (list: any) => {
+  //@ts-ignore
+  list.sort((a, b) => {
+    // Place Unknown groups at the end of the list  
+    if (a.kind === "UNKNOWN" && b.kind !== "UNKNOWN")
+      return 1;
+    if (a.kind !== "UNKNOWN" && b.kind === "UNKNOWN")
+      return -1;
+    if (a.name.toLowerCase() < b.name.toLowerCase())
+      return -1;
+    if (a.name.toLowerCase() > b.name.toLowerCase())
+      return 1;
+    return 0;    
+  });
+};
+
 const faceSlice = createSlice({
   name: "face",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    changeFaceOrderBy(state, action: PayloadAction<string>) {
+      const orderBy = action.payload;
+      // @ts-ignore
+      state.labeledFacesList.forEach(group => {sortFaces(group.faces, orderBy)});
+      // @ts-ignore
+      state.inferredFacesList.forEach(group => {sortFaces(group.faces, orderBy)});
+    },
+  },
   extraReducers: builder => {
     builder
       //@ts-ignore
@@ -37,6 +98,8 @@ const faceSlice = createSlice({
           }
           return completePersonFace;
         });
+        // sort both lists by name
+        sortGroupsByName(newFacesList);
         return {
           ...state,
           labeledFacesList: !meta.arg.originalArgs.inferred ? newFacesList : state.labeledFacesList,
@@ -49,20 +112,25 @@ const faceSlice = createSlice({
         const personId = meta.arg.originalArgs.person;
         //@ts-ignore
         const indexToReplace = personListToChange.findIndex(person => person.id === personId);
-        const personToChange = personListToChange[indexToReplace];
-        //@ts-ignore
-        const currentFaces = personToChange.faces;
-        //@ts-ignore
-        const newFaces = payload.results;
+        // To-Do need to check why the person might not be found in the list
+        if (indexToReplace !== -1) {
+          const personToChange = personListToChange[indexToReplace];
+          //@ts-ignore
+          const currentFaces = personToChange.faces;
+          //@ts-ignore
+          const newFaces = payload.results;
 
-        const updatedFaces = currentFaces
-          .slice(0, (meta.arg.originalArgs.page - 1) * 100)
-          .concat(newFaces)
-          .concat(currentFaces.slice(meta.arg.originalArgs.page * 100));
+          const updatedFaces = currentFaces
+            .slice(0, (meta.arg.originalArgs.page - 1) * 100)
+            .concat(newFaces)
+            .concat(currentFaces.slice(meta.arg.originalArgs.page * 100));
 
-        //@ts-ignore
-        personToChange.faces = updatedFaces;
-        personListToChange[indexToReplace] = personToChange;
+          //@ts-ignore
+          personToChange.faces = updatedFaces;
+          //@ts-ignore
+          sortFaces(personToChange.faces, meta.arg.originalArgs.orderBy);
+          personListToChange[indexToReplace] = personToChange;
+        }
       })
       //@ts-ignore
       .addMatcher(api.endpoints.clusterFaces.matchFulfilled, (state, { payload }) => {
@@ -208,28 +276,12 @@ const faceSlice = createSlice({
         });
 
         // sort both lists by name
-        newLabeledFacesList.sort((a, b) => {
-          //@ts-ignore
-          if (a.name.toLowerCase() < b.name.toLowerCase()) {
-            return -1;
-          }
-          //@ts-ignore
-          if (a.name.toLowerCase() > b.name.toLowerCase()) {
-            return 1;
-          }
-          return 0;
-        });
-        newInferredFacesList.sort((a, b) => {
-          //@ts-ignore
-          if (a.name.toLowerCase() < b.name.toLowerCase()) {
-            return -1;
-          }
-          //@ts-ignore
-          if (a.name.toLowerCase() > b.name.toLowerCase()) {
-            return 1;
-          }
-          return 0;
-        });
+        sortGroupsByName(newLabeledFacesList);
+        sortGroupsByName(newInferredFacesList);
+        // @ts-ignore
+        state.labeledFacesList.forEach(group => {sortFaces(group.faces, meta.arg.originalArgs.orderBy)});
+        // @ts-ignore
+        state.inferredFacesList.forEach(group => {sortFaces(group.faces, meta.arg.originalArgs.orderBy)});
       })
       .addDefaultCase(state => state);
   },

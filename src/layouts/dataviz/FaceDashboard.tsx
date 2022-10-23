@@ -14,12 +14,14 @@ import { ModalPersonEdit } from "../../components/modals/ModalPersonEdit";
 import i18n from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { calculateFaceGridCellSize, calculateFaceGridCells } from "../../util/gridUtils";
+import { faceActions } from "../../store/faces/faceSlice";
 
-export const FaceDashboard = () => {
+export function FaceDashboard () {
   const { ref, width } = useElementSize();
 
   const [lastChecked, setLastChecked] = useState(null);
   const [activeItem, setActiveItem] = useState(0);
+  const [orderBy, setOrderBy] = useState("confidence");
   const [entrySquareSize, setEntrySquareSize] = useState(200);
   const [numEntrySquaresPerRow, setNumEntrySquaresPerRow] = useState(10);
   const [selectMode, setSelectMode] = useState(false);
@@ -53,11 +55,16 @@ export const FaceDashboard = () => {
             person: element.person,
             page: element.page,
             inferred: activeItem === 1,
+            orderBy: orderBy,
           })
         );
       });
     }
   }, [groups]);
+
+  useEffect(() => {
+      dispatch(faceActions.changeFaceOrderBy(orderBy));
+  }, [orderBy]);
 
   // ensure that the endpoint is not undefined
   const getEndpointCell = (cellContents, rowStopIndex, columnStopIndex) => {
@@ -274,7 +281,9 @@ export const FaceDashboard = () => {
         <ButtonHeaderGroup
           selectMode={selectMode}
           selectedFaces={selectedFaces}
+          orderBy={orderBy}
           changeSelectMode={changeSelectMode}
+          setOrderBy={setOrderBy}
           addFaces={addFaces}
           deleteFaces={deleteSelectedFaces}
           notThisPerson={notThisPersonFunc}
