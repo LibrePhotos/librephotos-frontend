@@ -12,6 +12,7 @@ const initialState: IFacesState = {
   trained: false,
   clustering: false,
   clustered: false,
+  orderBy: "confidence",
   error: null,
 };
 
@@ -72,11 +73,12 @@ const faceSlice = createSlice({
   initialState: initialState,
   reducers: {
     changeFaceOrderBy(state, action: PayloadAction<string>) {
-      const orderBy = action.payload;
       // @ts-ignore
-      state.labeledFacesList.forEach(group => {sortFaces(group.faces, orderBy)});
+      state.orderBy = action.payload;
       // @ts-ignore
-      state.inferredFacesList.forEach(group => {sortFaces(group.faces, orderBy)});
+      state.labeledFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
+      // @ts-ignore
+      state.inferredFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
     },
   },
   extraReducers: builder => {
@@ -128,7 +130,7 @@ const faceSlice = createSlice({
           //@ts-ignore
           personToChange.faces = updatedFaces;
           //@ts-ignore
-          sortFaces(personToChange.faces, meta.arg.originalArgs.orderBy);
+          sortFaces(personToChange.faces, state.orderBy);
           personListToChange[indexToReplace] = personToChange;
         }
       })
@@ -194,6 +196,10 @@ const faceSlice = createSlice({
               newInferredFacesList[indexToReplaceInferred] = personToChangeInferred;
             }
           }
+          // @ts-ignore
+          newLabeledFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
+          // @ts-ignore
+          newInferredFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
         });
       })
       .addMatcher(api.endpoints.setFacesPersonLabel.matchFulfilled, (state, { meta, payload }) => {
@@ -279,9 +285,9 @@ const faceSlice = createSlice({
         sortGroupsByName(newLabeledFacesList);
         sortGroupsByName(newInferredFacesList);
         // @ts-ignore
-        state.labeledFacesList.forEach(group => {sortFaces(group.faces, meta.arg.originalArgs.orderBy)});
+        state.labeledFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
         // @ts-ignore
-        state.inferredFacesList.forEach(group => {sortFaces(group.faces, meta.arg.originalArgs.orderBy)});
+        state.inferredFacesList.forEach(group => {sortFaces(group.faces, state.orderBy)});
       })
       .addDefaultCase(state => state);
   },

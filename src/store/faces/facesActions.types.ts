@@ -8,6 +8,7 @@ export type IFacesState = {
   trained: boolean;
   clustering: boolean;
   clustered: boolean;
+  orderBy: string;
   error: any;
 };
 
@@ -50,7 +51,6 @@ export const PersonFaceListRequest = z.object({
   person: z.number(),
   page: z.number(),
   inferred: z.boolean(),
-  orderBy: z.string(),
 });
 export type IPersonFaceListRequest = z.infer<typeof PersonFaceListRequest>;
 
