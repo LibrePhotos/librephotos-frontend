@@ -255,7 +255,7 @@ function PhotoListViewComponent(props: Props) {
           width: "100%",
           zIndex: 10,
           boxSizing: "border-box",
-          top: 50,
+          top: 45,
           padding: 6,
         }}
       >
