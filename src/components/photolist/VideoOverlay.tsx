@@ -29,6 +29,11 @@ export function VideoOverlay({ item }: Props) {
   const { classes } = styles();
 
   function getDuration({ video_length }) {
+    if (video_length.match(/\d+:[0-5]\d/)){
+      const [hour, minute, sec] = video_length.split(':');
+      const time = hour * 3600 + minute * 60 + sec * 1;
+      return <span className={classes.duration}>{Duration.fromObject({ seconds: time }).toFormat("mm:ss")}</span>;
+    }
     return <span className={classes.duration}>{Duration.fromObject({ seconds: video_length }).toFormat("mm:ss")}</span>;
   }
 
