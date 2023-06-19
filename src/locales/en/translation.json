@@ -595,7 +595,9 @@
         "removefacestoperson": "{{numberOfFaces}} face(s) were moved to 'Unknown - Other'",
         "removefacestopersontitle": "Remove faces from person",
         "savecaptions": "Image caption updated successfully",
-        "captionupdate": "Update Caption"
+        "captionupdate": "Update Caption",
+        "rotatephoto": "Photo rotated successfully",
+        "rotateupdate": "Rotate photo"
     },
     "rules": {
         "1": "Local time from DATE_TIME_ORIGINAL exif tag",
