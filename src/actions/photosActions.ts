@@ -4,7 +4,7 @@ import type { Dispatch } from "redux";
 import { z } from "zod";
 
 // eslint-disable-next-line import/no-cycle
-import { Server } from "../api_client/apiClient";
+import { Server, serverAddress } from "../api_client/apiClient";
 import i18n from "../i18n";
 // eslint-disable-next-line import/no-cycle
 import { PhotosetType } from "../reducers/photosReducer";
@@ -631,6 +631,29 @@ export function editPhoto(image_hash: string, photo_details: any) {
       })
       .catch(error => {
         dispatch({ type: "EDIT_PHOTO_REJECTED" });
+        console.error(error);
+      });
+  };
+}
+
+export function rotatePhoto(image_hash: string, angle: number, flip: boolean = false) {
+  return function (dispatch: Dispatch<any>) {
+    Server.post("photosedit/rotate", { image_hash: image_hash, angle: angle, flip: flip })
+      .then(() => {
+        dispatch({ type: "ROTATE_PHOTO_FULFILLED" });
+        dispatch(fetchPhotoDetail(image_hash));
+        showNotification({
+          message: i18n.t<string>("toasts.rotatephoto"),
+          title: i18n.t<string>("toasts.rotateupdate"),
+          color: "teal",
+        });
+        // Reset the cache
+        fetch(`${serverAddress}/media/thumbnails_big/${image_hash}`, {cache: 'reload', credentials: 'include'});
+        fetch(`${serverAddress}/media/square_thumbnails/${image_hash}`, {cache: 'reload', credentials: 'include'});
+        fetch(`${serverAddress}/media/square_thumbnails_small/${image_hash}`, {cache: 'reload', credentials: 'include'});
+      })
+      .catch(error => {
+        dispatch({ type: "ROTATE_PHOTO_REJECTED" });
         console.error(error);
       });
   };

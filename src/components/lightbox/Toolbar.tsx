@@ -1,8 +1,8 @@
 import { ActionIcon, Group, Loader } from "@mantine/core";
 import React from "react";
-import { Eye, EyeOff, Globe, InfoCircle, PlayerPause, PlayerPlay, Star } from "tabler-icons-react";
+import { Eye, EyeOff, Globe, InfoCircle, PlayerPause, PlayerPlay, Star, RotateClockwise2, Rotate2 } from "tabler-icons-react";
 
-import { setPhotosFavorite, setPhotosHidden, setPhotosPublic } from "../../actions/photosActions";
+import { rotatePhoto, setPhotosFavorite, setPhotosHidden, setPhotosPublic } from "../../actions/photosActions";
 import { shareAddress } from "../../api_client/apiClient";
 import { playerActions } from "../../store/player/playerSlice";
 import { useAppDispatch, useAppSelector } from "../../store/store";
@@ -42,6 +42,17 @@ export function Toolbar(props: Props) {
 
   return (
     <Group style={{ paddingBottom: 10, paddingRight: 5 }}>
+
+      {!photosDetail && (
+        <ActionIcon loading disabled={isPublic}>
+          <Rotate2 color="grey" />
+        </ActionIcon>
+      )}
+      {!photosDetail && (
+        <ActionIcon loading disabled={isPublic}>
+          <RotateClockwise2 color="grey" />
+        </ActionIcon>
+      )}
       {!photosDetail && (
         <ActionIcon loading disabled={isPublic}>
           <Eye color="grey" />
@@ -58,6 +69,28 @@ export function Toolbar(props: Props) {
         </ActionIcon>
       )}
       {playButton(photosDetail)}
+      {photosDetail && (
+        <ActionIcon
+          disabled={isPublic}
+          onClick={() => {
+            const { image_hash: imageHash } = photosDetail;
+            dispatch(rotatePhoto(imageHash, -90));
+          }}
+        >
+          <Rotate2 color="grey" />
+        </ActionIcon>
+      )}
+      {photosDetail && (
+        <ActionIcon
+          disabled={isPublic}
+          onClick={() => {
+            const { image_hash: imageHash } = photosDetail;
+            dispatch(rotatePhoto(imageHash, 90));
+          }}
+        >
+          <RotateClockwise2 color="grey" />
+        </ActionIcon>
+      )}
       {photosDetail && (
         <ActionIcon
           disabled={isPublic}
