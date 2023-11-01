@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Star } from "tabler-icons-react";
+import { Video } from "tabler-icons-react";
 
 import { fetchAlbumDate, fetchAlbumDateList } from "../../actions/albumsActions";
 import { PhotoListView } from "../../components/photolist/PhotoListView";
@@ -36,7 +36,7 @@ export function OnlyVideos() {
     <PhotoListView
       title={t("photos.videos")}
       loading={fetchedPhotosetType !== PhotosetType.VIDEOS}
-      icon={<Star size={50} />}
+      icon={<Video size={50} />}
       photoset={photosGroupedByDate}
       updateGroups={updatePhotoGroups(setGroup)}
       idx2hash={photosFlat}
