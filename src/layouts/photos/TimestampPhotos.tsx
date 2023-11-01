@@ -39,7 +39,7 @@ export function TimestampPhotos() {
       const visibleImages = group.items;
       if (visibleImages.filter((i: any) => i.isTemp).length > 0) {
         const firstTempObject = visibleImages.filter((i: any) => i.isTemp)[0];
-        const page = Math.ceil((parseInt(firstTempObject.id) + 1) / 100);
+        const page = Math.ceil((parseInt(firstTempObject.id, 10) + 1) / 100);
         setGroup({ id: group.id, page: page });
       }
     });
