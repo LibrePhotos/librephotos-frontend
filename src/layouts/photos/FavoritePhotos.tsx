@@ -39,7 +39,7 @@ export function FavoritePhotos() {
   const getAlbums = (visibleGroups: any) => {
     visibleGroups.forEach((group: any) => {
       const visibleImages = group.items;
-      if (visibleImages.filter((i: any) => i.isTemp && i.isTemp != undefined).length > 0) {
+      if (visibleImages.filter((i: any) => i.isTemp).length > 0) {
         const firstTempObject = visibleImages.filter((i: any) => i.isTemp)[0];
         const page = Math.ceil((parseInt(firstTempObject.id) + 1) / 100);
         setGroup({ id: group.id, page: page });

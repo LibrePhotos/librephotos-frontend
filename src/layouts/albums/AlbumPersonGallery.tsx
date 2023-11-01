@@ -23,7 +23,7 @@ export function AlbumPersonGallery(): JSX.Element {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const [group, setGroup] = useState({} as IFetchedGroup);
-  const person = people.filter((i: any) => i.key == albumID)[0];
+  const person = people.filter((i: any) => i.key === albumID)[0];
   const personname = person ? person.value : undefined;
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function AlbumPersonGallery(): JSX.Element {
   const getAlbums = (visibleGroups: any) => {
     visibleGroups.forEach((group: any) => {
       const visibleImages = group.items;
-      if (visibleImages.filter((i: any) => i.isTemp && i.isTemp != undefined).length > 0) {
+      if (visibleImages.filter((i: any) => i.isTemp).length > 0) {
         const firstTempObject = visibleImages.filter((i: any) => i.isTemp)[0];
         const page = Math.ceil((parseInt(firstTempObject.id) + 1) / 100);
         setGroup({ id: group.id, page: page });
