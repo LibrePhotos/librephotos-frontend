@@ -1,4 +1,5 @@
 import { FETCH_USER_ALBUM_FULFILLED, FETCH_USER_ALBUM_REJECTED } from "../actions/albumsActions";
+import { DEFAULT_ACTION } from "./common";
 
 const initialState = {
   albumsUserList: [],
@@ -60,7 +61,7 @@ const initialState = {
 
   error: null,
 };
-export default function reducer(state = initialState, action) {
+export default function reducer(state = initialState, action = DEFAULT_ACTION) {
   let newAlbum;
   switch (action.type) {
     case "FETCH_ALBUMS_SHARED_TO_ME": {
