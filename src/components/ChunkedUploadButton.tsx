@@ -26,6 +26,11 @@ export function ChunkedUploadButton() {
     let offset = 0;
     const md5 = CryptoJS.algo.MD5.create();
     return new Promise<string>((resolve, reject) => {
+      function readNext() {
+        const fileSlice = file.slice(offset, offset + chunkSize);
+        temporaryFileReader.readAsBinaryString(fileSlice);
+      }
+
       temporaryFileReader.onerror = () => {
         temporaryFileReader.abort();
         reject(new DOMException("Problem parsing input file."));
@@ -46,10 +51,7 @@ export function ChunkedUploadButton() {
           readNext();
         }
       };
-      function readNext() {
-        const fileSlice = file.slice(offset, offset + chunkSize);
-        temporaryFileReader.readAsBinaryString(fileSlice);
-      }
+
       readNext();
     });
   };

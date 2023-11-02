@@ -38,6 +38,12 @@ export function HeaderComponent({
   const [checked, setChecked] = useState(false);
   const [renameDialogVisible, { open: showRenameDialog, close: hideRenameDialog }] = useDisclosure(false);
   const [deleteDialogVisible, { open: showDeleteDialog, close: hideDeleteDialog }] = useDisclosure(false);
+  const [renamePerson] = useRenamePersonAlbumMutation();
+  const [deletePerson] = useDeletePersonAlbumMutation();
+  const { data: albums } = useFetchPeopleAlbumsQuery();
+  const [personID, setPersonID] = useState("");
+  const [personName, setPersonName] = useState("");
+  const [newPersonName, setNewPersonName] = useState("");
 
   function openDeleteDialog(id: string) {
     setPersonID(id);
@@ -50,14 +56,6 @@ export function HeaderComponent({
     setNewPersonName("");
     showRenameDialog();
   }
-
-  const [renamePerson] = useRenamePersonAlbumMutation();
-  const [deletePerson] = useDeletePersonAlbumMutation();
-  const { data: albums, isFetching } = useFetchPeopleAlbumsQuery();
-
-  const [personID, setPersonID] = useState("");
-  const [personName, setPersonName] = useState("");
-  const [newPersonName, setNewPersonName] = useState("");
 
   const handleClick = () => {
     if (!checked) {
@@ -144,7 +142,7 @@ export function HeaderComponent({
         <Group>
           <TextInput
             error={
-              albums && albums.map(el => el.text.toLowerCase().trim()).includes(newPersonName.toLowerCase().trim())
+              albums?.map(el => el.text.toLowerCase().trim()).includes(newPersonName.toLowerCase().trim())
                 ? t("personalbum.personalreadyexists", {
                     name: newPersonName.trim(),
                   })
@@ -160,9 +158,7 @@ export function HeaderComponent({
               renamePerson({ id: personID, personName, newPersonName });
               hideRenameDialog();
             }}
-            disabled={
-              albums && albums.map(el => el.text.toLowerCase().trim()).includes(newPersonName.toLowerCase().trim())
-            }
+            disabled={albums?.map(el => el.text.toLowerCase().trim()).includes(newPersonName.toLowerCase().trim())}
             type="submit"
           >
             {t("rename")}

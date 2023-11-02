@@ -1,4 +1,4 @@
-import { ActionIcon, Button, PasswordInput, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, PasswordInput, Stack, Text, Title } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Lock, LockOpen } from "tabler-icons-react";
@@ -8,6 +8,7 @@ type Props = {
   onValidate: (string, boolean) => void;
   closing?: boolean;
 };
+
 export function PasswordEntry(props: Props): JSX.Element {
   const { closing, createNew, onValidate } = props;
 
@@ -17,10 +18,6 @@ export function PasswordEntry(props: Props): JSX.Element {
   const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-
-  useEffect(() => {
-    validateAndUpdatePassword(newPassword, newPasswordConfirm, closing);
-  }, [createNew, closing, editPasswordMode]);
 
   const validateAndUpdatePassword = (password, passwordConfirm, closing = false) => {
     setConfirmPasswordError("");
@@ -45,6 +42,10 @@ export function PasswordEntry(props: Props): JSX.Element {
 
     onValidate(validPassword, isValid);
   };
+
+  useEffect(() => {
+    validateAndUpdatePassword(newPassword, newPasswordConfirm, closing);
+  }, [createNew, closing, editPasswordMode]);
 
   return (
     <Stack style={{ display: "flex", alignContent: "stretch" }} spacing="xs">
