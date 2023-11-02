@@ -13,8 +13,8 @@ type Props = {
 };
 
 export function WordCloud(props: Props) {
-  const { observe, unobserve, width } = useDimensions({
-    onResize: ({ observe, unobserve, width, height, entry }) => {
+  const { observe, width } = useDimensions({
+    onResize: ({ observe }) => {
       observe();
     },
     useBorderBoxSize: true, // Tell the hook to measure based on the border-box size, default is false

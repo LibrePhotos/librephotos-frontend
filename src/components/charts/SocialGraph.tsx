@@ -11,10 +11,11 @@ const { Graph } = require("react-d3-graph");
 type Props = {
   height: number;
 };
+
 export function SocialGraph(props: Props) {
   const { colorScheme } = useMantineColorScheme();
   const { observe, width } = useDimensions({
-    onResize: ({ observe, unobserve, width, height, entry }) => {
+    onResize: ({ observe }) => {
       observe();
     },
   });

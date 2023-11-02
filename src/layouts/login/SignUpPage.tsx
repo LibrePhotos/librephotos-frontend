@@ -45,7 +45,7 @@ export function SignupPage(): JSX.Element {
       username: value => validateUsername(value),
     },
   });
-  const [signup, { isSuccess, isLoading }] = useSignUpMutation();
+  const [signup, { isSuccess }] = useSignUpMutation();
 
   const { colorScheme } = useMantineColorScheme();
   const dark = colorScheme === "dark";

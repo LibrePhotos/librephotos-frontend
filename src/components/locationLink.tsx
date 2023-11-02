@@ -33,9 +33,9 @@ export function LocationLink(props: Props) {
   const [layout, setLayout] = useState("cartesian");
   const [orientation, setOrientation] = useState("horizontal");
   const [linkType, setLinkType] = useState("diagonal");
-  const [stepPercent, setStepPercent] = useState(0.5);
+  const [stepPercent] = useState(0.5);
 
-  const { locationSunburst, fetchedLocationSunburst } = useAppSelector(store => store.util);
+  const { locationSunburst } = useAppSelector(store => store.util);
   const dispatch = useAppDispatch();
 
   useEffect(() => {

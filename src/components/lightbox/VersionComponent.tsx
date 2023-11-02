@@ -13,7 +13,7 @@ export function VersionComponent(props: { photoDetail: PhotoType }) {
   const { photoDetail } = props;
 
   const [showMore, setShowMore] = useState(false);
-  const [otherVersions, setOtherVersions] = useState<PhotoType[]>([]);
+  const [otherVersions] = useState<PhotoType[]>([]);
   const [openDeleteDialogState, setOpenDeleteDialogState] = useState(false);
   const [imageHash, setImageHash] = useState("");
   const [path, setPath] = useState("");
@@ -104,13 +104,13 @@ export function VersionComponent(props: { photoDetail: PhotoType }) {
                 <Button color="red" onClick={() => openDeleteDialog(photoDetail.image_hash, element)}>
                   {t("delete")}
                 </Button>
-                {/** 
-              <Group>
-                  // To-Do: Change a path to the primary file
-                  // To-Do: Implement endpoint
-                <Button color="green">Change to primary</Button>
-                  // To-Do: Use a ActionIcon instead?
-              </Group> */}
+                {/**
+                                 <Group>
+                                 // To-Do: Change a path to the primary file
+                                 // To-Do: Implement endpoint
+                                 <Button color="green">Change to primary</Button>
+                                 // To-Do: Use a ActionIcon instead?
+                                 </Group> */}
                 <Divider my="sm" />
               </Stack>
             ))}

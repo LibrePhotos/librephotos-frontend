@@ -17,7 +17,7 @@ export function FaceClusterGraph(props: Props) {
   const [hintValue, setHintValue] = useState<any>({} as any);
   const { t } = useTranslation();
   const { observe, width } = useDimensions({
-    onResize: ({ observe, unobserve, width, height, entry }) => {
+    onResize: ({ observe }) => {
       observe();
     },
   });
@@ -46,7 +46,7 @@ export function FaceClusterGraph(props: Props) {
         colorType="literal"
         key={`cluster-marker-${idx}`}
         animation
-        onValueClick={(d: any, info: any) => {
+        onValueClick={d => {
           setHintValue(d);
         }}
         data={thisPersonData}

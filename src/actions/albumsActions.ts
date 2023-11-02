@@ -149,7 +149,7 @@ export function renameUserAlbum(albumID: string, albumTitle: string, newAlbumTit
     Server.patch(`/albums/user/edit/${albumID}/`, {
       title: newAlbumTitle,
     })
-      .then(response => {
+      .then(() => {
         dispatch({ type: "RENAME_USER_ALBUM_FULFILLED", payload: albumID });
         dispatch(fetchUserAlbumsList());
         showNotification({
@@ -169,7 +169,7 @@ export function deleteUserAlbum(albumID: string, albumTitle: string) {
   return function (dispatch: Dispatch<any>) {
     dispatch({ type: "DELETE_USER_ALBUM" });
     Server.delete(`/albums/user/${albumID}`)
-      .then(response => {
+      .then(() => {
         dispatch({ type: "DELETE_USER_ALBUM_FULFILLED", payload: albumID });
         dispatch(fetchUserAlbumsList());
         showNotification({
@@ -220,7 +220,7 @@ export function setAlbumCoverForUserAlbum(album_id, photo_hash) {
     Server.patch(`albums/user/edit/${album_id}/`, {
       cover_photo: photo_hash,
     })
-      .then(response => {
+      .then(() => {
         // To-Do: I should do something with the response
         dispatch({ type: "SET_ALBUM_COVER_FOR_USER_ALBUM_FULFILLED" });
         showNotification({
@@ -434,7 +434,7 @@ export function deleteAutoAlbum(albumID: string, albumTitle: string) {
   return function (dispatch: Dispatch<any>) {
     dispatch({ type: "DELETE_AUTO_ALBUM" });
     Server.delete(`/albums/auto/${albumID}`)
-      .then(response => {
+      .then(() => {
         dispatch({ type: "DELETE_AUTO_ALBUM_FULFILLED", payload: albumID });
         dispatch(fetchAutoAlbumsList());
         showNotification({
@@ -453,7 +453,7 @@ export function deleteAllAutoAlbum() {
   return function (dispatch: Dispatch<any>) {
     dispatch({ type: "DELETE_All_AUTO_ALBUM" });
     Server.post(`/albums/auto/delete_all/`)
-      .then(response => {
+      .then(() => {
         dispatch({ type: "DELETE_ALL_AUTO_ALBUM_FULFILLED" });
         dispatch(fetchAutoAlbumsList());
         showNotification({

@@ -27,7 +27,6 @@ module.exports = {
     "react/no-unstable-nested-components": "warn",
     "@typescript-eslint/default-param-last": "warn",
     "@typescript-eslint/naming-convention": "warn",
-    "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-shadow": "warn",
   },
   parserOptions: {

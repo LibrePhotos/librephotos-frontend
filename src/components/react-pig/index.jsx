@@ -45,8 +45,8 @@ export default class Pig extends Component {
     this.imageData = props.imageData;
     this.numberOfItems = props.numberOfItems || this.imageData.length;
     this.scaleOfImages = props.scaleOfImages || 1;
-    this.updateGroups = props.updateGroups || function (visibleGroups) {};
-    this.updateItems = props.updateItems || function (visibleItems) {};
+    this.updateGroups = props.updateGroups || function () {};
+    this.updateItems = props.updateItems || function () {};
     // if sortFunc has been provided as a prop, use it
     if (props.sortFunc) this.imageData.sort(props.sortFunc);
     else if (props.sortByDate) this.imageData = sortByDate(this.imageData);
