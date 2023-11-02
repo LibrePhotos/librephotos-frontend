@@ -71,12 +71,11 @@ export function HeaderComponent({
 
   const confirmFacesAssociation = () => {
     const facesToAddIDs = cell.faces.map(i => i.id);
-    const personName = cell.name;
-    dispatch(api.endpoints.setFacesPersonLabel.initiate({ faceIds: facesToAddIDs, personName }));
+    dispatch(api.endpoints.setFacesPersonLabel.initiate({ faceIds: facesToAddIDs, personName: cell.name }));
     showNotification({
       message: i18n.t("toasts.addfacestoperson", {
         numberOfFaces: facesToAddIDs.length,
-        personName,
+        personNamen: cell.name,
       }),
       title: i18n.t("toasts.addfacestopersontitle"),
       color: "teal",

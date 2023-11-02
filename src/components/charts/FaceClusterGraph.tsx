@@ -16,7 +16,7 @@ type Props = {
 export function FaceClusterGraph(props: Props) {
   const [hintValue, setHintValue] = useState<any>({} as any);
   const { t } = useTranslation();
-  const { observe, width } = useDimensions({
+  const { observe: observeChange, width } = useDimensions({
     onResize: ({ observe }) => {
       observe();
     },
@@ -56,7 +56,7 @@ export function FaceClusterGraph(props: Props) {
   }, this);
   if (clustered) {
     return (
-      <Stack ref={observe}>
+      <Stack ref={observeChange}>
         <div>
           <Title order={3}> {t("facecluster")} </Title>
           <Text color="dimmed">{t("faceclusterexplanation")}</Text>

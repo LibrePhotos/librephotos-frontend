@@ -25,7 +25,6 @@ module.exports = {
     "react/no-array-index-key": "warn",
     "react/require-default-props": "warn",
     "react/no-unstable-nested-components": "warn",
-    "@typescript-eslint/no-shadow": "warn",
   },
   parserOptions: {
     project: "./tsconfig.eslint.json",

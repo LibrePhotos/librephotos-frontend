@@ -19,10 +19,10 @@ export function VersionComponent(props: { photoDetail: PhotoType }) {
   const [path, setPath] = useState("");
   const { t } = useTranslation();
 
-  const openDeleteDialog = (imageHash, path) => {
+  const openDeleteDialog = (hash, filePath) => {
     setOpenDeleteDialogState(true);
-    setImageHash(imageHash);
-    setPath(path);
+    setImageHash(hash);
+    setPath(filePath);
   };
 
   const dispatch = useAppDispatch();

@@ -129,8 +129,8 @@ export default class Pig extends Component {
       this.setRenderedItems(this.imageData);
 
       // measure users scrolling speed and set it to state, used for conditional tile rendering
-      const scrollSpeed = getScrollSpeed(this.latestYOffset, this.scrollThrottleMs, scrollSpeed => {
-        this.setState({ scrollSpeed }); // scroll idle callback
+      const scrollSpeed = getScrollSpeed(this.latestYOffset, this.scrollThrottleMs, speed => {
+        this.setState({ scrollSpeed: speed }); // scroll idle callback
       });
       this.setState({ scrollSpeed });
 

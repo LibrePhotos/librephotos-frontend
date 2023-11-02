@@ -19,7 +19,7 @@ export function PasswordEntry(props: Props): JSX.Element {
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  const validateAndUpdatePassword = (password, passwordConfirm, closing = false) => {
+  const validateAndUpdatePassword = (password, passwordConfirm, isClosing = false) => {
     setConfirmPasswordError("");
     setNewPasswordError("");
     let validPassword = "";
@@ -31,7 +31,7 @@ export function PasswordEntry(props: Props): JSX.Element {
         isValid = true;
       } else if (passwordConfirm !== "") {
         setConfirmPasswordError(t("settings.password.errormustmatch"));
-      } else if (closing) {
+      } else if (isClosing) {
         setConfirmPasswordError(t("settings.password.errormustretype"));
       }
     } else if (editPasswordMode || createNew) {
