@@ -9,8 +9,6 @@ module.exports = {
   rules: {
     "no-await-in-loop": "warn",
     "no-restricted-syntax": "warn",
-    "no-console": "off",
-    "no-void": "off",
     "no-plusplus": "warn",
     "no-param-reassign": "warn",
     "no-underscore-dangle": "warn",
