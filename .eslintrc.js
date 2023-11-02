@@ -24,7 +24,6 @@ module.exports = {
     "react/no-unused-class-component-methods": "warn",
     "react/no-array-index-key": "warn",
     "react/require-default-props": "warn",
-    "react/no-unstable-nested-components": "warn",
   },
   parserOptions: {
     project: "./tsconfig.eslint.json",
