@@ -17,7 +17,6 @@ module.exports = {
     "import/no-cycle": "warn",
     "react/prop-types": "warn",
     "react/destructuring-assignment": "warn",
-    "react/jsx-filename-extension": "warn",
     "react/sort-comp": "warn",
     "react/no-access-state-in-setstate": "warn",
     "react/jsx-props-no-spreading": "warn",
