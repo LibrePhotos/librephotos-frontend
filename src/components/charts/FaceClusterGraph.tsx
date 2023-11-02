@@ -28,9 +28,9 @@ export function FaceClusterGraph(props: Props) {
     dispatch(api.endpoints.clusterFaces.initiate());
   }, [dispatch]); // Only run on first render
 
-  const person_names = [...new Set(facesVis.map((el: any) => el.person_name))];
+  const personNames = [...new Set(facesVis.map((el: any) => el.person_name))];
 
-  const mappedScatter = person_names.map((person_name, idx) => {
+  const mappedScatter = personNames.map((person_name, idx) => {
     const thisPersonVis = facesVis.filter((el: any) => person_name === el.person_name);
     const thisPersonData = thisPersonVis.map((el: any) => ({
       x: el.value.x,
