@@ -16,7 +16,6 @@ module.exports = {
     "import/no-named-as-default": "warn",
     "import/prefer-default-export": "off",
     "import/no-cycle": "warn",
-    "import/no-mutable-exports": "warn",
     "react/prop-types": "warn",
     "react/destructuring-assignment": "warn",
     "react/jsx-filename-extension": "warn",
