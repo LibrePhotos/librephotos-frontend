@@ -13,7 +13,6 @@ module.exports = {
     "no-underscore-dangle": "warn",
     "no-return-assign": "warn",
     "no-nested-ternary": "warn",
-    "import/no-named-as-default": "warn",
     "import/prefer-default-export": "off",
     "import/no-cycle": "warn",
     "react/prop-types": "warn",
