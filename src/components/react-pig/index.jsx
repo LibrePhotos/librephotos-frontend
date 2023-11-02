@@ -100,6 +100,37 @@ export default class Pig extends Component {
     this.debouncedResize = debounce(this.onResize, 500);
   }
 
+  componentDidMount() {
+    this.container = this.containerRef.current;
+    this.containerOffsetTop = this.container.offsetTop;
+    this.containerWidth = this.container.offsetWidth;
+
+    this.imageData = this.getUpdatedImageLayout();
+    this.setRenderedItems(this.imageData);
+
+    if (typeof window === "undefined") return;
+    window.addEventListener("scroll", this.throttledScroll);
+    window.addEventListener("resize", this.debouncedResize);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps) {
+      const { imageData } = this.props;
+      this.imageData = imageData;
+      this.imageData = this.getUpdatedImageLayout();
+      this.container.style.height = `${this.totalHeight}px`; // set the container height again based on new layout
+      this.containerWidth = this.container.offsetWidth;
+      this.containerOffsetTop = this.container.offsetTop;
+      this.windowHeight = window.innerHeight;
+      this.setRenderedItems(this.imageData);
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.throttledScroll);
+    window.removeEventListener("resize", this.debouncedResize);
+  }
+
   setRenderedItems(imageData) {
     // Set the container height, only need to do this once.
     if (!this.container.style.height) this.container.style.height = `${this.totalHeight}px`;
@@ -148,31 +179,6 @@ export default class Pig extends Component {
     this.windowHeight = window.innerHeight;
   };
 
-  defaultHandleSelection = item => {
-    console.log(item);
-    let { newSelectedItems } = this.state;
-    if (newSelectedItems.includes(item)) {
-      newSelectedItems = newSelectedItems.filter(value => value !== item);
-    } else {
-      newSelectedItems = newSelectedItems.concat(item);
-    }
-    this.setState({ selectedItems: newSelectedItems });
-  };
-
-  defaultHandleClick = (event, item) => {
-    // if an image is already the width of the container, don't expand it on click
-    if (item.style.width >= this.containerWidth) {
-      this.setState({ activeTileUrl: null });
-      return;
-    }
-
-    const { activeTileUrl } = this.state;
-    this.setState({
-      // if Tile is already active, deactivate it
-      activeTileUrl: item.url !== activeTileUrl ? item.url : null,
-    });
-  };
-
   getUpdatedImageLayout() {
     const wrapperWidth = this.container.offsetWidth;
 
@@ -201,36 +207,30 @@ export default class Pig extends Component {
     return imageData;
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props !== prevProps) {
-      const { imageData } = this.props;
-      this.imageData = imageData;
-      this.imageData = this.getUpdatedImageLayout();
-      this.container.style.height = `${this.totalHeight}px`; // set the container height again based on new layout
-      this.containerWidth = this.container.offsetWidth;
-      this.containerOffsetTop = this.container.offsetTop;
-      this.windowHeight = window.innerHeight;
-      this.setRenderedItems(this.imageData);
+  defaultHandleSelection = item => {
+    console.log(item);
+    let { newSelectedItems } = this.state;
+    if (newSelectedItems.includes(item)) {
+      newSelectedItems = newSelectedItems.filter(value => value !== item);
+    } else {
+      newSelectedItems = newSelectedItems.concat(item);
     }
-  }
+    this.setState({ selectedItems: newSelectedItems });
+  };
 
-  componentDidMount() {
-    this.container = this.containerRef.current;
-    this.containerOffsetTop = this.container.offsetTop;
-    this.containerWidth = this.container.offsetWidth;
+  defaultHandleClick = (event, item) => {
+    // if an image is already the width of the container, don't expand it on click
+    if (item.style.width >= this.containerWidth) {
+      this.setState({ activeTileUrl: null });
+      return;
+    }
 
-    this.imageData = this.getUpdatedImageLayout();
-    this.setRenderedItems(this.imageData);
-
-    if (typeof window === "undefined") return;
-    window.addEventListener("scroll", this.throttledScroll);
-    window.addEventListener("resize", this.debouncedResize);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("scroll", this.throttledScroll);
-    window.removeEventListener("resize", this.debouncedResize);
-  }
+    const { activeTileUrl } = this.state;
+    this.setState({
+      // if Tile is already active, deactivate it
+      activeTileUrl: item.url !== activeTileUrl ? item.url : null,
+    });
+  };
 
   renderTile = item => {
     const { useLqip, selectedItems, thumbnailSize, toprightoverlay, bottomleftoverlay } = this.props;
