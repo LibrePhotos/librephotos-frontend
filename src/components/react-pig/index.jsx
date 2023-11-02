@@ -134,7 +134,8 @@ export default class Pig extends Component {
       this.setState({ scrollSpeed });
 
       // dismiss any active Tile
-      if (this.state.activeTileUrl) this.setState({ activeTileUrl: null });
+      const { activeTileUrl } = this.state;
+      if (activeTileUrl) this.setState({ activeTileUrl: null });
     });
   };
 
@@ -149,7 +150,7 @@ export default class Pig extends Component {
 
   defaultHandleSelection = item => {
     console.log(item);
-    let newSelectedItems = this.state.selectedItems;
+    let { newSelectedItems } = this.state;
     if (newSelectedItems.includes(item)) {
       newSelectedItems = newSelectedItems.filter(value => value !== item);
     } else {
@@ -165,9 +166,10 @@ export default class Pig extends Component {
       return;
     }
 
+    const { activeTileUrl } = this.state;
     this.setState({
       // if Tile is already active, deactivate it
-      activeTileUrl: item.url !== this.state.activeTileUrl ? item.url : null,
+      activeTileUrl: item.url !== activeTileUrl ? item.url : null,
     });
   };
 
@@ -201,7 +203,8 @@ export default class Pig extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
-      this.imageData = this.props.imageData;
+      const { imageData } = this.props;
+      this.imageData = imageData;
       this.imageData = this.getUpdatedImageLayout();
       this.container.style.height = `${this.totalHeight}px`; // set the container height again based on new layout
       this.containerWidth = this.container.offsetWidth;
@@ -229,46 +232,54 @@ export default class Pig extends Component {
     window.removeEventListener("resize", this.debouncedResize);
   }
 
-  renderTile = item => (
-    <Tile
-      key={item.url}
-      useLqip={this.props.useLqip}
-      windowHeight={this.windowHeight}
-      containerWidth={this.containerWidth}
-      containerOffsetTop={this.containerOffsetTop}
-      item={item}
-      gridGap={this.settings.gridGap}
-      getUrl={this.getUrl}
-      handleClick={this.handleClick}
-      handleSelection={this.handleSelection}
-      selectable={this.selectable}
-      selected={
-        this.props.selectedItems
-          ? this.props.selectedItems.findIndex(selectedItem => selectedItem.id === item.id) >= 0
-          : this.state.selectedItems.includes(item)
-      }
-      activeTileUrl={this.state.activeTileUrl}
-      settings={this.settings}
-      thumbnailSize={this.props.thumbnailSize}
-      scrollSpeed={this.state.scrollSpeed}
-      toprightoverlay={this.props.toprightoverlay}
-      bottomleftoverlay={this.props.bottomleftoverlay}
-    />
-  );
+  renderTile = item => {
+    const { useLqip, selectedItems, thumbnailSize, toprightoverlay, bottomleftoverlay } = this.props;
+    const { selectedItems: stateSelectedItems, activeTileUrl, scrollSpeed } = this.state;
+    return (
+      <Tile
+        key={item.url}
+        useLqip={useLqip}
+        windowHeight={this.windowHeight}
+        containerWidth={this.containerWidth}
+        containerOffsetTop={this.containerOffsetTop}
+        item={item}
+        gridGap={this.settings.gridGap}
+        getUrl={this.getUrl}
+        handleClick={this.handleClick}
+        handleSelection={this.handleSelection}
+        selectable={this.selectable}
+        selected={
+          selectedItems
+            ? selectedItems.findIndex(selectedItem => selectedItem.id === item.id) >= 0
+            : stateSelectedItems.includes(item)
+        }
+        activeTileUrl={activeTileUrl}
+        settings={this.settings}
+        thumbnailSize={thumbnailSize}
+        scrollSpeed={scrollSpeed}
+        toprightoverlay={toprightoverlay}
+        bottomleftoverlay={bottomleftoverlay}
+      />
+    );
+  };
 
-  renderGroup = group => (
-    <React.Fragment key={group.date}>
-      <GroupHeader key={group.date} settings={this.settings} group={group} activeTileUrl={this.state.activeTileUrl} />
-      {group.items.map(item => this.renderTile(item))}
-    </React.Fragment>
-  );
+  renderGroup = group => {
+    const { activeTileUrl } = this.state;
+    return (
+      <React.Fragment key={group.date}>
+        <GroupHeader key={group.date} settings={this.settings} group={group} activeTileUrl={activeTileUrl} />
+        {group.items.map(item => this.renderTile(item))}
+      </React.Fragment>
+    );
+  };
 
   renderFlat = item => this.renderTile(item);
 
   render() {
+    const { renderedItems } = this.state;
     return (
       <div className={styles.output} ref={this.containerRef}>
-        {this.state.renderedItems.map(item => {
+        {renderedItems.map(item => {
           if (this.settings.groupByDate) {
             return this.renderGroup(item);
           }

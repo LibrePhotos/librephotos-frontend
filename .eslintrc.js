@@ -16,7 +16,6 @@ module.exports = {
     "import/prefer-default-export": "off",
     "import/no-cycle": "warn",
     "react/prop-types": "warn",
-    "react/destructuring-assignment": "warn",
     "react/sort-comp": "warn",
     "react/no-access-state-in-setstate": "warn",
     "react/jsx-props-no-spreading": "off", // some Mantine components need to use spread operator

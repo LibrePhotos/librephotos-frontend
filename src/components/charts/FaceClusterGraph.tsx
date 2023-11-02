@@ -13,7 +13,7 @@ type Props = {
   height: number;
 };
 
-export function FaceClusterGraph(props: Props) {
+export function FaceClusterGraph({ height }: Props) {
   const [hintValue, setHintValue] = useState<any>({} as any);
   const { t } = useTranslation();
   const { observe: observeChange, width } = useDimensions({
@@ -61,7 +61,7 @@ export function FaceClusterGraph(props: Props) {
           <Title order={3}> {t("facecluster")} </Title>
           <Text color="dimmed">{t("faceclusterexplanation")}</Text>
         </div>
-        <XYPlot width={width - 30} height={props.height}>
+        <XYPlot width={width - 30} height={height}>
           <HorizontalGridLines />
           <VerticalGridLines />
           {mappedScatter}

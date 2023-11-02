@@ -5,8 +5,8 @@ type Props = {
   photos: any[];
 };
 
-export function AlbumLocationMap(props: Readonly<Props>) {
-  const photosWithGPS = props.photos.filter(photo => photo.exif_gps_lon !== null && photo.exif_gps_lon);
+export function AlbumLocationMap({ photos }: Readonly<Props>) {
+  const photosWithGPS = photos.filter(photo => photo.exif_gps_lon !== null && photo.exif_gps_lon);
   let sumLat = 0;
   let sumLon = 0;
   for (const element of photosWithGPS) {
