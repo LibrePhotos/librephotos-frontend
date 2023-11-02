@@ -12,7 +12,6 @@ module.exports = {
     "no-param-reassign": "warn",
     "no-underscore-dangle": "warn",
     "no-return-assign": "warn",
-    "no-var": "warn",
     "no-nested-ternary": "warn",
     "import/no-named-as-default": "warn",
     "import/prefer-default-export": "off",
