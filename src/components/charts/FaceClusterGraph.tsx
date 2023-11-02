@@ -30,8 +30,8 @@ export function FaceClusterGraph(props: Props) {
 
   const personNames = [...new Set(facesVis.map((el: any) => el.person_name))];
 
-  const mappedScatter = personNames.map((person_name, idx) => {
-    const thisPersonVis = facesVis.filter((el: any) => person_name === el.person_name);
+  const mappedScatter = personNames.map(name => {
+    const thisPersonVis = facesVis.filter((el: any) => name === el.person_name);
     const thisPersonData = thisPersonVis.map((el: any) => ({
       x: el.value.x,
       y: el.value.y,
@@ -44,7 +44,7 @@ export function FaceClusterGraph(props: Props) {
     return (
       <MarkSeries
         colorType="literal"
-        key={`cluster-marker-${idx}`}
+        key={`cluster-marker-${name}`}
         animation
         onValueClick={d => {
           setHintValue(d);
