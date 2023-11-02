@@ -76,7 +76,6 @@ export default class Pig extends Component {
     this.totalHeight = 0;
 
     this.containerRef = React.createRef();
-    this.titleRef = React.createRef();
     this.minAspectRatio = null;
     this.latestYOffset = 0;
     this.previousYOffset = 0;

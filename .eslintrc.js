@@ -21,7 +21,6 @@ module.exports = {
     "react/no-access-state-in-setstate": "warn",
     "react/jsx-props-no-spreading": "warn",
     "react-hooks/exhaustive-deps": "warn",
-    "react/no-unused-class-component-methods": "warn",
     "react/no-array-index-key": "warn",
     "react/require-default-props": "warn",
   },
