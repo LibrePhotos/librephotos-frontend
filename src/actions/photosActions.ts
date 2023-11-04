@@ -2,9 +2,9 @@ import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import type { Dispatch } from "redux";
 import { z } from "zod";
-
+import axios ,{ AxiosResponse }from "axios";
 // eslint-disable-next-line import/no-cycle
-import { Server } from "../api_client/apiClient";
+import { Server,serverAddress } from "../api_client/apiClient";
 import { photoDetailsApi } from "../api_client/photos/photoDetail";
 import i18n from "../i18n";
 // eslint-disable-next-line import/no-cycle
@@ -13,6 +13,7 @@ import type { AppDispatch } from "../store/store";
 import { getPhotosFlatFromGroupedByDate, getPhotosFlatFromGroupedByUser } from "../util/util";
 import type { DatePhotosGroup, Photo, PigPhoto, SimpleUser } from "./photosActions.types";
 import { DatePhotosGroupSchema, PhotoSchema, PigPhotoSchema, SharedFromMePhotoSchema } from "./photosActions.types";
+
 
 export type UserPhotosGroup = {
   userId: number;
@@ -33,27 +34,96 @@ const fetchPhotosetRejected = (err: string) => ({
   payload: err,
 });
 
+
 export function downloadPhotos(image_hashes: string[]) {
-  return function () {
-    Server.post(
-      `photos/download`,
-      {
-        image_hashes: image_hashes,
-      },
-      {
-        responseType: "blob",
-      }
-    ).then(response => {
-      const downloadUrl = window.URL.createObjectURL(new Blob([response.data], { type: "application/zip" }));
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute("download", "file.zip");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+  let fileUrl;
+
+
+  const startDownloadProcess = () => {
+    showNotification({
+      message: "Download Starting ...",
+      title: i18n.t<string>("toasts.downloadstart"),
+      color: "teal",
     });
+    return Server.post("photos/download", {
+      image_hashes: image_hashes,
+    })
+  };
+  const checkDownloadStatus = (job_id) => Server.get(`photos/download?job_id=${job_id}`)
+      .then((response) =>  response.data.status)
+      .catch((error) =>  console.error("Error checking download status:", error));
+ 
+  const getDownloadFile=(fileUrl: string):Promise<AxiosResponse<Blob>>=> axios.get<Blob>(`${serverAddress}/media/zip/${fileUrl}`,{responseType: "blob",})
+
+  const deleteDownloadFile = (fileUrl) => 
+     Server.delete(`delete/zip/${fileUrl}`)
+      .then((response) => response.data.status )
+      .catch((error) => {
+        console.error("Error Deleting the file :", error);
+      });
+ 
+
+  
+  return function () {
+    startDownloadProcess()
+    
+      .then((response) => {
+        fileUrl = response.data.url;
+        let checkStatusInterval;
+
+        const checkStatus = () => {
+         
+          checkDownloadStatus(response.data.job_id)
+            .then((status) => {
+              if (status === "SUCCESS") {
+                clearInterval(checkStatusInterval); // Stop checking once successful
+                  
+                  getDownloadFile(fileUrl).then(response => {
+                    const downloadUrl = window.URL.createObjectURL(new Blob([response.data], { type: "application/zip" }));
+
+                    const link = document.createElement("a");
+                    link.href = downloadUrl;
+                    link.setAttribute("download", "file.zip");
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    showNotification({
+                      message: "Download Completed",
+                      title: i18n.t<string>("toasts.downloadcomplete"),
+                      color: "teal",
+                    });
+                    deleteDownloadFile(fileUrl)
+                  })
+                .catch((error) => {
+                  console.error("Error downloading:", error);
+                });
+              }
+              else if (status === "FAILURE") {
+                showNotification({
+                  message: "Download Completed",
+                  title: i18n.t<string>("toasts.downloaderror"),
+                  color: "teal",
+                });
+
+                clearInterval(checkStatusInterval); // Stop checking on failure as well
+                throw new Error("Download failed.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error checking download status:", error);
+            });
+        };
+        // Set up an interval to periodically check the download status
+        checkStatusInterval = setInterval(checkStatus, 3000);
+    
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 }
+
 
 export function setPhotosShared(image_hashes: string[], val_shared: boolean, target_user: SimpleUser) {
   return function (dispatch: Dispatch<any>) {
