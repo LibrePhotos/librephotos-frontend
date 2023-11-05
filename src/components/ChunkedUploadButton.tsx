@@ -135,12 +135,7 @@ export function ChunkedUploadButton() {
   }
 
   function onDrop(acceptedFiles: File[]) {
-    let total = 0;
-    acceptedFiles.forEach(file => {
-      const fileSize = file.size;
-      total += fileSize;
-    });
-    setTotalSize(total);
+    setTotalSize(acceptedFiles.reduce((acc, file) => acc + file.size, 0));
     acceptedFiles.forEach(file => {
       calculateMD5(file)
         .then(checkIfAlreadyUploaded)
