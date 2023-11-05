@@ -1,7 +1,7 @@
 import { ActionIcon, Progress } from "@mantine/core";
 import CryptoJS from "crypto-js";
 import MD5 from "crypto-js/md5";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload } from "tabler-icons-react";
 
@@ -158,10 +158,6 @@ export function ChunkedUploadButton() {
     noKeyboard: true,
     onDrop,
   });
-
-  useEffect(() => {}, [totalSize]);
-
-  useEffect(() => {}, [currentSize]);
 
   if (settings?.allow_upload) {
     return (
