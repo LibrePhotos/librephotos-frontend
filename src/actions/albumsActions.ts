@@ -15,7 +15,6 @@ import {
   FetchUserAlbumsListResponseSchema,
   FetchUserAlbumsSharedResponseSchema,
   PlaceAlbumSchema,
-  UserAlbumEditResponseSchema,
   UserAlbumInfoSchema,
   UserAlbumSchema,
 } from "./albumActions.types";
@@ -63,88 +62,6 @@ export function fetchUserAlbum(album_id: number) {
       })
       .catch(err => {
         dispatch({ type: FETCH_USER_ALBUM_REJECTED, payload: err });
-      });
-  };
-}
-
-export function removeFromUserAlbum(album_id: number, title: string, image_hashes: string[]) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "REMOVE_USER_ALBUMS_LIST" });
-    Server.patch(`albums/user/edit/${album_id}/`, {
-      removedPhotos: image_hashes,
-    })
-      .then(response => {
-        const data = UserAlbumEditResponseSchema.parse(response.data);
-        dispatch({
-          type: "REMOVE_USER_ALBUMS_LIST_FULFILLED",
-          payload: data,
-        });
-        showNotification({
-          message: i18n.t("toasts.removefromalbum", {
-            numberOfPhotos: image_hashes.length,
-            title,
-          }),
-          title: i18n.t("toasts.removefromalbumtitle"),
-          color: "teal",
-        });
-
-        dispatch(fetchUserAlbumsList());
-        dispatch(fetchUserAlbum(album_id));
-      })
-      .catch(err => {
-        dispatch({ type: "REMOVE_USER_ALBUMS_LIST_REJECTED", payload: err });
-      });
-  };
-}
-
-export function setAlbumCoverForUserAlbum(album_id, photo_hash) {
-  return function cb(dispatch) {
-    dispatch({ type: "SET_ALBUM_COVER_FOR_USER_ALBUM" });
-    Server.patch(`albums/user/edit/${album_id}/`, {
-      cover_photo: photo_hash,
-    })
-      .then(() => {
-        // To-Do: I should do something with the response
-        dispatch({ type: "SET_ALBUM_COVER_FOR_USER_ALBUM_FULFILLED" });
-        showNotification({
-          message: i18n.t("toasts.setcoverphoto"),
-          title: i18n.t("toasts.setcoverphototitle"),
-          color: "teal",
-        });
-        dispatch(fetchUserAlbumsList());
-      })
-      .catch(err => {
-        dispatch({ type: "SET_ALBUM_COVER_FOR_PERSON_REJECTED", payload: err });
-      });
-  };
-}
-
-export function addToUserAlbum(album_id: number, title: string, image_hashes: string[]) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "EDIT_USER_ALBUMS_LIST" });
-    Server.patch(`albums/user/edit/${album_id}/`, {
-      title,
-      photos: image_hashes,
-    })
-      .then(response => {
-        const data = UserAlbumEditResponseSchema.parse(response.data);
-        dispatch({
-          type: "EDIT_USER_ALBUMS_LIST_FULFILLED",
-          payload: data,
-        });
-        showNotification({
-          message: i18n.t("toasts.addtoalbum", {
-            numberOfPhotos: image_hashes.length,
-            title,
-          }),
-          title: i18n.t("toasts.addtoalbumtitle"),
-          color: "teal",
-        });
-
-        dispatch(fetchUserAlbumsList());
-      })
-      .catch(err => {
-        dispatch({ type: "EDIT_USER_ALBUMS_LIST_REJECTED", payload: err });
       });
   };
 }

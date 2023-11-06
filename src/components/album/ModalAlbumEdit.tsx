@@ -4,10 +4,12 @@ import { DateTime } from "luxon";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { addToUserAlbum } from "../../actions/albumsActions";
-import { useCreateUserAlbumMutation, useFetchUserAlbumsQuery } from "../../api_client/albums/user";
+import {
+  useAddPhotoToUserAlbumMutation,
+  useCreateUserAlbumMutation,
+  useFetchUserAlbumsQuery,
+} from "../../api_client/albums/user";
 import { i18nResolvedLanguage } from "../../i18n";
-import { useAppDispatch } from "../../store/store";
 import { fuzzyMatch } from "../../util/util";
 import { Tile } from "../Tile";
 
@@ -20,11 +22,11 @@ type Props = {
 export function ModalAlbumEdit(props: Props) {
   const [newAlbumTitle, setNewAlbumTitle] = useState("");
   const matches = useMediaQuery("(min-width: 700px)");
-  const dispatch = useAppDispatch();
   const { isOpen, onRequestClose, selectedImages } = props;
   const { t } = useTranslation();
   const { data: albumsUserList = [] } = useFetchUserAlbumsQuery();
   const [createUserAlbum] = useCreateUserAlbumMutation();
+  const [addPhotoToUserAlbum] = useAddPhotoToUserAlbumMutation();
   const [filteredUserAlbumList, setFilteredUserAlbumList] = useState(albumsUserList);
 
   useEffect(() => {
@@ -93,13 +95,11 @@ export function ModalAlbumEdit(props: Props) {
               <UnstyledButton
                 key={`ub-${item.id}`}
                 onClick={() => {
-                  dispatch(
-                    addToUserAlbum(
-                      item.id,
-                      item.title,
-                      selectedImages.map(i => i.id)
-                    )
-                  );
+                  addPhotoToUserAlbum({
+                    id: `${item.id}`,
+                    title: item.title,
+                    photos: selectedImages.map(i => i.id),
+                  });
                   onRequestClose();
                 }}
               >
