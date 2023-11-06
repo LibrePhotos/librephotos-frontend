@@ -68,8 +68,8 @@ export const userAlbumsApi = api
         }),
         transformResponse: (response, meta, query) => {
           showNotification({
-            message: i18n.t<string>("toasts.deletealbum", query),
-            title: i18n.t<string>("toasts.deletealbumtitle"),
+            message: i18n.t("toasts.deletealbum", query),
+            title: i18n.t("toasts.deletealbumtitle"),
             color: "teal",
           });
         },
@@ -82,11 +82,28 @@ export const userAlbumsApi = api
         }),
         transformResponse: (response, meta, query) => {
           showNotification({
-            message: i18n.t<string>("toasts.renamealbum", {
+            message: i18n.t("toasts.renamealbum", {
               oldTitle: query.title,
               newTitle: query.newTitle,
             }),
-            title: i18n.t<string>("toasts.renamealbumtitle"),
+            title: i18n.t("toasts.renamealbumtitle"),
+            color: "teal",
+          });
+        },
+      }),
+      [Endpoints.createUserAlbum]: builder.mutation<void, { title: string; photos: string[] }>({
+        query: ({ title, photos }) => ({
+          url: `albums/user/edit/`,
+          method: "POST",
+          body: { title, photos },
+        }),
+        transformResponse: (response, meta, query) => {
+          showNotification({
+            message: i18n.t("toasts.createnewalbum", {
+              title: query.title,
+              numberOfPhotos: query.photos.length,
+            }),
+            title: i18n.t("toasts.createalbumtitle"),
             color: "teal",
           });
         },
@@ -105,13 +122,18 @@ export const userAlbumsApi = api
       [Endpoints.deleteUserAlbum]: {
         invalidatesTags: ["UserAlbums"],
       },
+      [Endpoints.createUserAlbum]: {
+        invalidatesTags: ["UserAlbums"],
+      },
       // To-Do: Add invalidatesTags for when adding photos to an album / create album
     },
   });
 
 export const {
   useFetchUserAlbumsQuery,
+  useLazyFetchUserAlbumsQuery,
   useLazyFetchUserAlbumQuery,
   useDeleteUserAlbumMutation,
   useRenameUserAlbumMutation,
+  useCreateUserAlbumMutation,
 } = userAlbumsApi;

@@ -402,6 +402,7 @@ function PhotoListViewComponent(props: Props) {
           isOpen={modalAddToAlbumOpen}
           onRequestClose={() => {
             setModalAddToAlbumOpen(false);
+            updateSelectionState({ selectedItems: [], selectMode: false });
           }}
           selectedImages={selectionState.selectedItems}
         />
@@ -421,7 +422,7 @@ function PhotoListViewComponent(props: Props) {
           onRequestClose={() => {
             setModalAlbumShareOpen(false);
           }}
-          albumID={params && params.albumID ? params.albumID : ""}
+          albumID={params?.albumID ?? ""}
         />
       )}
     </div>
