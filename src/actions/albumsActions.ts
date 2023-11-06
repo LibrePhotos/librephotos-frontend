@@ -67,33 +67,6 @@ export function fetchUserAlbum(album_id: number) {
   };
 }
 
-export function createNewUserAlbum(title: string, image_hashes: string[]) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "CREATE_USER_ALBUMS_LIST" });
-    Server.post("albums/user/edit/", { title, photos: image_hashes })
-      .then(response => {
-        const data = UserAlbumEditResponseSchema.parse(response.data);
-        dispatch({
-          type: "CREATE_USER_ALBUMS_LIST_FULFILLED",
-          payload: data,
-        });
-        dispatch(fetchUserAlbumsList());
-        showNotification({
-          message: i18n.t("toasts.createnewalbum", {
-            numberOfPhotos: image_hashes.length,
-            title,
-          }),
-          title: i18n.t("toasts.createalbumtitle"),
-          color: "teal",
-          // status: "success",
-        });
-      })
-      .catch(err => {
-        dispatch({ type: "CREATE_USER_ALBUMS_LIST_REJECTED", payload: err });
-      });
-  };
-}
-
 export function removeFromUserAlbum(album_id: number, title: string, image_hashes: string[]) {
   return function cb(dispatch: Dispatch<any>) {
     dispatch({ type: "REMOVE_USER_ALBUMS_LIST" });
