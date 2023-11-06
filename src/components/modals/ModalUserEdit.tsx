@@ -70,7 +70,7 @@ export function ModalUserEdit(props: Props) {
     let error = null;
     if (!username) {
       error = t("modaluseredit.errorusernamecannotbeblank");
-    } else if (userList && userList.results) {
+    } else if (userList?.results) {
       userList.results.every(user => {
         if (user.username.toLowerCase() === username.toLowerCase() && user.id !== userToEdit.id) {
           error = t("modaluseredit.errorusernameexists");
@@ -118,7 +118,7 @@ export function ModalUserEdit(props: Props) {
   });
 
   useEffect(() => {
-    if (auth.access && auth.access.is_admin) {
+    if (auth.access?.is_admin) {
       fetchDirectoryTree("");
     }
   }, [auth.access, dispatch]);
