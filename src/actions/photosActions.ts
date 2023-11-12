@@ -2,9 +2,9 @@ import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import type { Dispatch } from "redux";
 import { z } from "zod";
-
+import axios from "axios";
 // eslint-disable-next-line import/no-cycle
-import { Server } from "../api_client/apiClient";
+import { Server,serverAddress } from "../api_client/apiClient";
 import { photoDetailsApi } from "../api_client/photos/photoDetail";
 import i18n from "../i18n";
 // eslint-disable-next-line import/no-cycle
@@ -13,6 +13,7 @@ import type { AppDispatch } from "../store/store";
 import { getPhotosFlatFromGroupedByDate, getPhotosFlatFromGroupedByUser } from "../util/util";
 import type { DatePhotosGroup, Photo, PigPhoto, SimpleUser } from "./photosActions.types";
 import { DatePhotosGroupSchema, PhotoSchema, PigPhotoSchema, SharedFromMePhotoSchema } from "./photosActions.types";
+
 
 export type UserPhotosGroup = {
   userId: number;
@@ -33,50 +34,119 @@ const fetchPhotosetRejected = (err: string) => ({
   payload: err,
 });
 
+
 export function downloadPhotos(image_hashes: string[]) {
-  return function cb() {
-    Server.post(
-      `photos/download`,
-      {
-        image_hashes,
-      },
-      {
-        responseType: "blob",
-      }
-    ).then(response => {
-      const downloadUrl = window.URL.createObjectURL(new Blob([response.data], { type: "application/zip" }));
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute("download", "file.zip");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+  let fileUrl;
+
+
+  const startDownloadProcess = () => {
+    showNotification({
+      message: "Download Starting ...",
+      title: i18n.t<string>("toasts.downloadstart"),
+      color: "teal",
     });
+    return Server.post("photos/download", {
+      image_hashes: image_hashes,
+    })
+  };
+  const checkDownloadStatus = (job_id) => Server.get(`photos/download?job_id=${job_id}`)
+      .then((response) =>  response.data.status)
+      .catch((error) =>  console.error("Error checking download status:", error));
+ 
+  const getDownloadFile=(fileUrl: string)=> axios.get<Blob>(`${serverAddress}/media/zip/${fileUrl}`,{responseType: "blob",})
+
+  const deleteDownloadFile = (fileUrl) => 
+     Server.delete(`delete/zip/${fileUrl}`)
+      .then((response) => response.data.status )
+      .catch((error) => {
+        console.error("Error Deleting the file :", error);
+      });
+ 
+
+  
+  return function () {
+    startDownloadProcess()
+    
+      .then((response) => {
+        fileUrl = response.data.url;
+        let checkStatusInterval;
+
+        const checkStatus = () => {
+         
+          checkDownloadStatus(response.data.job_id)
+            .then((status) => {
+              if (status === "SUCCESS") {
+                clearInterval(checkStatusInterval); // Stop checking once successful
+                  
+                  getDownloadFile(fileUrl).then(response => {
+                    const downloadUrl = window.URL.createObjectURL(new Blob([response.data], { type: "application/zip" }));
+
+                    const link = document.createElement("a");
+                    link.href = downloadUrl;
+                    link.setAttribute("download", "file.zip");
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    showNotification({
+                      message: "Download Completed",
+                      title: i18n.t<string>("toasts.downloadcomplete"),
+                      color: "teal",
+                    });
+                    deleteDownloadFile(fileUrl)
+                  })
+                .catch((error) => {
+                  console.error("Error downloading:", error);
+                });
+              }
+              else if (status === "FAILURE") {
+                showNotification({
+                  message: "Download failed",
+                  title: i18n.t<string>("toasts.downloaderror"),
+                  color: "red",
+                });
+
+                clearInterval(checkStatusInterval); // Stop checking on failure as well
+                throw new Error("Download failed.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error checking download status:", error);
+            });
+        };
+        // Set up an interval to periodically check the download status
+        checkStatusInterval = setInterval(checkStatus, 3000);
+    
+      })
+
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 }
 
+
 export function setPhotosShared(image_hashes: string[], val_shared: boolean, target_user: SimpleUser) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: "SET_PHOTOS_SHARED" });
     Server.post(`photosedit/share/`, {
-      image_hashes,
+      image_hashes: image_hashes,
       shared: val_shared,
       target_user_id: target_user.id,
     })
       .then(() => {
-        let notificationMessage = i18n.t("toasts.unsharephoto", {
+        let notificationMessage = i18n.t<string>("toasts.unsharephoto", {
           username: target_user.username,
           numberOfPhotos: image_hashes.length,
         });
         if (val_shared) {
-          notificationMessage = i18n.t("toasts.sharephoto", {
+          notificationMessage = i18n.t<string>("toasts.sharephoto", {
             username: target_user.username,
             numberOfPhotos: image_hashes.length,
           });
         }
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.sharephototitle"),
+          title: i18n.t<string>("toasts.sharephototitle"),
           color: "teal",
         });
 
@@ -98,7 +168,6 @@ const RecentlyAddedResponseDataSchema = z.object({
 export const FETCH_RECENTLY_ADDED_PHOTOS = "FETCH_RECENTLY_ADDED_PHOTOS";
 export const FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED = "FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED";
 export const FETCH_RECENTLY_ADDED_PHOTOS_REJECTED = "FETCH_RECENTLY_ADDED_PHOTOS_REJECTED";
-
 export function fetchRecentlyAddedPhotos(dispatch: AppDispatch) {
   dispatch({ type: FETCH_RECENTLY_ADDED_PHOTOS });
   Server.get("photos/recentlyadded/")
@@ -108,7 +177,7 @@ export function fetchRecentlyAddedPhotos(dispatch: AppDispatch) {
       dispatch({
         type: FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED,
         payload: {
-          photosFlat,
+          photosFlat: photosFlat,
           date: response.data.date,
         },
       });
@@ -126,7 +195,7 @@ const PigPhotoListResponseSchema = z.object({
 });
 
 export function fetchPhotosSharedToMe() {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: FETCH_PHOTOSET });
     Server.get("photos/shared/tome/")
       .then(response => {
@@ -155,7 +224,7 @@ const PhotosSharedFromMeResponseSchema = z.object({
 });
 
 export function fetchPhotosSharedFromMe() {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: FETCH_PHOTOSET });
     Server.get("photos/shared/fromme/")
       .then(response => {
@@ -191,27 +260,34 @@ const PhotosUpdatedResponseSchema = z.object({
 export const SET_PHOTOS_PUBLIC_FULFILLED = "SET_PHOTOS_PUBLIC_FULFILLED";
 
 export function setPhotosPublic(image_hashes: string[], val_public: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: "SET_PHOTOS_PUBLIC" });
-    Server.post(`photosedit/makepublic/`, { image_hashes, val_public })
+    Server.post(`photosedit/makepublic/`, {
+      image_hashes: image_hashes,
+      val_public: val_public,
+    })
       .then(response => {
         const data = PhotosUpdatedResponseSchema.parse(response.data);
         const updatedPhotos: Photo[] = data.updated;
         dispatch({
           type: SET_PHOTOS_PUBLIC_FULFILLED,
-          payload: { image_hashes, val_public, updatedPhotos },
+          payload: {
+            image_hashes: image_hashes,
+            val_public: val_public,
+            updatedPhotos: updatedPhotos,
+          },
         });
-        let notificationMessage = i18n.t("toasts.removepublicphoto", {
+        let notificationMessage = i18n.t<string>("toasts.removepublicphoto", {
           numberOfPhotos: image_hashes.length,
         });
         if (val_public) {
-          notificationMessage = i18n.t("toasts.addpublicphoto", {
+          notificationMessage = i18n.t<string>("toasts.addpublicphoto", {
             numberOfPhotos: image_hashes.length,
           });
         }
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.setpublicphotostitle"),
+          title: i18n.t<string>("toasts.setpublicphotostitle"),
           color: "teal",
         });
 
@@ -231,21 +307,28 @@ export const SET_PHOTOS_FAVORITE_FULFILLED = "SET_PHOTOS_FAVORITE_FULFILLED";
 export const SET_PHOTOS_FAVORITE_REJECTED = "SET_PHOTOS_FAVORITE_REJECTED";
 
 export function setPhotosFavorite(image_hashes: string[], favorite: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: SET_PHOTOS_FAVORITE });
-    Server.post(`photosedit/favorite/`, { image_hashes, favorite })
+    Server.post(`photosedit/favorite/`, {
+      image_hashes: image_hashes,
+      favorite: favorite,
+    })
       .then(response => {
         const data = PhotosUpdatedResponseSchema.parse(response.data);
         const updatedPhotos: Photo[] = data.updated;
         dispatch({
           type: SET_PHOTOS_FAVORITE_FULFILLED,
-          payload: { image_hashes, favorite, updatedPhotos },
+          payload: {
+            image_hashes: image_hashes,
+            favorite: favorite,
+            updatedPhotos: updatedPhotos,
+          },
         });
-        let notificationMessage = i18n.t("toasts.unfavoritephoto", {
+        let notificationMessage = i18n.t<string>("toasts.unfavoritephoto", {
           numberOfPhotos: image_hashes.length,
         });
         if (favorite) {
-          notificationMessage = i18n.t("toasts.favoritephoto", {
+          notificationMessage = i18n.t<string>("toasts.favoritephoto", {
             numberOfPhotos: image_hashes.length,
           });
         }
@@ -254,7 +337,7 @@ export function setPhotosFavorite(image_hashes: string[], favorite: boolean) {
         dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hashes[0])).refetch();
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.setfavoritestitle"),
+          title: i18n.t<string>("toasts.setfavoritestitle"),
           color: "teal",
         });
       })
@@ -269,24 +352,29 @@ export const PHOTOS_FINAL_DELETED_FULFILLED = "PHOTOS_FINAL_DELETED_FULFILLED";
 export const PHOTOS_FINAL_DELETED_REJECTED = "PHOTOS_FINAL_DELETED_REJECTED";
 
 export function finalPhotosDeleted(image_hashes: string[]) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: PHOTOS_FINAL_DELETED });
     Server.delete(`photosedit/delete`, {
-      data: { image_hashes },
+      data: {
+        image_hashes: image_hashes,
+      },
     })
       .then(response => {
         const data = PhotosUpdatedResponseSchema.parse(response.data);
         const updatedPhotos: Photo[] = data.updated;
         dispatch({
           type: PHOTOS_FINAL_DELETED_FULFILLED,
-          payload: { image_hashes, updatedPhotos },
+          payload: {
+            image_hashes: image_hashes,
+            updatedPhotos: updatedPhotos,
+          },
         });
-        const notificationMessage = i18n.t("toasts.finaldeletephoto", {
+        const notificationMessage = i18n.t<string>("toasts.finaldeletephoto", {
           numberOfPhotos: image_hashes.length,
         });
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.finaldeletephototitle"),
+          title: i18n.t<string>("toasts.finaldeletephototitle"),
           color: "teal",
         });
       })
@@ -297,20 +385,23 @@ export function finalPhotosDeleted(image_hashes: string[]) {
 }
 
 export function deleteDuplicateImage(image_hash: string, path: string) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: PHOTOS_FINAL_DELETED });
     Server.delete(`/photosedit/duplicate/delete`, {
-      data: { image_hash, path },
+      data: {
+        image_hash: image_hash,
+        path: path,
+      },
     })
       .then(() => {
         // To-Do: Change locale for this
-        const notificationMessage = i18n.t("toasts.finaldeletephoto", {
+        const notificationMessage = i18n.t<string>("toasts.finaldeletephoto", {
           numberOfPhotos: 1,
         });
         // To-Do: Change locale for this
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.finaldeletephototitle"),
+          title: i18n.t<string>("toasts.finaldeletephototitle"),
           color: "teal",
         });
       })
@@ -325,27 +416,34 @@ export const SET_PHOTOS_DELETED_FULFILLED = "SET_PHOTOS_DELETED_FULFILLED";
 export const SET_PHOTOS_DELETED_REJECTED = "SET_PHOTOS_DELETED_REJECTED";
 
 export function setPhotosDeleted(image_hashes: string[], deleted: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: SET_PHOTOS_DELETED });
-    Server.post(`photosedit/setdeleted/`, { image_hashes, deleted })
+    Server.post(`photosedit/setdeleted/`, {
+      image_hashes: image_hashes,
+      deleted: deleted,
+    })
       .then(response => {
         const data = PhotosUpdatedResponseSchema.parse(response.data);
         const updatedPhotos: Photo[] = data.updated;
         dispatch({
           type: SET_PHOTOS_DELETED_FULFILLED,
-          payload: { image_hashes, deleted, updatedPhotos },
+          payload: {
+            image_hashes: image_hashes,
+            deleted: deleted,
+            updatedPhotos: updatedPhotos,
+          },
         });
-        let notificationMessage = i18n.t("toasts.recoverphoto", {
+        let notificationMessage = i18n.t<string>("toasts.recoverphoto", {
           numberOfPhotos: image_hashes.length,
         });
         if (deleted) {
-          notificationMessage = i18n.t("toasts.deletephoto", {
+          notificationMessage = i18n.t<string>("toasts.deletephoto", {
             numberOfPhotos: image_hashes.length,
           });
         }
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.setdeletetitle"),
+          title: i18n.t<string>("toasts.setdeletetitle"),
           color: "teal",
         });
       })
@@ -358,27 +456,34 @@ export function setPhotosDeleted(image_hashes: string[], deleted: boolean) {
 export const SET_PHOTOS_HIDDEN_FULFILLED = "SET_PHOTOS_HIDDEN_FULFILLED";
 
 export function setPhotosHidden(image_hashes: string[], hidden: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: "SET_PHOTOS_HIDDEN" });
-    Server.post(`photosedit/hide/`, { image_hashes, hidden })
+    Server.post(`photosedit/hide/`, {
+      image_hashes: image_hashes,
+      hidden: hidden,
+    })
       .then(response => {
         const data = PhotosUpdatedResponseSchema.parse(response.data);
         const updatedPhotos: Photo[] = data.updated;
         dispatch({
           type: SET_PHOTOS_HIDDEN_FULFILLED,
-          payload: { image_hashes, hidden, updatedPhotos },
+          payload: {
+            image_hashes: image_hashes,
+            hidden: hidden,
+            updatedPhotos: updatedPhotos,
+          },
         });
-        let notificationMessage = i18n.t("toasts.unhidephoto", {
+        let notificationMessage = i18n.t<string>("toasts.unhidephoto", {
           numberOfPhotos: image_hashes.length,
         });
         if (hidden) {
-          notificationMessage = i18n.t("toasts.hidephoto", {
+          notificationMessage = i18n.t<string>("toasts.hidephoto", {
             numberOfPhotos: image_hashes.length,
           });
         }
         showNotification({
           message: notificationMessage,
-          title: i18n.t("toasts.sethidetitle"),
+          title: i18n.t<string>("toasts.sethidetitle"),
           color: "teal",
         });
         if (image_hashes.length === 1) {
@@ -392,46 +497,87 @@ export function setPhotosHidden(image_hashes: string[], hidden: boolean) {
   };
 }
 
-function triggerScan(dispatch: Dispatch<any>, url: string, i18nPrefix: string): void {
-  dispatch({ type: "SCAN_PHOTOS" });
-  dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
-
-  Server.get(url)
-    .then(response => {
-      const payload = JobResponseSchema.parse(response.data);
-      showNotification({
-        message: i18n.t(`toasts.${i18nPrefix}`),
-        title: i18n.t(`toasts.${i18nPrefix}title`),
-        color: "teal",
-      });
-      dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload });
-    })
-    .catch(payload => {
-      dispatch({ type: "SCAN_PHOTOS_REJECTED", payload });
-    });
-}
-
 export function scanPhotos() {
-  return function cb(dispatch: Dispatch<any>) {
-    triggerScan(dispatch, "scanphotos/", "scanphotos");
+  return function (dispatch: Dispatch<any>) {
+    dispatch({ type: "SCAN_PHOTOS" });
+    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
+
+    Server.get(`scanphotos/`)
+      .then(response => {
+        const jobResponse = JobResponseSchema.parse(response.data);
+        showNotification({
+          message: i18n.t<string>("toasts.scanphotos"),
+          title: i18n.t<string>("toasts.scanphotostitle"),
+          color: "teal",
+        });
+        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
+      })
+      .catch(err => {
+        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
+      });
   };
 }
 
 export function scanUploadedPhotos() {
-  return function cb(dispatch: Dispatch<any>) {
-    triggerScan(dispatch, "scanuploadedphotos/", "scanuploadedphotos");
+  return function (dispatch: Dispatch<any>) {
+    dispatch({ type: "SCAN_PHOTOS" });
+    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
+
+    Server.get(`scanuploadedphotos/`)
+      .then(response => {
+        const jobResponse = JobResponseSchema.parse(response.data);
+        showNotification({
+          message: i18n.t<string>("toasts.scanuploadedphotos"),
+          title: i18n.t<string>("toasts.scanuploadedphotostitle"),
+          color: "teal",
+        });
+        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
+      })
+      .catch(err => {
+        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
+      });
   };
 }
 
 export function scanAllPhotos() {
-  return function cb(dispatch: Dispatch<any>) {
-    triggerScan(dispatch, "fullscanphotos/", "fullscanphotos");
+  return function (dispatch: Dispatch<any>) {
+    dispatch({ type: "SCAN_PHOTOS" });
+    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
+
+    Server.get(`fullscanphotos/`)
+      .then(response => {
+        const jobResponse = JobResponseSchema.parse(response.data);
+        showNotification({
+          message: i18n.t<string>("toasts.fullscanphotos"),
+          title: i18n.t<string>("toasts.fullscanphotostitle"),
+          color: "teal",
+        });
+        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
+      })
+      .catch(err => {
+        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
+      });
   };
 }
 
 export function scanNextcloudPhotos() {
-  return function cb(dispatch: Dispatch<any>) {
-    triggerScan(dispatch, "nextcloud/scanphotos/", "scannextcloudphotos");
+  return function (dispatch: Dispatch<any>) {
+    dispatch({ type: "SCAN_PHOTOS" });
+    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
+
+    Server.get(`nextcloud/scanphotos/`)
+      .then(response => {
+        const jobResponse = JobResponseSchema.parse(response.data);
+        showNotification({
+          message: i18n.t<string>("toasts.scannextcloudphotos"),
+          title: i18n.t<string>("toasts.scannextcloudphotostitle"),
+          color: "teal",
+        });
+        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
+      })
+      .catch(err => {
+        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
+      });
   };
 }
 
@@ -448,7 +594,7 @@ export function fetchHiddenPhotos(dispatch: AppDispatch) {
       dispatch({
         type: FETCH_PHOTOSET_FULFILLED,
         payload: {
-          photosGroupedByDate,
+          photosGroupedByDate: photosGroupedByDate,
           photosFlat: getPhotosFlatFromGroupedByDate(photosGroupedByDate),
           photosetType: PhotosetType.HIDDEN,
         },
@@ -478,10 +624,15 @@ export function fetchNoTimestampPhotoPaginated(dispatch: AppDispatch, page: numb
       const photosCount = data.count;
       dispatch({
         type: FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED,
-        payload: { photosFlat, fetchedPage: page, photosCount },
+        payload: {
+          photosFlat: photosFlat,
+          fetchedPage: page,
+          photosCount: photosCount,
+        },
       });
     })
     .catch(err => {
+      console.error(err);
       dispatch({
         type: FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED,
         payload: err,
@@ -490,55 +641,58 @@ export function fetchNoTimestampPhotoPaginated(dispatch: AppDispatch, page: numb
 }
 
 export function generatePhotoIm2txtCaption(image_hash: string) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: "GENERATE_PHOTO_CAPTION" });
-    Server.post("photosedit/generateim2txt", { image_hash })
+    Server.post("photosedit/generateim2txt", { image_hash: image_hash })
       .then(() => {
         dispatch({ type: "GENERATE_PHOTO_CAPTION_FULFILLED" });
         // @ts-ignore
         dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
       })
       .catch(error => {
-        dispatch({ type: "GENERATE_PHOTO_CAPTION_REJECTED", payload: error });
+        dispatch({ type: "GENERATE_PHOTO_CAPTION_REJECTED" });
+        console.error(error);
       });
   };
 }
 
 export function savePhotoCaption(image_hash: string, caption?: string | undefined) {
-  return function cb(dispatch: Dispatch<any>) {
-    Server.post("photosedit/savecaption", { image_hash, caption })
+  return function (dispatch: Dispatch<any>) {
+    Server.post("photosedit/savecaption", { image_hash: image_hash, caption: caption })
       .then(() => {
         dispatch({ type: "SAVE_PHOTO_CAPTION_FULFILLED" });
         // @ts-ignore
         dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
         showNotification({
-          message: i18n.t("toasts.savecaptions"),
-          title: i18n.t("toasts.captionupdate"),
+          message: i18n.t<string>("toasts.savecaptions"),
+          title: i18n.t<string>("toasts.captionupdate"),
           color: "teal",
         });
       })
       .catch(error => {
-        dispatch({ type: "SAVE_PHOTO_CAPTION_REJECTED", payload: error });
+        dispatch({ type: "SAVE_PHOTO_CAPTION_REJECTED" });
+        console.error(error);
       });
   };
 }
 
 export function editPhoto(image_hash: string, photo_details: any) {
-  return function cb(dispatch: Dispatch<any>) {
+  return function (dispatch: Dispatch<any>) {
     dispatch({ type: "EDIT_PHOTO" });
     Server.patch(`photos/edit/${image_hash}/`, photo_details)
       .then(() => {
         dispatch({ type: "EDIT_PHOTO_FULFILLED" });
         showNotification({
-          message: i18n.t("toasts.editphoto"),
-          title: i18n.t("toasts.editphototitle"),
+          message: i18n.t<string>("toasts.editphoto"),
+          title: i18n.t<string>("toasts.editphototitle"),
           color: "teal",
         });
         // @ts-ignore
         dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
       })
       .catch(error => {
-        dispatch({ type: "EDIT_PHOTO_REJECTED", payload: error });
+        dispatch({ type: "EDIT_PHOTO_REJECTED" });
+        console.error(error);
       });
   };
 }

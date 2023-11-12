@@ -1,6 +1,6 @@
 import type { ColorScheme } from "@mantine/core";
 import { AppShell, ColorSchemeProvider, MantineProvider } from "@mantine/core";
-import { Notifications } from "@mantine/notifications";
+import { NotificationsProvider } from "@mantine/notifications";
 import React, { useCallback, useMemo, useState } from "react";
 import { Cookies, CookiesProvider } from "react-cookie";
 import { Route, Routes, useLocation } from "react-router-dom";
@@ -93,7 +93,7 @@ export function App() {
     <CookiesProvider>
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
         <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
-          <Notifications autoClose={3000} zIndex={1001} />
+          <NotificationsProvider autoClose={3000} zIndex={1001} />
           <AppShell
             fixed
             padding={0}
