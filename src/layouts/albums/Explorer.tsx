@@ -10,10 +10,25 @@ import { useFetchThingsAlbumsQuery } from "../../api_client/albums/things";
 import { Tile } from "../../components/Tile";
 import { HeaderComponent } from "./HeaderComponent";
 
+function showMoreButton(navigate: Function, link: string) {
+  return (
+    <Button variant="light" color="gray" onClick={() => navigate(link)}>
+      Show More
+    </Button>
+  );
+}
+
+function albumTileLink(id: number, image_hash: string, isVideo: boolean, link: string) {
+  return (
+    <Link key={id} to={link}>
+      <Tile video={isVideo} height={190} width={190} image_hash={image_hash} />
+    </Link>
+  );
+}
+
 export function Explorer() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const entrySquareSize = 200;
   const { data: peopleAlbums, isFetching: isFetchingPeopleAlbums } = useFetchPeopleAlbumsQuery();
   const { data: thingsAlbums, isFetching: isFetchingThingsAlbums } = useFetchThingsAlbumsQuery();
   const { data: placesAlbums, isFetching: isFetchingPlacesAlbums } = useFetchPlacesAlbumsQuery();
@@ -31,27 +46,10 @@ export function Explorer() {
         <>
           <Title order={3}>{t("people")}</Title>
           <Group>
-            {peopleAlbums?.slice(0, 19).map(album => (
-              <Link key={album.key} to={`/person/${album.key}/`}>
-                <Tile
-                  video={album.video === true}
-                  height={entrySquareSize - 10}
-                  width={entrySquareSize - 10}
-                  image_hash={album.face_photo_url}
-                />
-              </Link>
-            ))}
-            <Box color="gray">
-              <Button
-                variant="light"
-                color="gray"
-                onClick={() => {
-                  navigate(`/people/`);
-                }}
-              >
-                Show More
-              </Button>
-            </Box>
+            {peopleAlbums
+              ?.slice(0, 19)
+              .map(album => albumTileLink(+album.key, album.face_photo_url, !!album.video, `/person/${album.key}/`))}
+            <Box color="gray">{showMoreButton(navigate, "/people/")}</Box>
           </Group>
         </>
       )}
@@ -60,27 +58,17 @@ export function Explorer() {
         <>
           <Title order={3}>{t("things")}</Title>
           <Group>
-            {thingsAlbums?.slice(0, 19).map(album => (
-              <Link key={album.id} to={`/thing/${album.id}/`}>
-                <Tile
-                  video={album.cover_photos[0].video === true}
-                  height={entrySquareSize - 10}
-                  width={entrySquareSize - 10}
-                  image_hash={album.cover_photos[0].image_hash}
-                />
-              </Link>
-            ))}
-            <Box color="gray">
-              <Button
-                variant="light"
-                color="gray"
-                onClick={() => {
-                  navigate(`/things/`);
-                }}
-              >
-                Show More
-              </Button>
-            </Box>
+            {thingsAlbums
+              ?.slice(0, 19)
+              .map(album =>
+                albumTileLink(
+                  album.id,
+                  album.cover_photos[0].image_hash,
+                  !!album.cover_photos[0].video,
+                  `/thing/${album.id}/`
+                )
+              )}
+            <Box color="gray">{showMoreButton(navigate, "/things/")}</Box>
           </Group>
         </>
       )}
@@ -89,27 +77,17 @@ export function Explorer() {
         <>
           <Title order={3}>{t("places")}</Title>
           <Group>
-            {placesAlbums?.slice(0, 19).map(album => (
-              <Link key={album.id} to={`/place/${album.id}/`}>
-                <Tile
-                  video={album.cover_photos[0].video === true}
-                  height={entrySquareSize - 10}
-                  width={entrySquareSize - 10}
-                  image_hash={album.cover_photos[0].image_hash}
-                />
-              </Link>
-            ))}
-            <Box color="gray">
-              <Button
-                variant="light"
-                color="gray"
-                onClick={() => {
-                  navigate(`/places/`);
-                }}
-              >
-                Show More
-              </Button>
-            </Box>
+            {placesAlbums
+              ?.slice(0, 19)
+              .map(album =>
+                albumTileLink(
+                  album.id,
+                  album.cover_photos[0].image_hash,
+                  !!album.cover_photos[0].video,
+                  `/place/${album.id}/`
+                )
+              )}
+            <Box color="gray">{showMoreButton(navigate, "/places/")}</Box>
           </Group>
         </>
       )}
