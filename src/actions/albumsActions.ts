@@ -5,35 +5,13 @@ import { Server } from "../api_client/apiClient";
 import { PhotosetType } from "../reducers/photosReducer";
 import type { AppDispatch } from "../store/store";
 import { addTempElementsToGroups, getPhotosFlatFromGroupedByDate } from "../util/util";
-import type { AutoAlbumInfo, UserAlbumInfo } from "./albumActions.types";
-import {
-  FetchAutoAlbumsListResponseSchema,
-  FetchDateAlbumsListResponseSchema,
-  FetchUserAlbumsSharedResponseSchema,
-} from "./albumActions.types";
+import type { UserAlbumInfo } from "./albumActions.types";
+import { FetchDateAlbumsListResponseSchema, FetchUserAlbumsSharedResponseSchema } from "./albumActions.types";
 import type { IncompleteDatePhotosGroup } from "./photosActions.types";
 import { IncompleteDatePhotosGroupSchema } from "./photosActions.types";
 
 export const FETCH_USER_ALBUM_FULFILLED = "FETCH_USER_ALBUM_FULFILLED";
 export const FETCH_USER_ALBUM_REJECTED = "FETCH_USER_ALBUM_REJECTED";
-
-export function fetchAutoAlbumsList() {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "FETCH_AUTO_ALBUMS_LIST" });
-    Server.get("albums/auto/list/")
-      .then(response => {
-        const data = FetchAutoAlbumsListResponseSchema.parse(response.data);
-        const autoAlbumsList: AutoAlbumInfo[] = data.results;
-        dispatch({
-          type: "FETCH_AUTO_ALBUMS_LIST_FULFILLED",
-          payload: autoAlbumsList,
-        });
-      })
-      .catch(err => {
-        dispatch({ type: "FETCH_AUTO_ALBUMS_LIST_REJECTED", payload: err });
-      });
-  };
-}
 
 type AlbumDateListOptions = {
   photosetType: PhotosetType;
