@@ -1,9 +1,7 @@
-import { showNotification } from "@mantine/notifications";
 import _ from "lodash";
 import type { Dispatch } from "react";
 
 import { Server } from "../api_client/apiClient";
-import i18n from "../i18n";
 import { PhotosetType } from "../reducers/photosReducer";
 import type { AppDispatch } from "../store/store";
 import { addTempElementsToGroups, getPhotosFlatFromGroupedByDate } from "../util/util";
@@ -11,29 +9,10 @@ import type { AutoAlbumInfo, UserAlbumInfo } from "./albumActions.types";
 import {
   FetchAutoAlbumsListResponseSchema,
   FetchDateAlbumsListResponseSchema,
-  FetchUserAlbumsListResponseSchema,
   FetchUserAlbumsSharedResponseSchema,
 } from "./albumActions.types";
 import type { IncompleteDatePhotosGroup } from "./photosActions.types";
 import { IncompleteDatePhotosGroupSchema } from "./photosActions.types";
-
-export function fetchUserAlbumsList() {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "FETCH_USER_ALBUMS_LIST" });
-    Server.get("albums/user/list/")
-      .then(response => {
-        const data = FetchUserAlbumsListResponseSchema.parse(response.data);
-        const userAlbumInfoList: UserAlbumInfo[] = data.results;
-        dispatch({
-          type: "FETCH_USER_ALBUMS_LIST_FULFILLED",
-          payload: userAlbumInfoList,
-        });
-      })
-      .catch(err => {
-        dispatch({ type: "FETCH_USER_ALBUMS_LIST_REJECTED", payload: err });
-      });
-  };
-}
 
 export const FETCH_USER_ALBUM_FULFILLED = "FETCH_USER_ALBUM_FULFILLED";
 export const FETCH_USER_ALBUM_REJECTED = "FETCH_USER_ALBUM_REJECTED";
@@ -138,25 +117,6 @@ export function fetchAlbumDate(dispatch: AppDispatch, options: AlbumDateOption) 
     .catch(err => {
       dispatch({ type: "FETCH_DATE_ALBUMS_RETRIEVE_REJECTED", payload: err });
     });
-}
-
-export function deleteAllAutoAlbum() {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "DELETE_All_AUTO_ALBUM" });
-    Server.post(`/albums/auto/delete_all/`)
-      .then(() => {
-        dispatch({ type: "DELETE_ALL_AUTO_ALBUM_FULFILLED" });
-        dispatch(fetchAutoAlbumsList());
-        showNotification({
-          message: i18n.t("toasts.deleteallautoalbums"),
-          title: i18n.t("toasts.deleteallautoalbumstitle"),
-          color: "teal",
-        });
-      })
-      .catch(err => {
-        dispatch({ type: "DELETE_ALL_AUTO_ALBUM_REJECTED", payload: err });
-      });
-  };
 }
 
 export function fetchUserAlbumsSharedToMe() {
