@@ -30,7 +30,9 @@ export function ModalPersonEdit(props: Props) {
   let filteredPeopleList = people;
 
   if (newPersonName.length > 0) {
-    filteredPeopleList = people.filter(el => fuzzyMatch(newPersonName, el.text));
+    filteredPeopleList = people
+      .filter(el => fuzzyMatch(newPersonName, el.text))
+      .sort((a, b) => b.face_count - a.face_count);
   }
 
   const selectedImageIDs = selectedFaces.map(face => face.face_url);
@@ -114,26 +116,29 @@ export function ModalPersonEdit(props: Props) {
         >
           {filteredPeopleList.length > 0 &&
             filteredPeopleList.map(item => (
-              <Group key={item.key}>
+              <Group
+                key={item.key}
+                onClick={() => {
+                  dispatch(
+                    api.endpoints.setFacesPersonLabel.initiate({ faceIds: selectedFaceIDs, personName: item.text })
+                  );
+                  showNotification({
+                    message: i18n.t<string>("toasts.addfacestoperson", {
+                      numberOfFaces: selectedFaceIDs.length,
+                      personName: item.text,
+                    }),
+                    title: i18n.t<string>("toasts.addfacestopersontitle"),
+                    color: "teal",
+                  });
+                  onRequestClose();
+                }}
+                style={{cursor: 'pointer'}}
+              >
                 <Avatar radius="xl" size={60} src={serverAddress + item.face_url} />
                 <div>
                   <Title
                     style={{ width: "250px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}
                     order={4}
-                    onClick={() => {
-                      dispatch(
-                        api.endpoints.setFacesPersonLabel.initiate({ faceIds: selectedFaceIDs, personName: item.text })
-                      );
-                      showNotification({
-                        message: i18n.t<string>("toasts.addfacestoperson", {
-                          numberOfFaces: selectedFaceIDs.length,
-                          personName: item.text,
-                        }),
-                        title: i18n.t<string>("toasts.addfacestopersontitle"),
-                        color: "teal",
-                      });
-                      onRequestClose();
-                    }}
                   >
                     {item.text}
                   </Title>
