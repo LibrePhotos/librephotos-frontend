@@ -92,7 +92,7 @@ export const peopleAlbumsApi = api
       }),
     }),
   })
-  .enhanceEndpoints<"PeopleAlbums" | "Photo">({
+  .enhanceEndpoints<"PeopleAlbums">({
     addTagTypes: ["PeopleAlbums"],
     endpoints: {
       [Endpoints.fetchPeopleAlbums]: {
