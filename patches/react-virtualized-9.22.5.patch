@@ -1,0 +1,8 @@
+--- a/node_modules/react-virtualized/dist/es/WindowScroller/utils/onScroll.js	2024-01-24 20:35:28.449287595 +0000
++++ b/node_modules/react-virtualized/dist/es/WindowScroller/utils/onScroll.js	2024-01-24 20:36:40.231134876 +0000
+@@ -71,4 +71,3 @@
+     }
+   }
+ }
+-import { bpfrpt_proptype_WindowScroller } from "../WindowScroller.js";
+\ No newline at end of file
