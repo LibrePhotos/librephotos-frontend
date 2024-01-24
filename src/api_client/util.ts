@@ -88,6 +88,10 @@ export const util = api
       [Endpoints.fetchWordCloud]: builder.query<WordCloudResponse, void>({
         query: () => "wordcloud/",
         async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          /**
+           * This is a workaround. For the time being we'll use redux store instead of cache.
+           * The use of cached data is not working properly with Word Cloud component. This could be due to the timing.
+           */
           dispatch({ type: "FETCH_WORDCLOUD" });
           try {
             const { data } = await queryFulfilled;
