@@ -2,6 +2,7 @@
   "name": "librephotos-frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "lint:warn": "eslint --cache \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:error": "eslint --cache --quiet \"src/**/*.{js,jsx,ts,tsx}\"",
@@ -17,11 +18,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "yarn prettier --config ./prettier.config.js --write",
-      "yarn eslint --cache --quiet -c ./.eslintrc.js"
+      "yarn prettier --config ./prettier.config.cjs --write",
+      "yarn eslint --cache --quiet -c ./.eslintrc.cjs"
     ],
     "*.{json,css,scss,md}": [
-      "yarn prettier --config ./prettier.config.js  --write"
+      "yarn prettier --config ./prettier.config.cjs  --write"
     ]
   },
   "browserslist": [
@@ -59,6 +60,7 @@
     "@visx/hierarchy": "3.3.0",
     "@visx/shape": "3.3.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "@welldone-software/why-did-you-render": "^7.0.1",
     "axios": "1.6.5",
     "bootstrap": "5.3.2",
     "calendar-months": "1.0.1",
@@ -146,7 +148,6 @@
     "@types/react-virtualized": "^9.21.28",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
-    "@welldone-software/why-did-you-render": "7.0.1",
     "eslint": "8.56.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-airbnb-typescript": "17.1.0",
