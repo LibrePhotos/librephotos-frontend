@@ -87,7 +87,7 @@
     "react-i18next": "13.5.0",
     "react-image-lightbox": "npm:librephotos-react-image-lightbox@^1.0.0",
     "react-leaflet": "^1.9.1",
-    "react-leaflet-markercluster": "^1.1.8",
+    "react-leaflet-markercluster": "^2.0.0",
     "react-player": "2.16.0",
     "react-redux": "8.1.3",
     "react-router-dom": "6.23.0",
