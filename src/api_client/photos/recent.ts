@@ -14,7 +14,7 @@ enum Endpoints {
   fetchRecentlyAddedPhotos = "fetchRecentlyAddedPhotos",
 }
 
-export const sharingPhotosApi = api
+export const recentPhotosApi = api
   .injectEndpoints({
     endpoints: builder => ({
       [Endpoints.fetchRecentlyAddedPhotos]: builder.query<RecentlyAddedPhotosResponse, void>({
@@ -40,4 +40,4 @@ export const sharingPhotosApi = api
     },
   });
 
-export const { useLazyFetchRecentlyAddedPhotosQuery } = sharingPhotosApi;
+export const { useLazyFetchRecentlyAddedPhotosQuery } = recentPhotosApi;

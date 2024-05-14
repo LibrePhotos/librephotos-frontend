@@ -33,7 +33,7 @@ enum Endpoints {
   updatePhotoSharing = "updatePhotoSharing",
 }
 
-export const sharingPhotosApi = api
+export const photoSharingApi = api
   .injectEndpoints({
     endpoints: builder => ({
       [Endpoints.fetchSharedPhotosByMe]: builder.query<UserPhotosGroup[], void>({
@@ -87,4 +87,4 @@ export const sharingPhotosApi = api
   });
 
 export const { useFetchSharedPhotosByMeQuery, useFetchSharedPhotosWithMeQuery, useUpdatePhotoSharingMutation } =
-  sharingPhotosApi;
+  photoSharingApi;
