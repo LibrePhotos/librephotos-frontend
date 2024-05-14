@@ -1,7 +1,11 @@
 import _ from "lodash";
 import { z } from "zod";
 
-import { UserPhotosGroup } from "../../actions/photosActions";
+import {
+  FETCH_RECENTLY_ADDED_PHOTOS,
+  FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED,
+  UserPhotosGroup,
+} from "../../actions/photosActions";
 import { PigPhotoSchema, SimpleUserSchema } from "../../actions/photosActions.types";
 import { notification } from "../../service/notifications";
 import { api } from "../api";
@@ -27,10 +31,17 @@ const SharePhotosRequestSchema = z.object({
 });
 type SharePhotosRequest = z.infer<typeof SharePhotosRequestSchema>;
 
+const RecentlyAddedPhotosResponseSchema = z.object({
+  results: PigPhotoSchema.array(),
+  date: z.string(),
+});
+type RecentlyAddedPhotosResponse = z.infer<typeof RecentlyAddedPhotosResponseSchema>;
+
 enum Endpoints {
   fetchSharedPhotosByMe = "fetchSharedPhotosByMe",
   fetchSharedPhotosWithMe = "fetchSharedPhotosWithMe",
   updatePhotoSharing = "updatePhotoSharing",
+  fetchRecentlyAddedPhotos = "fetchRecentlyAddedPhotos",
 }
 
 export const sharingPhotosApi = api
@@ -72,10 +83,22 @@ export const sharingPhotosApi = api
           }
         },
       }),
+      [Endpoints.fetchRecentlyAddedPhotos]: builder.query<RecentlyAddedPhotosResponse, void>({
+        query: () => "photos/recentlyadded/",
+        async onQueryStarted(_args, { queryFulfilled, dispatch }) {
+          dispatch({ type: FETCH_RECENTLY_ADDED_PHOTOS });
+          const response = await queryFulfilled;
+          const { results: photosFlat, date } = RecentlyAddedPhotosResponseSchema.parse(response.data);
+          dispatch({
+            type: FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED,
+            payload: { photosFlat, date },
+          });
+        },
+      }),
     }),
   })
-  .enhanceEndpoints<"SharedPhotosByMe" | "SharedPhotosWithMe">({
-    addTagTypes: ["SharedPhotosByMe", "SharedPhotosWithMe"],
+  .enhanceEndpoints<"SharedPhotosByMe" | "SharedPhotosWithMe" | "RecentlyAddedPhotos">({
+    addTagTypes: ["SharedPhotosByMe", "SharedPhotosWithMe", "RecentlyAddedPhotos"],
     endpoints: {
       [Endpoints.fetchSharedPhotosByMe]: {
         providesTags: ["SharedPhotosByMe"],
@@ -83,8 +106,15 @@ export const sharingPhotosApi = api
       [Endpoints.fetchSharedPhotosWithMe]: {
         providesTags: ["SharedPhotosWithMe"],
       },
+      [Endpoints.fetchRecentlyAddedPhotos]: {
+        providesTags: ["RecentlyAddedPhotos"],
+      },
     },
   });
 
-export const { useFetchSharedPhotosByMeQuery, useFetchSharedPhotosWithMeQuery, useUpdatePhotoSharingMutation } =
-  sharingPhotosApi;
+export const {
+  useFetchSharedPhotosByMeQuery,
+  useFetchSharedPhotosWithMeQuery,
+  useUpdatePhotoSharingMutation,
+  useLazyFetchRecentlyAddedPhotosQuery,
+} = sharingPhotosApi;

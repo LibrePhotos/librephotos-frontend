@@ -105,35 +105,9 @@ export function downloadPhotos(image_hashes: string[]) {
   };
 }
 
-const RecentlyAddedResponseDataSchema = z.object({
-  results: PigPhotoSchema.array(),
-  date: z.string(),
-});
 export const FETCH_RECENTLY_ADDED_PHOTOS = "FETCH_RECENTLY_ADDED_PHOTOS";
 export const FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED = "FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED";
 export const FETCH_RECENTLY_ADDED_PHOTOS_REJECTED = "FETCH_RECENTLY_ADDED_PHOTOS_REJECTED";
-
-export function fetchRecentlyAddedPhotos(dispatch: AppDispatch) {
-  dispatch({ type: FETCH_RECENTLY_ADDED_PHOTOS });
-  Server.get("photos/recentlyadded/")
-    .then(response => {
-      const data = RecentlyAddedResponseDataSchema.parse(response.data);
-      const photosFlat: PigPhoto[] = data.results;
-      dispatch({
-        type: FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED,
-        payload: {
-          photosFlat,
-          date: response.data.date,
-        },
-      });
-    })
-    .catch(error => {
-      dispatch({
-        type: FETCH_RECENTLY_ADDED_PHOTOS_REJECTED,
-        payload: error,
-      });
-    });
-}
 
 const PhotosUpdatedResponseSchema = z.object({
   status: z.boolean(),
