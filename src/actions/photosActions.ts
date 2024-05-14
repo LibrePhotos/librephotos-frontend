@@ -115,38 +115,6 @@ const PhotosUpdatedResponseSchema = z.object({
   updated: PhotoSchema.array(),
   not_updated: PhotoSchema.array(),
 });
-export const SET_PHOTOS_PUBLIC_FULFILLED = "SET_PHOTOS_PUBLIC_FULFILLED";
-
-export function setPhotosPublic(image_hashes: string[], val_public: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "SET_PHOTOS_PUBLIC" });
-    Server.post(`photosedit/makepublic/`, {
-      image_hashes,
-      val_public,
-    })
-      .then(response => {
-        const data = PhotosUpdatedResponseSchema.parse(response.data);
-        const updatedPhotos: Photo[] = data.updated;
-        dispatch({
-          type: SET_PHOTOS_PUBLIC_FULFILLED,
-          payload: {
-            image_hashes,
-            val_public,
-            updatedPhotos,
-          },
-        });
-        notification.togglePhotosPublic(image_hashes.length, val_public);
-
-        if (image_hashes.length === 1) {
-          // @ts-ignore
-          dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hashes[0])).refetch();
-        }
-      })
-      .catch(err => {
-        dispatch({ type: "SET_PHOTOS_PUBLIC_REJECTED", payload: err });
-      });
-  };
-}
 
 export const SET_PHOTOS_FAVORITE = "SET_PHOTOS_FAVORITE";
 export const SET_PHOTOS_FAVORITE_FULFILLED = "SET_PHOTOS_FAVORITE_FULFILLED";
@@ -216,38 +184,6 @@ export function deleteDuplicateImage(image_hash: string, path: string) {
     Server.delete(`/photosedit/duplicate/delete`, { data: { image_hash, path } })
       .then(() => notification.removePhotos(1))
       .catch(err => dispatch({ type: PHOTOS_FINAL_DELETED_REJECTED, payload: err }));
-  };
-}
-
-export const SET_PHOTOS_HIDDEN_FULFILLED = "SET_PHOTOS_HIDDEN_FULFILLED";
-
-export function setPhotosHidden(image_hashes: string[], hidden: boolean) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "SET_PHOTOS_HIDDEN" });
-    Server.post(`photosedit/hide/`, {
-      image_hashes,
-      hidden,
-    })
-      .then(response => {
-        const data = PhotosUpdatedResponseSchema.parse(response.data);
-        const updatedPhotos: Photo[] = data.updated;
-        dispatch({
-          type: SET_PHOTOS_HIDDEN_FULFILLED,
-          payload: {
-            image_hashes,
-            hidden,
-            updatedPhotos,
-          },
-        });
-        notification.togglePhotosHidden(image_hashes.length, hidden);
-        if (image_hashes.length === 1) {
-          // @ts-ignore
-          dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hashes[0])).refetch();
-        }
-      })
-      .catch(err => {
-        dispatch({ type: "SET_PHOTOS_HIDDEN_REJECTED", payload: err });
-      });
   };
 }
 
