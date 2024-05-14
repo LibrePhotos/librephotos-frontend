@@ -2,7 +2,7 @@ import { IconClock as Clock } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useLazyFetchRecentlyAddedPhotosQuery } from "../../api_client/photos/sharing";
+import { useLazyFetchRecentlyAddedPhotosQuery } from "../../api_client/photos/recent-photos";
 import { PhotoListView } from "../../components/photolist/PhotoListView";
 import type { PhotosState } from "../../reducers/photosReducer";
 import { PhotosetType } from "../../reducers/photosReducer";
