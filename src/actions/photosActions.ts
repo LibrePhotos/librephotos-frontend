@@ -10,7 +10,7 @@ import { PhotosetType } from "../reducers/photosReducer";
 import { notification } from "../service/notifications";
 import type { AppDispatch } from "../store/store";
 import { getPhotosFlatFromGroupedByDate } from "../util/util";
-import type { DatePhotosGroup, Photo, PigPhoto, SimpleUser } from "./photosActions.types";
+import type { DatePhotosGroup, Photo, PigPhoto } from "./photosActions.types";
 import { DatePhotosGroupSchema, PhotoSchema, PigPhotoSchema } from "./photosActions.types";
 
 export type UserPhotosGroup = {
@@ -101,27 +101,6 @@ export function downloadPhotos(image_hashes: string[]) {
 
       .catch(error => {
         console.error("Error:", error);
-      });
-  };
-}
-
-export function setPhotosShared(image_hashes: string[], val_shared: boolean, target_user: SimpleUser) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "SET_PHOTOS_SHARED" });
-    Server.post(`photosedit/share/`, {
-      image_hashes,
-      val_shared,
-      target_user_id: target_user.id,
-    })
-      .then(() => {
-        notification.togglePhotoSharing(target_user.username, image_hashes.length, val_shared);
-        if (image_hashes.length === 1) {
-          // @ts-ignore
-          dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hashes[0])).refetch();
-        }
-      })
-      .catch(err => {
-        dispatch({ type: "SET_PHOTOS_SHARED_REJECTED", payload: err });
       });
   };
 }
