@@ -5,27 +5,15 @@ import { z } from "zod";
 // eslint-disable-next-line import/no-cycle
 import { Server, serverAddress } from "../api_client/apiClient";
 import { photoDetailsApi } from "../api_client/photos/photoDetail";
-// eslint-disable-next-line import/no-cycle
-import { PhotosetType } from "../reducers/photosReducer";
 import { notification } from "../service/notifications";
 import type { AppDispatch } from "../store/store";
-import { getPhotosFlatFromGroupedByDate } from "../util/util";
-import type { DatePhotosGroup, Photo, PigPhoto } from "./photosActions.types";
-import { DatePhotosGroupSchema, PhotoSchema, PigPhotoSchema } from "./photosActions.types";
+import type { Photo, PigPhoto } from "./photosActions.types";
+import { PhotoSchema, PigPhotoSchema } from "./photosActions.types";
 
 export type UserPhotosGroup = {
   userId: number;
   photos: PigPhoto[];
 };
-
-export const FETCH_PHOTOSET = "FETCH_PHOTOSET";
-export const FETCH_PHOTOSET_FULFILLED = "FETCH_PHOTOSET_FULFILLED";
-export const FETCH_PHOTOSET_REJECTED = "FETCH_PHOTOSET_REJECTED";
-
-const fetchPhotosetRejected = (err: string) => ({
-  type: FETCH_PHOTOSET_REJECTED,
-  payload: err,
-});
 
 export function downloadPhotos(image_hashes: string[]) {
   let fileUrl;
@@ -100,10 +88,6 @@ export function downloadPhotos(image_hashes: string[]) {
   };
 }
 
-export const FETCH_RECENTLY_ADDED_PHOTOS = "FETCH_RECENTLY_ADDED_PHOTOS";
-export const FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED = "FETCH_RECENTLY_ADDED_PHOTOS_FULFILLED";
-export const FETCH_RECENTLY_ADDED_PHOTOS_REJECTED = "FETCH_RECENTLY_ADDED_PHOTOS_REJECTED";
-
 const PhotosUpdatedResponseSchema = z.object({
   status: z.boolean(),
   results: PhotoSchema.array(),
@@ -148,30 +132,6 @@ export function deleteDuplicateImage(image_hash: string, path: string) {
       .then(() => notification.removePhotos(1))
       .catch(err => dispatch({ type: PHOTOS_FINAL_DELETED_REJECTED, payload: err }));
   };
-}
-
-const FetchPhotosByDateSchema = z.object({
-  results: DatePhotosGroupSchema.array(),
-});
-
-export function fetchHiddenPhotos(dispatch: AppDispatch) {
-  dispatch({ type: FETCH_PHOTOSET });
-  Server.get("photos/hidden/", { timeout: 100000 })
-    .then(response => {
-      const data = FetchPhotosByDateSchema.parse(response.data);
-      const photosGroupedByDate: DatePhotosGroup[] = data.results;
-      dispatch({
-        type: FETCH_PHOTOSET_FULFILLED,
-        payload: {
-          photosGroupedByDate,
-          photosFlat: getPhotosFlatFromGroupedByDate(photosGroupedByDate),
-          photosetType: PhotosetType.HIDDEN,
-        },
-      });
-    })
-    .catch(err => {
-      dispatch(fetchPhotosetRejected(err));
-    });
 }
 
 const PaginatedPigPhotosSchema = z.object({
