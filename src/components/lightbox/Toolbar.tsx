@@ -10,8 +10,8 @@ import {
 } from "@tabler/icons-react";
 import React from "react";
 
-import { setPhotosFavorite } from "../../actions/photosActions";
 import { shareAddress } from "../../api_client/apiClient";
+import { useSetFavoritePhotosMutation } from "../../api_client/photos/favorite";
 import { useSetPhotosHiddenMutation, useSetPhotosPublicMutation } from "../../api_client/photos/visibility";
 import { playerActions } from "../../store/player/playerSlice";
 import { useAppDispatch, useAppSelector } from "../../store/store";
@@ -31,6 +31,7 @@ export function Toolbar(props: Props) {
   const { playing: playerPlaying, loading: playerLoading } = useAppSelector(store => store.player);
   const [setPhotosHidden] = useSetPhotosHiddenMutation();
   const [setPhotosPublic] = useSetPhotosPublicMutation();
+  const [setFavoritePhotos] = useSetFavoritePhotosMutation();
 
   function playButton(photo) {
     if (!photo || photo.embedded_media.length === 0) {
@@ -85,7 +86,7 @@ export function Toolbar(props: Props) {
           onClick={() => {
             const { image_hash: imageHash } = photosDetail;
             const val = !(photosDetail.rating >= favoriteMinRating);
-            dispatch(setPhotosFavorite([imageHash], val));
+            setFavoritePhotos({ image_hashes: [imageHash], favorite: val });
           }}
         >
           <Star color={photosDetail.rating >= favoriteMinRating ? "yellow" : "grey"} />

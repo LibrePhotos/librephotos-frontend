@@ -111,38 +111,6 @@ const PhotosUpdatedResponseSchema = z.object({
   not_updated: PhotoSchema.array(),
 });
 
-export const SET_PHOTOS_FAVORITE = "SET_PHOTOS_FAVORITE";
-export const SET_PHOTOS_FAVORITE_FULFILLED = "SET_PHOTOS_FAVORITE_FULFILLED";
-export const SET_PHOTOS_FAVORITE_REJECTED = "SET_PHOTOS_FAVORITE_REJECTED";
-
-export function setPhotosFavorite(image_hashes: string[], favorite: boolean) {
-  return function (dispatch: Dispatch<any>) {
-    dispatch({ type: SET_PHOTOS_FAVORITE });
-    Server.post(`photosedit/favorite/`, {
-      image_hashes,
-      favorite,
-    })
-      .then(response => {
-        const data = PhotosUpdatedResponseSchema.parse(response.data);
-        const updatedPhotos: Photo[] = data.updated;
-        dispatch({
-          type: SET_PHOTOS_FAVORITE_FULFILLED,
-          payload: {
-            image_hashes,
-            favorite,
-            updatedPhotos,
-          },
-        });
-        // @ts-ignore
-        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hashes[0])).refetch();
-        notification.togglePhotosFavorite(image_hashes.length, favorite);
-      })
-      .catch(err => {
-        dispatch({ type: SET_PHOTOS_FAVORITE_REJECTED, payload: err });
-      });
-  };
-}
-
 export const PHOTOS_FINAL_DELETED = "PHOTOS_FINAL_DELETED";
 export const PHOTOS_FINAL_DELETED_FULFILLED = "PHOTOS_FINAL_DELETED_FULFILLED";
 export const PHOTOS_FINAL_DELETED_REJECTED = "PHOTOS_FINAL_DELETED_REJECTED";

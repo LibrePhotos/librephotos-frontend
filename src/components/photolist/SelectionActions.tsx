@@ -18,10 +18,11 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { downloadPhotos, setPhotosFavorite } from "../../actions/photosActions";
+import { downloadPhotos } from "../../actions/photosActions";
 import { UserAlbum } from "../../api_client/albums/types";
 import { useRemovePhotoFromUserAlbumMutation } from "../../api_client/albums/user";
 import { serverAddress } from "../../api_client/apiClient";
+import { useSetFavoritePhotosMutation } from "../../api_client/photos/favorite";
 import { photoDetailsApi } from "../../api_client/photos/photoDetail";
 import { useSetPhotosHiddenMutation, useSetPhotosPublicMutation } from "../../api_client/photos/visibility";
 import { notification } from "../../service/notifications";
@@ -46,6 +47,7 @@ export function SelectionActions(props: Readonly<Props>) {
   const [removePhotosFromAlbum] = useRemovePhotoFromUserAlbumMutation();
   const [setPhotosHidden] = useSetPhotosHiddenMutation();
   const [setPhotosPublic] = useSetPhotosPublicMutation();
+  const [setFavoritePhotos] = useSetFavoritePhotosMutation();
 
   const {
     selectedItems,
@@ -98,12 +100,10 @@ export function SelectionActions(props: Readonly<Props>) {
             icon={<Star />}
             disabled={selectedItems.length === 0}
             onClick={() => {
-              dispatch(
-                setPhotosFavorite(
-                  selectedItems.map(i => i.id),
-                  true
-                )
-              );
+              setFavoritePhotos({
+                image_hashes: selectedItems.map(i => i.id),
+                favorite: true,
+              });
               updateSelectionState({
                 selectMode: false,
                 selectedItems: [],
@@ -117,12 +117,10 @@ export function SelectionActions(props: Readonly<Props>) {
             icon={<StarOff />}
             disabled={selectedItems.length === 0}
             onClick={() => {
-              dispatch(
-                setPhotosFavorite(
-                  selectedItems.map(i => i.id),
-                  false
-                )
-              );
+              setFavoritePhotos({
+                image_hashes: selectedItems.map(i => i.id),
+                favorite: false,
+              });
 
               updateSelectionState({
                 selectMode: false,
