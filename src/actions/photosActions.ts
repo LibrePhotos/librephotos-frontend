@@ -1,9 +1,7 @@
 import axios from "axios";
-import type { Dispatch } from "redux";
 
 // eslint-disable-next-line import/no-cycle
 import { Server, serverAddress } from "../api_client/apiClient";
-import { photoDetailsApi } from "../api_client/photos/photoDetail";
 import { notification } from "../service/notifications";
 import type { PigPhoto } from "./photosActions.types";
 
@@ -81,21 +79,6 @@ export function downloadPhotos(image_hashes: string[]) {
 
       .catch(error => {
         console.error("Error:", error);
-      });
-  };
-}
-
-export function generatePhotoIm2txtCaption(image_hash: string) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "GENERATE_PHOTO_CAPTION" });
-    Server.post("photosedit/generateim2txt", { image_hash }, { timeout: 200000 })
-      .then(() => {
-        dispatch({ type: "GENERATE_PHOTO_CAPTION_FULFILLED" });
-        // @ts-ignore
-        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
-      })
-      .catch(error => {
-        dispatch({ type: "GENERATE_PHOTO_CAPTION_REJECTED", payload: error });
       });
   };
 }

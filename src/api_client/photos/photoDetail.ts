@@ -15,10 +15,10 @@ const PhotoUpdateResponseSchema = z.object({
 });
 type PhotoUpdateResponse = z.infer<typeof PhotoUpdateResponseSchema>;
 
-const PhotoCaptionUpdateResponseSchema = z.object({
+const StatusResponseSchema = z.object({
   status: z.boolean(),
 });
-type PhotoCaptionUpdateResponse = z.infer<typeof PhotoCaptionUpdateResponseSchema>;
+type StatusResponse = z.infer<typeof StatusResponseSchema>;
 
 enum Endpoints {
   fetchPhotoDetails = "fetchPhotoDetails",
@@ -51,7 +51,7 @@ export const photoDetailsApi = api.injectEndpoints({
         }
       },
     }),
-    [Endpoints.savePhotoCaption]: builder.mutation<PhotoCaptionUpdateResponse, { id: string; caption: string }>({
+    [Endpoints.savePhotoCaption]: builder.mutation<StatusResponse, { id: string; caption: string }>({
       query: ({ id, caption }) => ({
         method: "POST",
         url: `photosedit/savecaption/`,
@@ -59,12 +59,25 @@ export const photoDetailsApi = api.injectEndpoints({
       }),
       async onQueryStarted({ id }, { queryFulfilled, dispatch }) {
         const response = await queryFulfilled;
-        PhotoCaptionUpdateResponseSchema.parse(response.data);
+        StatusResponseSchema.parse(response.data);
         dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(id)).refetch();
         notification.savePhotoCaptions();
+      },
+    }),
+    [Endpoints.generateImageToTextCaption]: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        method: "POST",
+        url: `photosedit/generateim2txt/`,
+        body: { image_hash: id },
+      }),
+      async onQueryStarted({ id }, { queryFulfilled, dispatch }) {
+        const response = await queryFulfilled;
+        StatusResponseSchema.parse(response.data);
+        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(id)).refetch();
       },
     }),
   }),
 });
 
-export const { useUpdatePhotoMutation, useSavePhotoCaptionMutation } = photoDetailsApi;
+export const { useUpdatePhotoMutation, useSavePhotoCaptionMutation, useGenerateImageToTextCaptionMutation } =
+  photoDetailsApi;

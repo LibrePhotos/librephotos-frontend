@@ -10,10 +10,12 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { push } from "redux-first-history";
 
-import { generatePhotoIm2txtCaption } from "../../actions/photosActions";
 import type { Photo as PhotoType } from "../../actions/photosActions.types";
 import { useFetchThingsAlbumsQuery } from "../../api_client/albums/things";
-import { useSavePhotoCaptionMutation } from "../../api_client/photos/photoDetail";
+import {
+  useGenerateImageToTextCaptionMutation,
+  useSavePhotoCaptionMutation,
+} from "../../api_client/photos/photoDetail";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { fuzzyMatch } from "../../util/util";
 import "./Hashtag.css";
@@ -36,6 +38,7 @@ export function Description(props: Props) {
   const [editMode, setEditMode] = useState(false);
   const [imageCaption, setImageCaption] = useState("");
   const [updateCaption] = useSavePhotoCaptionMutation();
+  const [generateImageToTextCaptions] = useGenerateImageToTextCaptionMutation();
 
   const editor = useEditor({
     editable: editMode,
@@ -136,7 +139,7 @@ export function Description(props: Props) {
                 loading={generatingCaptionIm2txt}
                 variant="subtle"
                 onClick={() => {
-                  dispatch(generatePhotoIm2txtCaption(photoDetail.image_hash));
+                  generateImageToTextCaptions({ id: photoDetail.image_hash });
                 }}
                 disabled={isPublic || (generatingCaptionIm2txt != null && generatingCaptionIm2txt)}
               >
