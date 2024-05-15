@@ -18,11 +18,6 @@ export type UserPhotosGroup = {
   photos: PigPhoto[];
 };
 
-const JobResponseSchema = z.object({
-  status: z.boolean(),
-  job_id: z.string(),
-});
-
 export const FETCH_PHOTOSET = "FETCH_PHOTOSET";
 export const FETCH_PHOTOSET_FULFILLED = "FETCH_PHOTOSET_FULFILLED";
 export const FETCH_PHOTOSET_REJECTED = "FETCH_PHOTOSET_REJECTED";
@@ -184,74 +179,6 @@ export function deleteDuplicateImage(image_hash: string, path: string) {
     Server.delete(`/photosedit/duplicate/delete`, { data: { image_hash, path } })
       .then(() => notification.removePhotos(1))
       .catch(err => dispatch({ type: PHOTOS_FINAL_DELETED_REJECTED, payload: err }));
-  };
-}
-
-export function scanPhotos() {
-  return function (dispatch: Dispatch<any>) {
-    dispatch({ type: "SCAN_PHOTOS" });
-    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
-
-    Server.get(`scanphotos/`)
-      .then(response => {
-        const jobResponse = JobResponseSchema.parse(response.data);
-        notification.startPhotoScan();
-        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
-      })
-      .catch(err => {
-        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
-      });
-  };
-}
-
-export function scanUploadedPhotos() {
-  return function (dispatch: Dispatch<any>) {
-    dispatch({ type: "SCAN_PHOTOS" });
-    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
-
-    Server.get(`scanuploadedphotos/`)
-      .then(response => {
-        const jobResponse = JobResponseSchema.parse(response.data);
-        notification.startUploadedPhotoScan();
-        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
-      })
-      .catch(err => {
-        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
-      });
-  };
-}
-
-export function scanAllPhotos() {
-  return function (dispatch: Dispatch<any>) {
-    dispatch({ type: "SCAN_PHOTOS" });
-    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
-
-    Server.get(`fullscanphotos/`)
-      .then(response => {
-        const jobResponse = JobResponseSchema.parse(response.data);
-        notification.startFullPhotoScan();
-        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
-      })
-      .catch(err => {
-        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
-      });
-  };
-}
-
-export function scanNextcloudPhotos() {
-  return function (dispatch: Dispatch<any>) {
-    dispatch({ type: "SCAN_PHOTOS" });
-    dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
-
-    Server.get(`nextcloud/scanphotos/`)
-      .then(response => {
-        const jobResponse = JobResponseSchema.parse(response.data);
-        notification.startNextcloudPhotoScan();
-        dispatch({ type: "SCAN_PHOTOS_FULFILLED", payload: jobResponse });
-      })
-      .catch(err => {
-        dispatch({ type: "SCAN_PHOTOS_REJECTED", payload: err });
-      });
   };
 }
 
