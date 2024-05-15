@@ -115,19 +115,3 @@ export function savePhotoCaption(image_hash: string, caption?: string | undefine
       });
   };
 }
-
-export function editPhoto(image_hash: string, photo_details: any) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: "EDIT_PHOTO" });
-    Server.patch(`photos/edit/${image_hash}/`, photo_details)
-      .then(() => {
-        dispatch({ type: "EDIT_PHOTO_FULFILLED" });
-        notification.updatePhoto();
-        // @ts-ignore
-        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
-      })
-      .catch(error => {
-        dispatch({ type: "EDIT_PHOTO_REJECTED", payload: error });
-      });
-  };
-}
