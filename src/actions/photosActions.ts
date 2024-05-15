@@ -7,8 +7,8 @@ import { Server, serverAddress } from "../api_client/apiClient";
 import { photoDetailsApi } from "../api_client/photos/photoDetail";
 import { notification } from "../service/notifications";
 import type { AppDispatch } from "../store/store";
-import type { Photo, PigPhoto } from "./photosActions.types";
-import { PhotoSchema, PigPhotoSchema } from "./photosActions.types";
+import type { PigPhoto } from "./photosActions.types";
+import { PigPhotoSchema } from "./photosActions.types";
 
 export type UserPhotosGroup = {
   userId: number;
@@ -85,52 +85,6 @@ export function downloadPhotos(image_hashes: string[]) {
       .catch(error => {
         console.error("Error:", error);
       });
-  };
-}
-
-const PhotosUpdatedResponseSchema = z.object({
-  status: z.boolean(),
-  results: PhotoSchema.array(),
-  updated: PhotoSchema.array(),
-  not_updated: PhotoSchema.array(),
-});
-
-export const PHOTOS_FINAL_DELETED = "PHOTOS_FINAL_DELETED";
-export const PHOTOS_FINAL_DELETED_FULFILLED = "PHOTOS_FINAL_DELETED_FULFILLED";
-export const PHOTOS_FINAL_DELETED_REJECTED = "PHOTOS_FINAL_DELETED_REJECTED";
-
-export function finalPhotosDeleted(image_hashes: string[]) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: PHOTOS_FINAL_DELETED });
-    Server.delete(`photosedit/delete`, {
-      data: {
-        image_hashes,
-      },
-    })
-      .then(response => {
-        const data = PhotosUpdatedResponseSchema.parse(response.data);
-        const updatedPhotos: Photo[] = data.updated;
-        dispatch({
-          type: PHOTOS_FINAL_DELETED_FULFILLED,
-          payload: {
-            image_hashes,
-            updatedPhotos,
-          },
-        });
-        notification.removePhotos(image_hashes.length);
-      })
-      .catch(err => {
-        dispatch({ type: PHOTOS_FINAL_DELETED_REJECTED, payload: err });
-      });
-  };
-}
-
-export function deleteDuplicateImage(image_hash: string, path: string) {
-  return function cb(dispatch: Dispatch<any>) {
-    dispatch({ type: PHOTOS_FINAL_DELETED });
-    Server.delete(`/photosedit/duplicate/delete`, { data: { image_hash, path } })
-      .then(() => notification.removePhotos(1))
-      .catch(err => dispatch({ type: PHOTOS_FINAL_DELETED_REJECTED, payload: err }));
   };
 }
 

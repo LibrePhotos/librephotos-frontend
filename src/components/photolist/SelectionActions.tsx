@@ -22,10 +22,9 @@ import { downloadPhotos } from "../../actions/photosActions";
 import { UserAlbum } from "../../api_client/albums/types";
 import { useRemovePhotoFromUserAlbumMutation } from "../../api_client/albums/user";
 import { serverAddress } from "../../api_client/apiClient";
+import { useMarkPhotosDeletedMutation } from "../../api_client/photos/delete";
 import { useSetFavoritePhotosMutation } from "../../api_client/photos/favorite";
-import { photoDetailsApi } from "../../api_client/photos/photoDetail";
 import { useSetPhotosHiddenMutation, useSetPhotosPublicMutation } from "../../api_client/photos/visibility";
-import { notification } from "../../service/notifications";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { copyToClipboard } from "../../util/util";
 
@@ -48,6 +47,7 @@ export function SelectionActions(props: Readonly<Props>) {
   const [setPhotosHidden] = useSetPhotosHiddenMutation();
   const [setPhotosPublic] = useSetPhotosPublicMutation();
   const [setFavoritePhotos] = useSetFavoritePhotosMutation();
+  const [setPhotosDeleted] = useMarkPhotosDeletedMutation();
 
   const {
     selectedItems,
@@ -235,15 +235,7 @@ export function SelectionActions(props: Readonly<Props>) {
             icon={<Trash />}
             disabled={selectedItems.length === 0}
             onClick={() => {
-              const imageHashes = selectedItems.map(i => i.id);
-              const deleted = true;
-              dispatch(
-                photoDetailsApi.endpoints.setPhotosDeleted.initiate({
-                  image_hashes: imageHashes,
-                  deleted,
-                })
-              );
-              notification.togglePhotoDelete(deleted, imageHashes.length);
+              setPhotosDeleted({ image_hashes: selectedItems.map(i => i.id), deleted: true });
               updateSelectionState({
                 selectMode: false,
                 selectedItems: [],
