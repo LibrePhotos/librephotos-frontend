@@ -1,14 +1,11 @@
 import axios from "axios";
 import type { Dispatch } from "redux";
-import { z } from "zod";
 
 // eslint-disable-next-line import/no-cycle
 import { Server, serverAddress } from "../api_client/apiClient";
 import { photoDetailsApi } from "../api_client/photos/photoDetail";
 import { notification } from "../service/notifications";
-import type { AppDispatch } from "../store/store";
 import type { PigPhoto } from "./photosActions.types";
-import { PigPhotoSchema } from "./photosActions.types";
 
 export type UserPhotosGroup = {
   userId: number;
@@ -86,41 +83,6 @@ export function downloadPhotos(image_hashes: string[]) {
         console.error("Error:", error);
       });
   };
-}
-
-const PaginatedPigPhotosSchema = z.object({
-  count: z.number(),
-  next: z.string().nullable(),
-  previous: z.string().nullable(),
-  results: PigPhotoSchema.array(),
-});
-export const FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED = "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED";
-export const FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED = "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED";
-export const FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED = "FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED";
-
-export function fetchNoTimestampPhotoPaginated(dispatch: AppDispatch, page: number) {
-  dispatch({ type: FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED });
-  Server.get(`photos/notimestamp/?page=${page}`, { timeout: 100000 })
-    .then(response => {
-      const data = PaginatedPigPhotosSchema.parse(response.data);
-      const photosFlat: PigPhoto[] = data.results;
-      const photosCount = data.count;
-      dispatch({
-        type: FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_FULFILLED,
-        payload: {
-          photosFlat,
-          page,
-          photosCount,
-        },
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      dispatch({
-        type: FETCH_NO_TIMESTAMP_PHOTOS_PAGINATED_REJECTED,
-        payload: err,
-      });
-    });
 }
 
 export function generatePhotoIm2txtCaption(image_hash: string) {
