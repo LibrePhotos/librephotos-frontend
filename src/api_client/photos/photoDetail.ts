@@ -15,6 +15,11 @@ const PhotoUpdateResponseSchema = z.object({
 });
 type PhotoUpdateResponse = z.infer<typeof PhotoUpdateResponseSchema>;
 
+const PhotoCaptionUpdateResponseSchema = z.object({
+  status: z.boolean(),
+});
+type PhotoCaptionUpdateResponse = z.infer<typeof PhotoCaptionUpdateResponseSchema>;
+
 enum Endpoints {
   fetchPhotoDetails = "fetchPhotoDetails",
   updatePhoto = "updatePhoto",
@@ -25,7 +30,7 @@ enum Endpoints {
 export const photoDetailsApi = api.injectEndpoints({
   endpoints: builder => ({
     [Endpoints.fetchPhotoDetails]: builder.query<Photo, string>({
-      query: hash => `photos/${hash}`,
+      query: hash => `photos/${hash}/`,
     }),
     [Endpoints.updatePhoto]: builder.mutation<PhotoUpdateResponse, { id: string; data: Partial<Photo> }>({
       query: ({ id, data }) => ({
@@ -46,7 +51,20 @@ export const photoDetailsApi = api.injectEndpoints({
         }
       },
     }),
+    [Endpoints.savePhotoCaption]: builder.mutation<PhotoCaptionUpdateResponse, { id: string; caption: string }>({
+      query: ({ id, caption }) => ({
+        method: "POST",
+        url: `photosedit/savecaption/`,
+        body: { image_hash: id, caption },
+      }),
+      async onQueryStarted({ id }, { queryFulfilled, dispatch }) {
+        const response = await queryFulfilled;
+        PhotoCaptionUpdateResponseSchema.parse(response.data);
+        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(id)).refetch();
+        notification.savePhotoCaptions();
+      },
+    }),
   }),
 });
 
-export const { useUpdatePhotoMutation } = photoDetailsApi;
+export const { useUpdatePhotoMutation, useSavePhotoCaptionMutation } = photoDetailsApi;

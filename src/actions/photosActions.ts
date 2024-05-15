@@ -99,19 +99,3 @@ export function generatePhotoIm2txtCaption(image_hash: string) {
       });
   };
 }
-
-export function savePhotoCaption(image_hash: string, caption?: string | undefined) {
-  return function cb(dispatch: Dispatch<any>) {
-    Server.post("photosedit/savecaption", { image_hash, caption })
-      .then(() => {
-        dispatch({ type: "SAVE_PHOTO_CAPTION_FULFILLED" });
-        // @ts-ignore
-        dispatch(photoDetailsApi.endpoints.fetchPhotoDetails.initiate(image_hash)).refetch();
-        notification.savePhotoCaptions();
-      })
-      .catch(error => {
-        dispatch({ type: "SAVE_PHOTO_CAPTION_REJECTED" });
-        console.error(error);
-      });
-  };
-}

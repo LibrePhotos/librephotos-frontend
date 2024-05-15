@@ -10,9 +10,10 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { push } from "redux-first-history";
 
-import { generatePhotoIm2txtCaption, savePhotoCaption } from "../../actions/photosActions";
+import { generatePhotoIm2txtCaption } from "../../actions/photosActions";
 import type { Photo as PhotoType } from "../../actions/photosActions.types";
 import { useFetchThingsAlbumsQuery } from "../../api_client/albums/things";
+import { useSavePhotoCaptionMutation } from "../../api_client/photos/photoDetail";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { fuzzyMatch } from "../../util/util";
 import "./Hashtag.css";
@@ -34,6 +35,8 @@ export function Description(props: Props) {
 
   const [editMode, setEditMode] = useState(false);
   const [imageCaption, setImageCaption] = useState("");
+  const [updateCaption] = useSavePhotoCaptionMutation();
+
   const editor = useEditor({
     editable: editMode,
     extensions: [
@@ -174,7 +177,7 @@ export function Description(props: Props) {
                 variant="light"
                 color="green"
                 onClick={() => {
-                  dispatch(savePhotoCaption(photoDetail.image_hash, imageCaption));
+                  updateCaption({ id: photoDetail.image_hash, caption: imageCaption });
                   setEditMode(false);
                 }}
               >
