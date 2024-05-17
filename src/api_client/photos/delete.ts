@@ -24,6 +24,12 @@ const DeletePhotosResponseSchema = z.object({
 });
 type DeletePhotosResponse = z.infer<typeof DeletePhotosResponseSchema>;
 
+const DeleteMissingPhotosResponseSchema = z.object({
+  status: z.boolean(),
+  job_id: z.string().optional(),
+});
+type DeleteMissingPhotosResponse = z.infer<typeof DeleteMissingPhotosResponseSchema>;
+
 const PurgePhotosRequestSchema = z.object({
   image_hashes: z.array(z.string()),
 });
@@ -41,6 +47,7 @@ enum Endpoints {
   markPhotosDeleted = "markPhotosDeleted",
   purgeDeletedPhotos = "purgeDeletedPhotos",
   deleteDuplicatePhoto = "deleteDuplicatePhoto",
+  deleteMissingPhotos = "deleteMissingPhotos",
 }
 
 export const deletePhotosApi = api.injectEndpoints({
@@ -78,6 +85,24 @@ export const deletePhotosApi = api.injectEndpoints({
       async onQueryStarted(_args, { queryFulfilled }) {
         await queryFulfilled;
         notification.removePhotos(1);
+      },
+    }),
+    [Endpoints.deleteMissingPhotos]: builder.mutation<DeleteMissingPhotosResponse, void>({
+      query: () => ({
+        url: "deletemissingphotos",
+        methos: "POST",
+        body: {},
+      }),
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        dispatch({ type: "DELETE_MISSING_PHOTOS" });
+        dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
+        dispatch({
+          type: "SET_WORKER_RUNNING_JOB",
+          payload: { job_type_str: "Delete Missing Photos" },
+        });
+        const response = await queryFulfilled;
+        const payload = DeleteMissingPhotosResponseSchema.parse(response.data);
+        dispatch({ type: "DELETE_MISSING_PHOTOS_FULFILLED", payload });
       },
     }),
   }),
