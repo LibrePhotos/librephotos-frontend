@@ -1,8 +1,7 @@
 import _ from "lodash";
 import { z } from "zod";
 
-import { UserPhotosGroup } from "../../actions/photosActions";
-import { PigPhotoSchema, SimpleUserSchema } from "../../actions/photosActions.types";
+import { PigPhoto, PigPhotoSchema, SimpleUserSchema } from "../../actions/photosActions.types";
 import { notification } from "../../service/notifications";
 import { api } from "../api";
 import { photoDetailsApi } from "./photoDetail";
@@ -26,6 +25,11 @@ const SharePhotosRequestSchema = z.object({
   target_user: SimpleUserSchema,
 });
 type SharePhotosRequest = z.infer<typeof SharePhotosRequestSchema>;
+
+type UserPhotosGroup = {
+  userId: number;
+  photos: PigPhoto[];
+};
 
 enum Endpoints {
   fetchSharedPhotosByMe = "fetchSharedPhotosByMe",

@@ -108,5 +108,9 @@ export const deletePhotosApi = api.injectEndpoints({
   }),
 });
 
-export const { useMarkPhotosDeletedMutation, usePurgeDeletedPhotosMutation, useDeleteDuplicatePhotoMutation } =
-  deletePhotosApi;
+export const {
+  useMarkPhotosDeletedMutation,
+  usePurgeDeletedPhotosMutation,
+  useDeleteDuplicatePhotoMutation,
+  useDeleteMissingPhotosMutation,
+} = deletePhotosApi;

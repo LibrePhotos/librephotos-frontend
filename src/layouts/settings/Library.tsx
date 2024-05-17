@@ -38,11 +38,11 @@ import {
 import React, { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
-import { deleteMissingPhotos } from "../../actions/utilActions";
 import { useGenerateAutoAlbumsMutation } from "../../api_client/albums/auto";
 import { api, useWorkerQuery } from "../../api_client/api";
 import { serverAddress } from "../../api_client/apiClient";
 import { useLazyFetchNextcloudDirsQuery } from "../../api_client/nextcloud";
+import { useDeleteMissingPhotosMutation } from "../../api_client/photos/delete";
 import {
   useRescanPhotosMutation,
   useScanNextcloudPhotosMutation,
@@ -110,6 +110,7 @@ export function Library() {
   const [scanPhotos] = useScanPhotosMutation();
   const [rescanPhotos] = useRescanPhotosMutation();
   const [scanNextcloudPhotos] = useScanNextcloudPhotosMutation();
+  const [deleteMissingPhotos] = useDeleteMissingPhotosMutation();
 
   const onGenerateEventAlbumsButtonClick = () => {
     dispatch({ type: "SET_WORKER_AVAILABILITY", payload: false });
@@ -121,7 +122,7 @@ export function Library() {
   };
 
   const onDeleteMissingPhotosButtonClick = () => {
-    dispatch(deleteMissingPhotos());
+    deleteMissingPhotos();
     close();
   };
 
