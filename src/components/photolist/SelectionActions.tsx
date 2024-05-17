@@ -18,14 +18,14 @@ import {
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { downloadPhotos } from "../../actions/photosActions";
 import { UserAlbum } from "../../api_client/albums/types";
 import { useRemovePhotoFromUserAlbumMutation } from "../../api_client/albums/user";
 import { serverAddress } from "../../api_client/apiClient";
 import { useMarkPhotosDeletedMutation } from "../../api_client/photos/delete";
+import { useLazyDownloadPhotosQuery } from "../../api_client/photos/download";
 import { useSetFavoritePhotosMutation } from "../../api_client/photos/favorite";
 import { useSetPhotosHiddenMutation, useSetPhotosPublicMutation } from "../../api_client/photos/visibility";
-import { useAppDispatch, useAppSelector } from "../../store/store";
+import { useAppSelector } from "../../store/store";
 import { copyToClipboard } from "../../util/util";
 
 type Props = {
@@ -41,13 +41,13 @@ type Props = {
 
 export function SelectionActions(props: Readonly<Props>) {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
   const route = useAppSelector(store => store.router);
   const [removePhotosFromAlbum] = useRemovePhotoFromUserAlbumMutation();
   const [setPhotosHidden] = useSetPhotosHiddenMutation();
   const [setPhotosPublic] = useSetPhotosPublicMutation();
   const [setFavoritePhotos] = useSetFavoritePhotosMutation();
   const [setPhotosDeleted] = useMarkPhotosDeletedMutation();
+  const [downloadPhotoArchive] = useLazyDownloadPhotosQuery();
 
   const {
     selectedItems,
@@ -218,7 +218,7 @@ export function SelectionActions(props: Readonly<Props>) {
             icon={<Download />}
             disabled={selectedItems.length === 0}
             onClick={() => {
-              dispatch(downloadPhotos(selectedItems.map(i => i.id)));
+              downloadPhotoArchive({ image_hashes: selectedItems.map(i => i.id) });
 
               updateSelectionState({
                 selectMode: false,
