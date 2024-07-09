@@ -1208,7 +1208,7 @@
   resolved "https://registry.yarnpkg.com/@cucumber/message-streams/-/message-streams-4.0.1.tgz#a5339d3504594bb2edb5732aaae94dddb24d0970"
   integrity sha512-Kxap9uP5jD8tHUZVjTWgzxemi/0uOsbGjd4LBOSxcJoOCRbESFwemUzilJuzNTB8pcTQUh8D5oudUyxfkJOKmA==
 
-"@cucumber/messages@24.1.0", "@cucumber/messages@>=19.1.4 <=24", "@cucumber/messages@^24.0.0", "@cucumber/messages@^24.0.1":
+"@cucumber/messages@24.1.0", "@cucumber/messages@>=19.1.4 <=24", "@cucumber/messages@^24.0.0":
   version "24.1.0"
   resolved "https://registry.yarnpkg.com/@cucumber/messages/-/messages-24.1.0.tgz#a212c97b0548144c3ccfae021a96d6c56d3841d3"
   integrity sha512-hxVHiBurORcobhVk80I9+JkaKaNXkW6YwGOEFIh/2aO+apAN+5XJgUUWjng9NwqaQrW1sCFuawLB1AuzmBaNdQ==
@@ -1218,7 +1218,7 @@
     reflect-metadata "0.2.1"
     uuid "9.0.1"
 
-"@cucumber/messages@^25.0.1":
+"@cucumber/messages@^25.0.0", "@cucumber/messages@^25.0.1":
   version "25.0.1"
   resolved "https://registry.yarnpkg.com/@cucumber/messages/-/messages-25.0.1.tgz#551d416510e95c61ab970ee73fd7844a522ccbd5"
   integrity sha512-RjjhmzcauX5eYfcKns5pgenefDJQcfXE3ZDrVWdUDGcoaoyFVDmj+ZzQZWRWqFrfMjP3lKHJss6LtvIP/z+h8g==
