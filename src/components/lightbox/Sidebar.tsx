@@ -1,4 +1,5 @@
 import { ActionIcon, Avatar, Box, Button, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
 import { useViewportSize } from "@mantine/hooks";
 // only needs to be imported once
 import {
@@ -33,6 +34,26 @@ type Props = {
   closeSidepanel: () => void;
 };
 
+const useStyle = createStyles((theme, _, u) => ({
+  container: {
+    right: 0,
+    top: 0,
+    float: "right",
+    whiteSpace: "normal",
+    position: "fixed",
+    overflowY: "scroll",
+    overflowX: "hidden",
+    zIndex: 250,
+    padding: theme.spacing.sm,
+    [u.light]: {
+      backgroundColor: theme.colors.gray[0],
+    },
+    [u.dark]: {
+      backgroundColor: theme.colors.dark[6],
+    },
+  },
+}));
+
 export function Sidebar(props: Props) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -40,6 +61,7 @@ export function Sidebar(props: Props) {
   const [selectedFaces, setSelectedFaces] = useState<any[]>([]);
   const { photoDetail, isPublic, closeSidepanel } = props;
   const { width } = useViewportSize();
+  const { classes } = useStyle();
 
   const SCROLLBAR_WIDTH = 15;
   let LIGHTBOX_SIDEBAR_WIDTH = 320;
@@ -56,26 +78,15 @@ export function Sidebar(props: Props) {
   }
   return (
     <Box
-      sx={theme => ({
-        backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[0],
-        padding: theme.spacing.sm,
-      })}
+      className={classes.container}
       style={{
-        right: 0,
-        top: 0,
-        float: "right",
         width: LIGHTBOX_SIDEBAR_WIDTH,
         height: window.innerHeight,
-        whiteSpace: "normal",
-        position: "fixed",
-        overflowY: "scroll",
-        overflowX: "hidden",
-        zIndex: 250,
       }}
     >
       {photoDetail && (
         <Stack>
-          <Group position="apart">
+          <Group justify="apart">
             <Title order={3}>Details</Title>
             <ActionIcon
               onClick={() => {
@@ -122,10 +133,10 @@ export function Sidebar(props: Props) {
                 <Title order={4}>{t("lightbox.sidebar.people")}</Title>
               </Group>
               {photoDetail.people.map(nc => (
-                <Group position="center" spacing="xs" key={`${nc.name}`}>
+                <Group justify="center" gap="xs" key={`${nc.name}`}>
                   <Button
                     variant="subtle"
-                    leftIcon={<Avatar radius="xl" src={serverAddress + nc.face_url} />}
+                    leftSection={<Avatar radius="xl" src={serverAddress + nc.face_url} />}
                     onClick={() => {
                       if (isPublic) {
                         return;
@@ -133,7 +144,7 @@ export function Sidebar(props: Props) {
                       dispatch(push(`/search/${nc.name}`));
                     }}
                   >
-                    <Text align="center" size="sm">
+                    <Text ta="center" size="sm">
                       {nc.name}
                     </Text>
                   </Button>
@@ -172,7 +183,7 @@ export function Sidebar(props: Props) {
                 <Title order={4}>{t("lightbox.sidebar.similarphotos")}</Title>
               </Group>
               <Text>
-                <Group spacing="xs">
+                <Group gap="xs">
                   {photoDetail.similar_photos.slice(0, 30).map(el => (
                     <Tile video={el.type.includes("video")} height={85} width={85} image_hash={el.image_hash} />
                   ))}

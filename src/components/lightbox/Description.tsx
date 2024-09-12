@@ -1,4 +1,5 @@
 import { ActionIcon, Badge, Group, Stack, Text, Title, Tooltip, UnstyledButton } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
 import { RichTextEditor } from "@mantine/tiptap";
 import { IconCheck, IconEdit, IconX, IconNote as Note, IconTags as Tags, IconWand as Wand } from "@tabler/icons-react";
 import Document from "@tiptap/extension-document";
@@ -26,11 +27,37 @@ type Props = Readonly<{
   photoDetail: PhotoType;
 }>;
 
+const useStyle = createStyles((theme, _, u) => ({
+  captionButton: {
+    display: "block",
+    padding: theme.spacing.xs,
+    borderRadius: theme.radius.xl,
+    textDecoration: "none",
+    fontSize: theme.fontSizes.sm,
+    [u.light]: {
+      color: theme.colors.gray[7],
+      backgroundColor: theme.colors.gray[1],
+    },
+    [u.dark]: {
+      color: theme.colors.dark[1],
+      backgroundColor: theme.colors.dark[4],
+    },
+    "&:hover": {
+      [u.light]: {
+        backgroundColor: theme.colors.gray[3],
+      },
+      [u.dark]: {
+        backgroundColor: theme.colors.dark[6],
+      },
+    },
+  },
+}));
+
 export function Description(props: Props) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { generatingCaptionIm2txt } = useAppSelector(store => store.photos);
-
+  const { classes } = useStyle();
   const { data: thingAlbums } = useFetchThingsAlbumsQuery();
 
   const { photoDetail, isPublic } = props;
@@ -98,25 +125,14 @@ export function Description(props: Props) {
             editMode &&
             !imageCaption?.includes(photoDetail.captions_json.im2txt) && (
               <div>
-                <Group spacing="sm" style={{ paddingBottom: 12 }}>
+                <Group gap="sm" style={{ paddingBottom: 12 }}>
                   <Wand color="grey" size={20} />
-                  <Text size="sm" color="dimmed">
+                  <Text size="sm" c="dimmed">
                     Suggestion
                   </Text>
                 </Group>
                 <UnstyledButton
-                  sx={theme => ({
-                    display: "block",
-                    padding: theme.spacing.xs,
-                    borderRadius: theme.radius.xl,
-                    textDecoration: "none",
-                    fontSize: theme.fontSizes.sm,
-                    color: theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7],
-                    backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[1],
-                    "&:hover": {
-                      backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[3],
-                    },
-                  })}
+                  className={classes.captionButton}
                   onClick={() => {
                     editor?.commands.setContent(photoDetail.captions_json.im2txt);
                     setImageCaption(photoDetail.captions_json.im2txt);
@@ -163,7 +179,7 @@ export function Description(props: Props) {
           </RichTextEditor>
         </div>
         {editMode && (
-          <Group position="center">
+          <Group justify="center">
             <Tooltip label={t("lightbox.sidebar.cancel")}>
               <ActionIcon
                 variant="light"
@@ -195,7 +211,7 @@ export function Description(props: Props) {
               <Tags />
               <Title order={4}>{t("lightbox.sidebar.scene")}</Title>
             </Group>
-            <Text weight={700}>{t("lightbox.sidebar.attributes")}</Text>
+            <Text fw={700}>{t("lightbox.sidebar.attributes")}</Text>
             <Group>
               {photoDetail.captions_json.places365.attributes.map(nc => (
                 <Badge
@@ -210,7 +226,7 @@ export function Description(props: Props) {
               ))}
             </Group>
 
-            <Text weight={700}>{t("lightbox.sidebar.categories")}</Text>
+            <Text fw={700}>{t("lightbox.sidebar.categories")}</Text>
             <Group>
               {photoDetail.captions_json.places365.categories.map(nc => (
                 <Badge

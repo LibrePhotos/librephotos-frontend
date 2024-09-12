@@ -1,5 +1,4 @@
-import { ActionIcon, Divider, Footer, Group, Menu } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { ActionIcon, Divider, Flex, Menu } from "@mantine/core";
 import { IconHeart as Heart } from "@tabler/icons-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -16,13 +15,7 @@ export function FooterMenu(): JSX.Element {
   const canAccess = useAppSelector(selectAuthAccess);
   const dispatch = useAppDispatch();
   const { classes } = navigationStyles();
-
-  const matches = useMediaQuery("(min-width: 700px)");
   const { t } = useTranslation();
-
-  if (matches) {
-    return <div />;
-  }
 
   const navigationItems = getNavigationItems(t, isAuthenticated, canAccess);
 
@@ -60,9 +53,9 @@ export function FooterMenu(): JSX.Element {
               if (subitem.separator) {
                 return <Divider key={subkey} />;
               }
-              const submenuIcon = <subitem.icon size={20} color={subitem.color} />;
+              const submenuIcon = <subitem.icon color={subitem.color} />;
               return (
-                <Menu.Item key={subkey} icon={submenuIcon} onClick={() => dispatch(push(subitem.link!))}>
+                <Menu.Item key={subkey} leftSection={submenuIcon} onClick={() => dispatch(push(subitem.link!))}>
                   {subitem.label}
                 </Menu.Item>
               );
@@ -76,8 +69,8 @@ export function FooterMenu(): JSX.Element {
   });
 
   return (
-    <Footer height={50} p="xs">
-      <Group position="apart">{links}</Group>
-    </Footer>
+    <Flex p="xs" justify="space-between">
+      {links}
+    </Flex>
   );
 }

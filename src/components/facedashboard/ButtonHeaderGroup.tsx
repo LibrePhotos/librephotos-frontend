@@ -64,8 +64,8 @@ export function ButtonHeaderGroup({
 
   return (
     <div>
-      <Group position="apart">
-        <Group spacing="xs">
+      <Group justify="apart">
+        <Group gap="xs">
           <Switch
             label={t("facesdashboard.selectedfaces", {
               number: selectedFaces.length,
@@ -74,7 +74,7 @@ export function ButtonHeaderGroup({
             onChange={changeSelectMode}
           />
           <Divider orientation="vertical" style={{ height: "20px", marginTop: "10px" }} />
-          <Text size="sm" weight={500} mb={3}>
+          <Text size="sm" fw={500} mb={3}>
             {t("facesdashboard.sortby")}
           </Text>
           <SegmentedControl
@@ -139,7 +139,7 @@ export function ButtonHeaderGroup({
       <Modal opened={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} title={<h3>{t("deleteface")}</h3>}>
         <Stack>
           {t("deletefaceexplanation")}
-          <Group position="center">
+          <Group justify="center">
             <Button
               color="blue"
               onClick={() => {

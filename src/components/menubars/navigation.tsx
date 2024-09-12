@@ -1,5 +1,6 @@
-import { createStyles } from "@mantine/core";
-import type { Icon } from "@tabler/icons-react";
+import { MantineColor, rgba } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
+import type { Icon, IconProps } from "@tabler/icons-react";
 import {
   IconAlbum as Album,
   IconBookmark as Bookmark,
@@ -20,6 +21,7 @@ import {
   IconWand as Wand,
   IconWorld as World,
 } from "@tabler/icons-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
 
 type SubmenuItem = {
   label: string;
@@ -28,14 +30,14 @@ type SubmenuItem = {
   header: string;
   separator: boolean;
   disabled: boolean;
-  color: string;
+  color: MantineColor;
 };
 
 type MenuItem = {
   label: string;
   link: string;
-  icon: Icon;
-  color: string;
+  icon: ForwardRefExoticComponent<Omit<IconProps, "ref"> & RefAttributes<Icon>>;
+  color?: MantineColor;
   display?: boolean;
   submenu?: Array<Partial<SubmenuItem>>;
 };
@@ -90,21 +92,33 @@ export function getNavigationItems(
         { label: t("sidemenu.sharedwithyou"), link: "/shared/tome/photos/", icon: Download, color: "green" },
       ],
     },
-    { label: t("photos.deleted"), link: "/deleted", icon: Trash, color: "black" },
+    { label: t("photos.deleted"), link: "/deleted", icon: Trash, color: "gray" },
   ];
 }
 
-export const navigationStyles = createStyles(theme => ({
-  header: {
-    paddingBottom: theme.spacing.md,
-    marginBottom: `calc(${theme.spacing.md} * 1.5)`,
-    borderBottom: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+export const navigationStyles = createStyles((theme, _, u) => ({
+  navbar: {
+    backgroundColor: theme.colors.body,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    height: "100vh",
   },
 
-  footer: {
-    paddingTop: theme.spacing.md,
-    marginTop: theme.spacing.md,
-    borderTop: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+  navbarLinks: {
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+    alignItems: "start",
+  },
+
+  navbarFooter: {
+    paddingBottom: theme.spacing.sm,
+    [u.dark]: {
+      borderTop: `1px solid ${theme.colors.dark[4]}`,
+    },
+    [u.light]: {
+      borderTop: `1px solid ${theme.colors.gray[2]}`,
+    },
   },
 
   submenu: {
@@ -112,12 +126,10 @@ export const navigationStyles = createStyles(theme => ({
   },
 
   text: {
-    ...theme.fn.focusStyles(),
     display: "flex",
     alignItems: "center",
     textDecoration: "none",
     fontSize: theme.fontSizes.sm,
-    color: theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7],
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
@@ -125,25 +137,37 @@ export const navigationStyles = createStyles(theme => ({
 
   hover: {
     "&:hover": {
-      backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[0],
-      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+      [u.dark]: {
+        backgroundColor: theme.colors.dark[6],
+      },
+      [u.light]: {
+        backgroundColor: theme.colors.gray[0],
+      },
     },
   },
 
   link: {
-    ...theme.fn.focusStyles(),
     display: "flex",
     alignItems: "center",
     textDecoration: "none",
     fontSize: theme.fontSizes.sm,
-    color: theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7],
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
+    [u.dark]: {
+      color: theme.colors.gray[3],
+    },
+    [u.light]: {
+      color: theme.colors.dark[9],
+    },
 
     "&:hover": {
-      backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[0],
-      color: theme.colorScheme === "dark" ? theme.white : theme.black,
+      [u.dark]: {
+        backgroundColor: theme.colors.dark[6],
+      },
+      [u.light]: {
+        backgroundColor: theme.colors.gray[2],
+      },
     },
   },
 
@@ -153,10 +177,12 @@ export const navigationStyles = createStyles(theme => ({
 
   linkActive: {
     "&, &:hover": {
-      backgroundColor:
-        theme.colorScheme === "dark"
-          ? theme.fn.rgba(theme.colors[theme.primaryColor][8], 0.25)
-          : theme.colors[theme.primaryColor][0],
+      [u.dark]: {
+        backgroundColor: rgba(theme.colors[theme.primaryColor][8], 0.25),
+      },
+      [u.light]: {
+        backgroundColor: theme.colors[theme.primaryColor][0],
+      },
     },
   },
 }));

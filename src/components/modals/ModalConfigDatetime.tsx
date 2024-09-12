@@ -71,12 +71,12 @@ export function ModalConfigDatetime({ opened, onClose, availableRules, onAddRule
       title={<Title order={3}>Choose a new rule to add</Title>}
       onClose={() => onClose()}
     >
-      <Text color="dimmed">Choose a rule, that will parse the date from a certain field or attribute.</Text>
+      <Text c="dimmed">Choose a rule, that will parse the date from a certain field or attribute.</Text>
       <ScrollArea>
         <TextInput
           placeholder="Find rules by name or type..."
           mb="md"
-          icon={<Search size={14} />}
+          leftSection={<Search size={14} />}
           value={filter}
           onChange={e => handleFilterRules(e)}
         />

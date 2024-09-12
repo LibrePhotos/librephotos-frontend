@@ -20,8 +20,8 @@ import {
   Text,
   TextInput,
   Title,
-  createStyles,
 } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconBook as Book,
@@ -56,7 +56,7 @@ import { notification } from "../../service/notifications";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { IUser } from "../../store/user/user.zod";
 
-const useStyles = createStyles(theme => ({
+const useStyles = createStyles((theme, _, u) => ({
   button: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
@@ -66,7 +66,12 @@ const useStyles = createStyles(theme => ({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     border: 0,
-    borderLeft: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white}`,
+    [u.dark]: {
+      borderLeft: `1px solid ${theme.colors.dark[7]}`,
+    },
+    [u.light]: {
+      borderLeft: `1px solid ${theme.white}`,
+    },
   },
 }));
 
@@ -169,7 +174,7 @@ export function Library() {
   return (
     <Container>
       <Flex align="baseline" justify="space-between">
-        <Group spacing="xs" sx={{ marginBottom: 20, marginTop: 40 }}>
+        <Group gap="xs" mt={40} mb={20}>
           <Book size={35} />
           <Title order={1}>{t("settings.library")}</Title>
         </Group>
@@ -179,12 +184,12 @@ export function Library() {
         <CountStats />
         <Card shadow="md">
           <Stack>
-            <Title order={4} sx={{ marginBottom: 16 }}>
+            <Title order={4} mb={16}>
               <Trans i18nKey="settings.photos">Photos</Trans>
               {countStats.num_missing_photos > 0 && (
                 <HoverCard width={280} shadow="md">
                   <HoverCard.Target>
-                    <Badge onClick={open} color="red" sx={{ marginLeft: 10 }}>
+                    <Badge onClick={open} color="red" ml={10}>
                       {countStats.num_missing_photos} <Trans i18nKey="settings.missingphotos">Missing photos</Trans>
                     </Badge>
                   </HoverCard.Target>
@@ -196,7 +201,7 @@ export function Library() {
                 </HoverCard>
               )}
               <Modal opened={isOpen} title={t("settings.missingphotosbutton")} onClose={close}>
-                <Stack spacing="xl">
+                <Stack gap="xl">
                   This action will delete all missing photos and it&apos;s metadata from the database.
                   <Group>
                     <Button onClick={close}>Cancel</Button>
@@ -209,24 +214,24 @@ export function Library() {
             </Title>
             <Grid>
               <Grid.Col span={10}>
-                <Stack spacing={0}>
+                <Stack gap={0}>
                   <Group>
                     <Text>Scan Library</Text>
                     <ActionIcon radius="xl" variant="light" size="xs">
                       <QuestionMark onClick={() => setIsOpenNextcloudHelp(!isOpenNextcloudHelp)} />
                     </ActionIcon>
                   </Group>
-                  <Text fz="sm" color="dimmed">
+                  <Text fz="sm" c="dimmed">
                     {t("settings.scanphotosdescription")}
                   </Text>
                 </Stack>
               </Grid.Col>
               <Grid.Col span={2}>
-                <Group noWrap spacing={0}>
+                <Group wrap="nowrap" gap={0}>
                   <Button
                     onClick={() => scanPhotos()}
                     disabled={!workerAvailability}
-                    leftIcon={<Refresh />}
+                    leftSection={<Refresh />}
                     variant="filled"
                     className={classes.button}
                   >
@@ -242,7 +247,7 @@ export function Library() {
                       </ActionIcon>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Item icon={<Refresh size="1rem" />} onClick={() => rescanPhotos()}>
+                      <Menu.Item leftSection={<Refresh size="1rem" />} onClick={() => rescanPhotos()}>
                         {statusPhotoScan.status && statusPhotoScan.added ? <Loader /> : null}
                         {statusPhotoScan.added
                           ? `${t("settings.statusrescanphotostrue")}(${statusPhotoScan.added}/${
@@ -307,18 +312,12 @@ export function Library() {
                 </List.Item>
               </List>
             </Collapse>
-            <Divider
-              labelProps={{ fw: "bold" }}
-              labelPosition="left"
-              label={t("settings.eventsalbums")}
-              mt={20}
-              mb={10}
-            />
+            <Divider labelPosition="left" label={<Text fw="bold">{t("settings.eventsalbums")}</Text>} mt={20} mb={10} />
             <Grid>
               <Grid.Col span={10}>
-                <Stack spacing={0}>
+                <Stack gap={0}>
                   <Text>{t("settings.eventalbumsgenerate")}</Text>
-                  <Text fz="sm" color="dimmed">
+                  <Text fz="sm" c="dimmed">
                     {t("settings.eventsalbumsdescription")}
                   </Text>
                 </Stack>
@@ -327,7 +326,7 @@ export function Library() {
                 <Button
                   onClick={onGenerateEventAlbumsButtonClick}
                   disabled={!workerAvailability}
-                  leftIcon={<RefreshDot />}
+                  leftSection={<RefreshDot />}
                   variant="outline"
                 >
                   Generate
@@ -337,9 +336,9 @@ export function Library() {
 
             <Grid>
               <Grid.Col span={10}>
-                <Stack spacing={0}>
+                <Stack gap={0}>
                   <Text>{t("settings.eventalbumsregenerate")}</Text>
-                  <Text fz="sm" color="dimmed">
+                  <Text fz="sm" c="dimmed">
                     {t("settings.eventalbumsregeneratedescription")}
                   </Text>
                 </Stack>
@@ -351,7 +350,7 @@ export function Library() {
                     notification.regenerateEventAlbums();
                   }}
                   disabled={!workerAvailability}
-                  leftIcon={<RefreshDot />}
+                  leftSection={<RefreshDot />}
                   variant="outline"
                 >
                   Generate
@@ -360,17 +359,20 @@ export function Library() {
             </Grid>
           </Stack>
           <Divider
-            labelProps={{ fw: "bold" }}
             labelPosition="left"
-            label={`${t("settings.faces")} & ${t("settings.people")}`}
+            label={
+              <Text fw="bold">
+                {t("settings.faces")} & ${t("settings.people")}
+              </Text>
+            }
             mt={20}
             mb={10}
           />
           <Grid>
             <Grid.Col span={10}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Text>{t("settings.trainfacestitle")}</Text>
-                <Text fz="sm" color="dimmed">
+                <Text fz="sm" c="dimmed">
                   {t("settings.trainfacesdescription")}
                 </Text>
               </Stack>
@@ -382,7 +384,7 @@ export function Library() {
                   dispatch(api.endpoints.trainFaces.initiate());
                   notification.trainFaces();
                 }}
-                leftIcon={<FaceId />}
+                leftSection={<FaceId />}
                 variant="outline"
               >
                 <Trans i18nKey="settings.facesbutton">Train Faces</Trans>
@@ -391,9 +393,9 @@ export function Library() {
           </Grid>
           <Grid>
             <Grid.Col span={10}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Text>{t("settings.rescanfacestitle")}</Text>
-                <Text fz="sm" color="dimmed">
+                <Text fz="sm" c="dimmed">
                   {t("settings.rescanfacesdescription")}
                 </Text>
               </Stack>
@@ -405,17 +407,17 @@ export function Library() {
                   dispatch(api.endpoints.rescanFaces.initiate());
                   notification.rescanFaces();
                 }}
-                leftIcon={<FaceId />}
+                leftSection={<FaceId />}
                 variant="outline"
               >
                 <Trans i18nKey="settings.rescanfaces">Rescan</Trans>
               </Button>
             </Grid.Col>
           </Grid>
-          <Divider labelProps={{ fw: "bold" }} labelPosition="left" label="Nextcloud" mt={20} mb={10} />
+          <Divider labelPosition="left" label={<Text fw="bold">Nextcloud</Text>} mt={20} mb={10} />
           <Grid>
             <Grid.Col span={10}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Text>Status</Text>
               </Stack>
             </Grid.Col>
@@ -438,7 +440,7 @@ export function Library() {
               </Badge>
             </Grid.Col>
             <Grid.Col span={7}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Trans i18nKey="settings.serveradress" />
               </Stack>
             </Grid.Col>
@@ -452,7 +454,7 @@ export function Library() {
               />
             </Grid.Col>
             <Grid.Col span={7}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Trans i18nKey="settings.nextcloudusername" />
               </Stack>
             </Grid.Col>
@@ -466,10 +468,10 @@ export function Library() {
               />
             </Grid.Col>
             <Grid.Col span={7}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Trans i18nKey="settings.nextcloudpassword" />
 
-                <Text size="sm" color="dimmed">
+                <Text size="sm" c="dimmed">
                   {t("settings.credentialspopup")}
                 </Text>
               </Stack>
@@ -485,10 +487,10 @@ export function Library() {
               />
             </Grid.Col>
             <Grid.Col span={10}>
-              <Stack spacing={0}>
+              <Stack gap={0}>
                 <Trans i18nKey="settings.nextcloudscandirectory" />
 
-                <Text size="sm" color="dimmed">
+                <Text size="sm" c="dimmed">
                   {userSelfDetails.nextcloud_scan_directory
                     ? userSelfDetails.nextcloud_scan_directory
                     : "Choose the folder to process from the nextcloud instance"}
@@ -497,7 +499,7 @@ export function Library() {
             </Grid.Col>
             <Grid.Col span={2}>
               <Button
-                leftIcon={<Folder />}
+                leftSection={<Folder />}
                 disabled={isNextcloudError || isNextcloudFetching || !userSelfDetails.nextcloud_server_address}
                 onClick={() => {
                   setModalNextcloudScanDirectoryOpen(true);
@@ -515,7 +517,7 @@ export function Library() {
                 }}
                 disabled={isNextcloudFetching || !workerAvailability || !userSelfDetails.nextcloud_server_address}
                 variant="filled"
-                leftIcon={<BrandNextcloud />}
+                leftSection={<BrandNextcloud />}
               >
                 <Trans i18nKey="settings.scannextcloudphotos">Scan photos (Nextcloud)</Trans>
               </Button>
@@ -546,7 +548,7 @@ export function Library() {
           size="lg"
           radius="md"
         >
-          <Text size="sm" style={{ marginBottom: 10 }} weight={500}>
+          <Text size="sm" style={{ marginBottom: 10 }} fw={500}>
             Save Changes?
           </Text>
 

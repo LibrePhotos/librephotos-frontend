@@ -1,5 +1,6 @@
-import { Autocomplete, Avatar, Group, Text, createStyles } from "@mantine/core";
-import type { AutocompleteItem } from "@mantine/core";
+import { Autocomplete, Avatar, Group, Text } from "@mantine/core";
+// import type { AutocompleteItem } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
 import { useInterval, useViewportSize } from "@mantine/hooks";
 import {
   IconAlbum as Album,
@@ -65,7 +66,7 @@ const SearchSuggestionItem = forwardRef<HTMLDivElement, SearchSuggestion>(
   ({ icon = <Search />, value, ...rest }: SearchSuggestion, ref) => (
     /* eslint-disable react/jsx-props-no-spreading */
     <div ref={ref} {...rest}>
-      <Group noWrap>
+      <Group wrap="nowrap">
         {cloneElement(icon as React.ReactElement, { size: 20 })}
         <Text>{value}</Text>
       </Group>
@@ -89,7 +90,7 @@ export function CustomSearch() {
   const { width } = useViewportSize();
   const dispatch = useAppDispatch();
   const [value, setValue] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<Array<AutocompleteItem>>([]);
+  const [searchSuggestions, setSearchSuggestions] = useState<Array<any>>([]);
   const [searchPlaceholder, setSearchPlaceholder] = useState("");
   const searchBarWidth = width - width / 2.2;
   const { data: searchExamples } = useSearchExamplesQuery();
@@ -138,7 +139,8 @@ export function CustomSearch() {
     [placeAlbums, searchExamples, thingAlbums, userAlbums, people]
   );
 
-  function search(item: AutocompleteItem) {
+  // TODO: replace any with custom autocomplete item type
+  function search(item: any) {
     switch (item.type) {
       case undefined:
       case SuggestionType.EXAMPLE:
@@ -180,7 +182,7 @@ export function CustomSearch() {
     <Autocomplete
       width={searchBarWidth}
       data={searchSuggestions}
-      icon={<Search size={14} className={classes.icon} />}
+      leftSection={<Search size={14} className={classes.icon} />}
       placeholder={searchPlaceholder}
       itemComponent={SearchSuggestionItem}
       limit={10}

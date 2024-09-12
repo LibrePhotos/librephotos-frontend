@@ -90,7 +90,7 @@ export function Profile() {
   }
   return (
     <Container>
-      <Group spacing="xs" sx={{ marginBottom: 20, marginTop: 40 }}>
+      <Group gap="xs" mt={40} mb={20}>
         <User size={35} />
         <Title order={1}>{t("settings.profile")}</Title>
       </Group>
@@ -100,7 +100,7 @@ export function Profile() {
             User
           </Title>
           <Title order={5}>{t("settings.avatar")}</Title>
-          <Group position="center" align="self-start" grow mb="lg">
+          <Group justify="center" align="self-start" grow mb="lg">
             <div>
               <Dropzone
                 noClick
@@ -254,7 +254,6 @@ export function Profile() {
 
           <Group align="end" mb={10} mt={10}>
             <Select
-              withinPortal
               label={t("settings.language")}
               placeholder={t("settings.language")}
               // @ts-ignore
@@ -388,7 +387,7 @@ export function Profile() {
           size="lg"
           radius="md"
         >
-          <Text size="sm" style={{ marginBottom: 10 }} weight={500}>
+          <Text size="sm" style={{ marginBottom: 10 }} fw={500}>
             Save Changes?
           </Text>
 
