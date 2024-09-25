@@ -85,7 +85,7 @@
     "react-dropzone": "14.2.3",
     "react-i18next": "13.5.0",
     "react-image-lightbox": "npm:librephotos-react-image-lightbox@^1.0.0",
-    "react-leaflet": "^1.9.1",
+    "react-leaflet": "^4.0.0",
     "react-leaflet-markercluster": "^1.1.8",
     "react-player": "2.16.0",
     "react-redux": "8.1.3",
