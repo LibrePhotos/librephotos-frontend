@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { animated, useSpring } from "react-spring";
+import { Blurhash } from "react-blurhash";
 
 import getImageHeight from "../../utils/getImageHeight";
 import getTileMeasurements from "../../utils/getTileMeasurements";
@@ -99,6 +100,13 @@ const Tile = React.memo(
           transform: transform.to(t => t),
         }}
       >
+        {(item.blurhash) && (
+         <Blurhash
+            hash={item.blurhash}
+            width={item.style.width}
+            height={item.style.height}
+          />
+        )}
         {useLqip && !isTemp && (
           // LQIP
           <img
@@ -190,6 +198,7 @@ Tile.defaultProps = {
 const ItemType = PropTypes.shape({
   id: PropTypes.string,
   dominantColor: PropTypes.string,
+  blurhash: PropTypes.string,
   isTemp: PropTypes.bool,
   url: PropTypes.string,
   type: PropTypes.string,

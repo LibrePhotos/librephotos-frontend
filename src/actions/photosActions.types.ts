@@ -17,6 +17,7 @@ export enum MediaType {
 export const PigPhotoSchema = z.object({
   id: z.string(),
   dominantColor: z.string().optional(),
+  blurhash: z.string().optional(),
   url: z.string().optional(),
   location: z.string().optional(),
   date: z.string().optional().nullable(),
