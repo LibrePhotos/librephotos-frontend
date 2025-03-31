@@ -1,5 +1,7 @@
 {
   "settings": {
+    "scan_for_duplicates": "Scan for duplicate photos",
+    "scan_for_duplicates_description": "If enabled, the system will attempt to detect and ignore duplicate photos during scans.",
     "header": "Settings",
     "profile": "Profile",
     "account": "Account",
