@@ -28,21 +28,13 @@ export function Settings() {
   const [isOpenUpdateDialog, setIsOpenUpdateDialog] = useState(false);
   const userSelfDetailsRedux = useAppSelector(state => state.user.userSelfDetails);
   const [userSelfDetails, setUserSelfDetails] = useState(userSelfDetailsRedux);
-  useEffect(() => {
-    if (userSelfDetailsRedux) {
-      setUserSelfDetails({
-        ...userSelfDetailsRedux,
-        scan_for_duplicates: userSelfDetailsRedux.scan_for_duplicates ?? false,
-      });
-    }
-  }, [userSelfDetailsRedux]);
-  
   const dispatch = useAppDispatch();
   const auth = useAppSelector(state => state.auth);
   const { t } = useTranslation();
   const { data: timezoneList = [] } = useFetchTimezonesQuery();
   const [updateUser] = useUpdateUserMutation();
 
+  // open update dialog, when user was edited
   useEffect(() => {
     if (JSON.stringify(userSelfDetailsRedux) !== JSON.stringify(userSelfDetails)) {
       setIsOpenUpdateDialog(true);
@@ -105,11 +97,15 @@ export function Settings() {
               label={t("settings.scan_for_duplicates")}
               description={t("settings.scan_for_duplicates_description")}
               checked={userSelfDetails.scan_for_duplicates}
-              onChange={event => {
+              onChange={async event => {
+                const newValue = event.currentTarget.checked;
+
                 setUserSelfDetails({
                   ...userSelfDetails,
-                  scan_for_duplicates: event.currentTarget.checked,
+                  scan_for_duplicates: newValue,
                 });
+
+                await updateUser({ ...userSelfDetails, scan_for_duplicates: newValue });
               }}
             />
           </Flex>
@@ -161,12 +157,174 @@ export function Settings() {
           </Flex>
         </Card>
         <Card shadow="md">
+          <Title order={4} mb={16}>
+            {t("settings.albumoptions")}
+          </Title>
+          <NumberInput
+            label={t("settings.inferredfacesconfidence")}
+            description={t("settings.inferredfacesconfidencehelp")}
+            min={0}
+            max={1.0}
+            placeholder="0.90"
+            decimalScale={2}
+            value={userSelfDetails.confidence_person}
+            hideControls
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, confidence_person: value });
+            }}
+          />
+        </Card>
+        <Card shadow="md">
+          <Title order={4} mb={16}>
+            {t("settings.face_options")}
+          </Title>
+          <Radio.Group
+            label={t("settings.face_recognition_model")}
+            description={t("settings.face_recognition_model_help")}
+            value={userSelfDetails.face_recognition_model}
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, face_recognition_model: value || "HOG" });
+            }}
+          >
+            <Group mt="xs">
+              <Radio value="HOG" label={t("settings.models.hog")} />
+              <Radio value="CNN" label={t("settings.models.cnn")} />
+            </Group>
+          </Radio.Group>
+          <Radio.Group
+            label={t("settings.min_cluster_size")}
+            description={t("settings.min_cluster_size_help")}
+            value={userSelfDetails.min_cluster_size ? userSelfDetails.min_cluster_size.toString() : "0"}
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, min_cluster_size: value || 0 });
+            }}
+          >
+            <Group mt="xs">
+              <Radio value="0" label={t("settings.size.auto")} />
+              <Radio value="2" label={2} />
+              <Radio value="4" label={4} />
+              <Radio value="8" label={8} />
+              <Radio value="16" label={16} />
+            </Group>
+          </Radio.Group>
+          <Radio.Group
+            label={t("settings.min_samples")}
+            description={t("settings.min_samples_help")}
+            value={userSelfDetails.min_samples ? userSelfDetails.min_samples.toString() : "1"}
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, min_samples: value || 0 });
+            }}
+          >
+            <Group mt="xs">
+              <Radio value="1" label={1} />
+              <Radio value="2" label={2} />
+              <Radio value="4" label={4} />
+              <Radio value="8" label={8} />
+              <Radio value="16" label={16} />
+            </Group>
+          </Radio.Group>
+          <Radio.Group
+            label={t("settings.cluster_selection_epsilon")}
+            description={t("settings.cluster_selection_epsilon_help")}
+            value={
+              userSelfDetails.cluster_selection_epsilon ? userSelfDetails.cluster_selection_epsilon.toString() : "0.1"
+            }
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, cluster_selection_epsilon: value || 0 });
+            }}
+          >
+            <Group mt="xs">
+              <Radio value="0" label={t("settings.size.off")} />
+              <Radio value="0.025" label={t("settings.size.small")} />
+              <Radio value="0.05" label={t("settings.size.normal")} />
+              <Radio value="0.1" label={t("settings.size.high")} />
+              <Radio value="0.2" label={t("settings.size.veryhigh")} />
+            </Group>
+          </Radio.Group>
+          <NumberInput
+            label={t("settings.unknown_faces_confidence")}
+            description={t("settings.unknown_faces_confidence_help")}
+            min={0}
+            max={1.0}
+            placeholder="0.50"
+            decimalScale={2}
+            value={userSelfDetails.confidence_unknown_face}
+            hideControls
+            onChange={value => {
+              setUserSelfDetails({ ...userSelfDetails, confidence_unknown_face: value });
+            }}
+          />
+        </Card>
+        <Card shadow="md">
           <ConfigDateTime
             value={userSelfDetails.datetime_rules}
             onChange={value => {
               setUserSelfDetails({ ...userSelfDetails, datetime_rules: value || "[]" });
             }}
           />
+        </Card>
+        <Card shadow="md">
+          <Title order={4} mb={16}>
+            <Trans i18nKey="settings.experimentaloptions">Experimental options</Trans>
+          </Title>
+          <Switch
+            label={t("settings.transcodevideo")}
+            checked={userSelfDetails.transcode_videos}
+            onChange={event => {
+              setUserSelfDetails({
+                ...userSelfDetails,
+                transcode_videos: event.currentTarget.checked,
+              });
+            }}
+          />
+        </Card>
+        <Card shadow="md">
+          <Stack>
+            <Title order={4} mb={16}>
+              <Trans i18nKey="settings.llm">Large Language Model Settings</Trans>
+            </Title>
+            <Switch
+              label={t("settings.enablellm")}
+              checked={userSelfDetails.llm_settings?.enabled}
+              onChange={event => {
+                setUserSelfDetails({
+                  ...userSelfDetails,
+                  llm_settings: {
+                    ...userSelfDetails.llm_settings,
+                    enabled: event.currentTarget.checked,
+                  },
+                });
+              }}
+            />
+            <Switch
+              label={t("settings.addperson")}
+              checked={userSelfDetails.llm_settings?.add_person}
+              disabled={!userSelfDetails.llm_settings?.enabled}
+              onChange={event => {
+                setUserSelfDetails({
+                  ...userSelfDetails,
+                  llm_settings: {
+                    ...userSelfDetails.llm_settings,
+                    add_person: event.currentTarget.checked,
+                  },
+                });
+              }}
+            />
+            <Switch
+              label={t("settings.addlocation")}
+              checked={userSelfDetails.llm_settings?.add_location}
+              disabled={!userSelfDetails.llm_settings?.enabled}
+              onChange={event => {
+                setUserSelfDetails({
+                  ...userSelfDetails,
+                  llm_settings: {
+                    ...userSelfDetails.llm_settings,
+                    add_location: event.currentTarget.checked,
+                  },
+                });
+              }}
+            />
+          </Stack>
         </Card>
         <Space h="xl" />
       </Stack>
@@ -180,6 +338,7 @@ export function Settings() {
         <Text size="sm" style={{ marginBottom: 10 }} fw={500}>
           {t("settings.savechanges")}
         </Text>
+
         <Group justify="flex-end">
           <Button
             size="sm"
