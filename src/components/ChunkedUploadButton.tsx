@@ -159,7 +159,7 @@ export function ChunkedUploadButton() {
    const hasScanDirectory = userSelfDetails?.scan_directory && userSelfDetails.scan_directory.trim() !== "";
 
 
-  const { getRootProps, getInputProps, open } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [],
       "video/*": [],
@@ -181,7 +181,6 @@ export function ChunkedUploadButton() {
               color="gray"
               variant="light"
               loading={currentSize / totalSize < 1}
-              onClick={hasScanDirectory ? open : undefined}
               disabled={!hasScanDirectory}
               style={!hasScanDirectory ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
             >
