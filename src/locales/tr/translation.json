@@ -537,6 +537,7 @@
         "llm_model_header": "Büyük Dil Modeli",
         "llm_model_description": "Büyük bir dil modeliyle sonradan bir açıklamayı işlemek için bir model seçin.",
         "captioning_model_description": "Fotoğraf açıklamalarını oluşturmak için bir model seçin.",
+        "skip_raw_files": "RAW dosyalarını atla",
         "headerupload": "Yüklemelere izin ver",
         "allow": "İzin ver",
         "header": "Kullanıcı kaydına izin ver",
