@@ -55,7 +55,7 @@ export function SiteSettings() {
     }
     saveSettings(input);
   };
-console.log('SiteSettings - render - isLoading:', isLoading, 'settings:', settings);
+
   useEffect(() => {
     if (!isLoading && settings) {
       setSkipPatterns(settings.skip_patterns);
