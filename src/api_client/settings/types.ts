@@ -3,6 +3,7 @@ import { z } from "zod";
 export const SiteSettings = z.object({
   allow_registration: z.boolean(),
   allow_upload: z.boolean(),
+  skip_raw_files: z.boolean(),
   skip_patterns: z.string(),
   map_api_key: z.string(),
   map_api_provider: z.string(),
