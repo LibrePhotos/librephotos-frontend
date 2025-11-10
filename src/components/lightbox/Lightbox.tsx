@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useFetchPhotoDetailsQuery } from "../../api_client/photos/hooks";
+import { queryClient } from "../../api_client/api";
+import { PhotoDetailsQueryKeys, useFetchPhotoDetailsQuery } from "../../api_client/photos/hooks";
 import { ContentViewer } from "./ContentViewer";
 import type { LightBoxProps } from "./lightbox.types";
 
@@ -25,6 +26,10 @@ export function Lightbox(props: ExtendedLightBoxProps) {
   // Stable navigation snapshot - only used when current image is deleted
   const stableNavigationSnapshot = useRef<Array<{ id: string }>>([]);
   const usingStableNavigation = useRef<boolean>(false);
+
+  // Track viewed images to limit memory usage
+  const viewedImagesRef = useRef<string[]>([]);
+  const MAX_CACHED_IMAGES = 50; // Keep only 50 most recent images in cache
 
   const { data: photoDetails } = useFetchPhotoDetailsQuery(lightboxImageId);
 
@@ -58,6 +63,24 @@ export function Lightbox(props: ExtendedLightBoxProps) {
       stableNavigationSnapshot.current = [];
     }
   }, [idx2hash, lightboxImageId, previousIdx2hash]);
+
+  // Clean up old photo detail queries to prevent memory leaks when viewing many images
+  useEffect(() => {
+    // Add current image to viewed list
+    if (lightboxImageId && !viewedImagesRef.current.includes(lightboxImageId)) {
+      viewedImagesRef.current.push(lightboxImageId);
+
+      // If we've viewed more than MAX_CACHED_IMAGES, remove old ones from cache
+      if (viewedImagesRef.current.length > MAX_CACHED_IMAGES) {
+        const imagesToRemove = viewedImagesRef.current.splice(0, viewedImagesRef.current.length - MAX_CACHED_IMAGES);
+
+        // Remove old photo detail queries from React Query cache
+        imagesToRemove.forEach(imageId => {
+          queryClient.removeQueries({ queryKey: [...PhotoDetailsQueryKeys, imageId] });
+        });
+      }
+    }
+  }, [lightboxImageId]);
 
   // Update index only when image exists in current idx2hash
   useEffect(() => {
@@ -147,6 +170,8 @@ export function Lightbox(props: ExtendedLightBoxProps) {
   const handleCloseRequest = useCallback(() => {
     // Clear the snapshot when closing
     stableNavigationSnapshot.current = [];
+    // Clear viewed images list to start fresh next time
+    viewedImagesRef.current = [];
     onCloseRequest();
   }, [onCloseRequest]);
 
