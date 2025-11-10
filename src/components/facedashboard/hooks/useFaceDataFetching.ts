@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { queryClient } from "../../../api_client/api";
 import {
   CompletePersonFaceList,
@@ -11,6 +11,9 @@ import {
 } from "../../../api_client/faces";
 
 type OrderByType = "confidence" | "date" | "person";
+
+// Maximum number of face query results to keep in cache
+const MAX_CACHED_FACE_QUERIES = 50;
 
 // Custom hook to manage face data fetching
 export function useFaceDataFetching(
@@ -25,6 +28,8 @@ export function useFaceDataFetching(
   orderBy: OrderByType,
   minConfidence: number
 ) {
+  // Track fetched queries to limit cache size
+  const fetchedQueriesRef = useRef<Array<{ queryKey: unknown[] }>>([]);
   // Create params objects for API calls
   const params = {
     labeled: { inferred: false, orderBy: orderBy === "person" ? "date" : orderBy },
@@ -78,13 +83,30 @@ export function useFaceDataFetching(
             method: element.inferred ? element.method : undefined,
           };
 
+          const queryKey = [FacesQueryKeys, queryParams];
+
           // Fetch face data
           // TODO(sickelap): related to the above. optimize by using prefetchQuery and checking if data is already in cache
           // eslint-disable-next-line no-await-in-loop
           const data = await queryClient.fetchQuery({
-            queryKey: [FacesQueryKeys, queryParams],
+            queryKey,
             queryFn: () => fetchFaces(queryParams),
+            gcTime: 30 * 1000, // 30 seconds - aggressive cleanup for memory management
           });
+
+          // Track this query for cache management
+          fetchedQueriesRef.current.push({ queryKey });
+
+          // If we've exceeded the cache limit, remove old queries
+          if (fetchedQueriesRef.current.length > MAX_CACHED_FACE_QUERIES) {
+            const queriesToRemove = fetchedQueriesRef.current.splice(
+              0,
+              fetchedQueriesRef.current.length - MAX_CACHED_FACE_QUERIES
+            );
+            queriesToRemove.forEach(({ queryKey: oldQueryKey }) => {
+              queryClient.removeQueries({ queryKey: oldQueryKey });
+            });
+          }
 
           // Update cache with fetched data
           const incompleteParams = element.inferred ? params.inferred : params.labeled;
