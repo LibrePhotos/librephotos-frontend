@@ -111,7 +111,7 @@
     "@ianvs/prettier-plugin-sort-imports": "4.7.0",
     "@types/crypto-js": "4.2.2",
     "@types/jest": "^29.0.0",
-    "@types/lodash": "4.17.20",
+    "@types/lodash": "4.17.23",
     "@types/luxon": "3.7.1",
     "@types/node": "18.19.130",
     "@types/react": "18.3.26",
