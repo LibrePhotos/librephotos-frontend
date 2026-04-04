@@ -139,7 +139,7 @@ export const MetadataSourceEnum = z.enum(["embedded", "sidecar", "user_edit", "c
 export type MetadataSourceEnum = z.infer<typeof MetadataSourceEnum>;
 
 // Summary metadata included in Photo response
-// All fields are nullable and optional since the backend may return partial metadata
+// All fields are optional since the backend may return partial metadata in bulk operation responses
 export const PhotoMetadataSummary = z.object({
   // Camera info
   camera_display: z.string().nullable().optional(),
