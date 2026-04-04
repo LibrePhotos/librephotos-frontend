@@ -149,7 +149,7 @@ function CameraInfo({
   metadata,
   fallbackPhoto,
 }: {
-  metadata?: { camera_display: string | null; lens_display: string | null };
+  metadata?: { camera_display?: string | null; lens_display?: string | null };
   fallbackPhoto: PhotoType;
 }) {
   const camera = metadata?.camera_display || fallbackPhoto.camera;
@@ -184,11 +184,11 @@ function CaptureSettings({
   fallbackPhoto,
 }: {
   metadata?: {
-    aperture: number | null;
-    shutter_speed: string | null;
-    iso: number | null;
-    focal_length: number | null;
-    focal_length_35mm: number | null;
+    aperture?: number | null;
+    shutter_speed?: string | null;
+    iso?: number | null;
+    focal_length?: number | null;
+    focal_length_35mm?: number | null;
   };
   fallbackPhoto: PhotoType;
 }) {
@@ -316,10 +316,10 @@ export function MetadataSection({ photoDetail, isPublic = false }: MetadataSecti
   return (
     <Stack gap="sm">
       {/* Camera info */}
-      <CameraInfo metadata={summaryMetadata} fallbackPhoto={photoDetail} />
+      <CameraInfo metadata={summaryMetadata ?? undefined} fallbackPhoto={photoDetail} />
 
       {/* Capture settings */}
-      <CaptureSettings metadata={summaryMetadata} fallbackPhoto={photoDetail} />
+      <CaptureSettings metadata={summaryMetadata ?? undefined} fallbackPhoto={photoDetail} />
 
       {/* Image properties */}
       <ImageProperties metadata={fullMetadata} fallbackPhoto={photoDetail} />
