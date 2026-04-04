@@ -141,26 +141,26 @@ export type MetadataSourceEnum = z.infer<typeof MetadataSourceEnum>;
 // Summary metadata included in Photo response
 export const PhotoMetadataSummary = z.object({
   // Camera info
-  camera_display: z.string().nullable().optional(),
-  lens_display: z.string().nullable().optional(),
+  camera_display: z.string().nullable(),
+  lens_display: z.string().nullable(),
   // Capture settings
-  aperture: z.number().nullable().optional(),
-  shutter_speed: z.string().nullable().optional(),
-  iso: z.number().nullable().optional(),
-  focal_length: z.number().nullable().optional(),
-  focal_length_35mm: z.number().nullable().optional(),
+  aperture: z.number().nullable(),
+  shutter_speed: z.string().nullable(),
+  iso: z.number().nullable(),
+  focal_length: z.number().nullable(),
+  focal_length_35mm: z.number().nullable(),
   // Image info
-  resolution: z.string().nullable().optional(),
-  megapixels: z.number().nullable().optional(),
+  resolution: z.string().nullable(),
+  megapixels: z.number().nullable(),
   // Date/location
-  date_taken: z.string().nullable().optional(),
-  has_location: z.boolean().optional(),
+  date_taken: z.string().nullable(),
+  has_location: z.boolean(),
   // Content
-  rating: z.number().nullable().optional(),
+  rating: z.number().nullable(),
   // Edit tracking
-  source: MetadataSourceEnum.optional(),
-  version: z.number().optional(),
-  has_edits: z.boolean().optional(),
+  source: MetadataSourceEnum,
+  version: z.number(),
+  has_edits: z.boolean(),
 });
 export type PhotoMetadataSummary = z.infer<typeof PhotoMetadataSummary>;
 
