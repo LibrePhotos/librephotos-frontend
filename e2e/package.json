@@ -11,7 +11,7 @@
     "@badeball/cypress-cucumber-preprocessor": "^20.1.2",
     "@cypress/browserify-preprocessor": "^3.0.2",
     "@cucumber/messages": "^24.0.1",
-    "cypress": "^13.7.0"
+    "cypress": "^15.0.0"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": true,
